@@ -1,34 +1,66 @@
 import { eq } from 'drizzle-orm'
-import type { DrizzleD1Database } from 'drizzle-orm/d1'
+import { D1Database } from '@cloudflare/workers-types'
+import { drizzle } from 'drizzle-orm/d1'
 import * as schema from '@/database/schema'
-import { users } from '@/database/schema'
-import type { User } from '@/app/Models/User'
 
-type Db = DrizzleD1Database<typeof schema>
-
-/**
- * Repository — the only layer that talks to the database.
- * Controllers and Services never touch Drizzle directly.
- */
 export class UserRepository {
-  constructor(private db: Db) {}
+  private db
 
-  async findById(id: number): Promise<User | undefined> {
-    const rows = await this.db.select().from(users).where(eq(users.id, id)).limit(1)
-    return rows[0] as User | undefined
+  constructor(d1: D1Database) {
+    this.db = drizzle(d1, { schema })
   }
 
-  async findByEmail(email: string): Promise<User | undefined> {
-    const rows = await this.db.select().from(users).where(eq(users.email, email)).limit(1)
-    return rows[0] as User | undefined
+  public async findByUsername(username: string) {
+    const results = await this.db
+      .select()
+      .from(schema.users)
+      .where(eq(schema.users.username, username))
+      .limit(1)
+    return results[0] ?? null
   }
 
-  async all(): Promise<User[]> {
-    return this.db.select().from(users) as Promise<User[]>
+  public async findById(id: number) {
+    const results = await this.db.select().from(schema.users).where(eq(schema.users.id, id)).limit(1)
+    return results[0] ?? null
   }
 
-  async create(data: { name: string; email: string; passwordHash: string }): Promise<User> {
-    const [row] = await this.db.insert(users).values(data).returning()
-    return row as User
+  public async createUser(data: schema.NewUserRow) {
+    const inserted = await this.db.insert(schema.users).values(data).returning()
+    return inserted[0]
+  }
+
+  public async createTeacherProfile(data: typeof schema.teacherProfiles.$inferInsert) {
+    const inserted = await this.db.insert(schema.teacherProfiles).values(data).returning()
+    return inserted[0]
+  }
+
+  public async createStudentProfile(data: typeof schema.studentProfiles.$inferInsert) {
+    const inserted = await this.db.insert(schema.studentProfiles).values(data).returning()
+    return inserted[0]
+  }
+
+  public async getTeacherProfile(userId: number) {
+    const results = await this.db
+      .select()
+      .from(schema.teacherProfiles)
+      .where(eq(schema.teacherProfiles.userId, userId))
+      .limit(1)
+    return results[0] ?? null
+  }
+
+  public async getStudentProfile(userId: number) {
+    const results = await this.db
+      .select()
+      .from(schema.studentProfiles)
+      .where(eq(schema.studentProfiles.userId, userId))
+      .limit(1)
+    return results[0] ?? null
+  }
+
+  public async updatePassword(userId: number, passwordHash: string) {
+    await this.db
+      .update(schema.users)
+      .set({ passwordHash, updatedAt: new Date() })
+      .where(eq(schema.users.id, userId))
   }
 }

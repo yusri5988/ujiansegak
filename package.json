@@ -10,11 +10,11 @@
     "typecheck": "tsc --noEmit",
     "typegen": "wrangler types worker-configuration.d.ts",
     "db:generate": "drizzle-kit generate",
-    "db:migrate": "wrangler d1 migrations apply hono-laravel --local",
-    "db:migrate:remote": "wrangler d1 migrations apply hono-laravel --remote",
+    "db:migrate": "wrangler d1 migrations apply sistem-ujian-segak --local",
+    "db:migrate:remote": "wrangler d1 migrations apply sistem-ujian-segak --remote",
     "db:push": "drizzle-kit push",
-    "db:seed": "wrangler d1 execute hono-laravel --local --file=./src/database/seeders/seed.sql",
-    "db:seed:remote": "wrangler d1 execute hono-laravel --remote --file=./src/database/seeders/seed.sql",
+    "db:seed": "wrangler d1 execute sistem-ujian-segak --local --file=./src/database/seeders/seed.sql",
+    "db:seed:remote": "wrangler d1 execute sistem-ujian-segak --remote --file=./src/database/seeders/seed.sql",
     "setup:d1": "powershell -ExecutionPolicy Bypass -File ./scripts/setup.ps1",
     "test": "vitest run",
     "test:workers": "vitest run --config vitest.config.ts",
@@ -22,16 +22,17 @@
   },
   "dependencies": {
     "@hono/zod-validator": "^0.4.0",
-    "drizzle-orm": "^0.45.2",
-    "hono": "^4.7.0",
-    "zod": "^3.25.0"
+    "drizzle-orm": "^0.38.0",
+    "hono": "^4.6.0",
+    "zod": "^3.23.0"
   },
   "devDependencies": {
-    "@cloudflare/vitest-pool-workers": "^0.20.1",
-    "@types/node": "^26.1.2",
-    "drizzle-kit": "^0.31.0",
-    "typescript": "^5.8.0",
-    "vitest": "^4.1.10",
-    "wrangler": "^4.118.0"
+    "@cloudflare/vitest-pool-workers": "^0.5.0",
+    "@cloudflare/workers-types": "^5.20260804.1",
+    "@types/node": "^20.11.0",
+    "drizzle-kit": "^0.30.0",
+    "typescript": "^5.4.0",
+    "vitest": "^2.0.0",
+    "wrangler": "^4.119.0"
   }
 }

@@ -1,27 +1,23 @@
 {
-  "name": "hono-laravel",
+  "name": "sistem-ujian-segak",
   "main": "src/index.ts",
-  "compatibility_date": "2026-08-03",
+  "compatibility_date": "2024-09-25",
   "compatibility_flags": ["nodejs_compat"],
   "observability": {
     "enabled": true,
     "logs": {
       "head_sampling_rate": 1
-    },
-    "traces": {
-      "enabled": true,
-      "head_sampling_rate": 0.01
     }
   },
   "vars": {
-    "APP_NAME": "hono-laravel",
+    "APP_NAME": "sistem-ujian-segak",
     "CORS_ORIGIN": "http://localhost:5173"
   },
   "d1_databases": [
     {
       "binding": "DB",
-      "database_name": "hono-laravel",
-      "database_id": "REPLACE_WITH_YOUR_D1_DATABASE_ID",
+      "database_name": "sistem-ujian-segak",
+      "database_id": "local-segak-db-id",
       "migrations_dir": "src/database/migrations"
     }
   ],

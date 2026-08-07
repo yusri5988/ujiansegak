@@ -1,20 +1,20 @@
-/**
- * Worker bindings — D1 database + vars, defined in wrangler.jsonc.
- */
-/**
- * `Env` is generated from wrangler.jsonc by `wrangler types`.
- * JWT_SECRET is a Wrangler secret, so it is added as a required runtime value.
- */
-export type Bindings = Env & {
-  JWT_SECRET: string
+import { D1Database } from '@cloudflare/workers-types'
+
+export type Bindings = {
+  DB: D1Database
+  APP_NAME?: string
+  CORS_ORIGIN?: string
+  JWT_SECRET?: string
 }
 
-/**
- * Request-scoped variables set by middleware (auth, db).
- */
+export type AuthUser = {
+  id: number
+  username: string
+  role: 'admin' | 'teacher' | 'student'
+}
+
 export type Variables = {
-  /** Populated by `auth` middleware after a valid JWT. */
-  user?: import('@/app/Models/User').UserResource
+  user?: AuthUser
 }
 
 export type AppEnv = {

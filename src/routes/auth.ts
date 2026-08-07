@@ -1,9 +1,11 @@
 import { Hono } from 'hono'
 import type { AppEnv } from '@/app/Env'
-import { UserController } from '@/app/Controllers/UserController'
+import { AuthController } from '@/app/Controllers/AuthController'
+import { authMiddleware } from '@/app/Middleware/AuthMiddleware'
 
-const authRoutes = new Hono<AppEnv>()
+const authRouter = new Hono<AppEnv>()
 
-authRoutes.post('/login', ...UserController.login)
+authRouter.post('/login', (c) => AuthController.login(c))
+authRouter.get('/me', authMiddleware, (c) => AuthController.me(c))
 
-export default authRoutes
+export default authRouter

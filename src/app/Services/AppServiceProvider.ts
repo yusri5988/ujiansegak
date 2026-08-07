@@ -1,27 +1,44 @@
 import { createFactory } from 'hono/factory'
-import { drizzle } from 'drizzle-orm/d1'
-import * as schema from '@/database/schema'
 import type { AppEnv } from '@/app/Env'
 import { UserRepository } from '@/app/Repositories/UserRepository'
-import { UserService } from '@/app/Services/UserService'
+import { SchoolRepository } from '@/app/Repositories/SchoolRepository'
+import { ClassRepository } from '@/app/Repositories/ClassRepository'
+import { TrainingRepository } from '@/app/Repositories/TrainingRepository'
+import { SegakRepository } from '@/app/Repositories/SegakRepository'
+import { AuditRepository } from '@/app/Repositories/AuditRepository'
+import { BmiCalculationService } from '@/app/Services/BmiCalculationService'
+import { SegakScoringService } from '@/app/Services/SegakScoringService'
 
-/**
- * Hono factory typed with our env — used across the app layer so
- * handlers keep full type inference for `c.env` and `c.var`.
- */
 export const factory = createFactory<AppEnv>()
 
-/**
- * Build a Drizzle instance bound to the request's D1 connection.
- * Called per-request (no long-lived singletons — serverless friendly).
- */
-export function dbFrom(env: AppEnv['Bindings']) {
-  return drizzle(env.DB, { schema })
+export function userRepoFrom(env: AppEnv['Bindings']) {
+  return new UserRepository(env.DB)
 }
 
-/**
- * Helper to resolve UserService per-request without repeated instantiation boilerplates.
- */
-export function userServiceFrom(env: AppEnv['Bindings']) {
-  return new UserService(new UserRepository(dbFrom(env)))
+export function schoolRepoFrom(env: AppEnv['Bindings']) {
+  return new SchoolRepository(env.DB)
+}
+
+export function classRepoFrom(env: AppEnv['Bindings']) {
+  return new ClassRepository(env.DB)
+}
+
+export function trainingRepoFrom(env: AppEnv['Bindings']) {
+  return new TrainingRepository(env.DB)
+}
+
+export function segakRepoFrom(env: AppEnv['Bindings']) {
+  return new SegakRepository(env.DB)
+}
+
+export function auditRepoFrom(env: AppEnv['Bindings']) {
+  return new AuditRepository(env.DB)
+}
+
+export function bmiServiceFrom() {
+  return new BmiCalculationService()
+}
+
+export function segakScoringServiceFrom() {
+  return new SegakScoringService()
 }
