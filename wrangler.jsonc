@@ -1,5 +1,5 @@
 {
-  "name": "sistem-ujian-segak",
+  "name": "ujiansegak",
   "main": "src/index.ts",
   "compatibility_date": "2024-09-25",
   "compatibility_flags": ["nodejs_compat"],
@@ -17,7 +17,7 @@
     {
       "binding": "DB",
       "database_name": "sistem-ujian-segak",
-      "database_id": "local-segak-db-id",
+      "database_id": "d02515c2-3cf5-456a-987b-d1ec1ea69158",
       "migrations_dir": "src/database/migrations"
     }
   ],
