@@ -110,6 +110,7 @@ export const renderApp = (initialPath = '/login') => html`<!DOCTYPE html>
     </header>
 
     <!-- PWA Install Banner (Minimal Slate Accent) -->
+    <style>#pwaInstallBanner > div:first-child > span:first-child { display: none; }</style>
     <div id="pwaInstallBanner" class="hidden bg-slate-800 text-slate-200 px-4 py-2.5 flex justify-between items-center border-b border-slate-700">
       <div class="flex items-center space-x-2 text-xs font-medium">
         <span>ðŸ“²</span>
@@ -185,7 +186,7 @@ export const renderApp = (initialPath = '/login') => html`<!DOCTYPE html>
         </form>
 
         <!-- Quick Demo Login Card -->
-        <div class="bg-white/80 backdrop-blur-sm p-4 rounded-2xl border border-slate-200/80 shadow-sm space-y-2.5">
+        <div class="hidden bg-white/80 backdrop-blur-sm p-4 rounded-2xl border border-slate-200/80 shadow-sm space-y-2.5">
           <div class="flex items-center justify-center space-x-1.5">
             <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
             <p class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Log Masuk Pantas (Demo)</p>
@@ -207,7 +208,7 @@ export const renderApp = (initialPath = '/login') => html`<!DOCTYPE html>
         </div>
 
         <!-- Footer note -->
-        <p class="text-center text-[11px] text-slate-400 font-medium">
+        <p class="hidden text-center text-[11px] text-slate-400 font-medium">
           🔒 Sambungan Selamat • Sistem Ujian SEGAK v1.0
         </p>
 
