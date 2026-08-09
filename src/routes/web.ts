@@ -21,6 +21,7 @@ web.get('/student/daily-log', (c) => c.html(renderApp('/student/daily-log')))
 
 // Laluan Laman Pentadbir (Admin Pages)
 web.get('/admin/dashboard', (c) => c.html(renderApp('/admin/dashboard')))
+web.get('/profile', (c) => c.html(renderApp('/profile')))
 
 // PWA Manifest & Service Worker Routes
 web.get('/favicon.ico', (c) => {

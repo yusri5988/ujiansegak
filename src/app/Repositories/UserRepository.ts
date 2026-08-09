@@ -1,4 +1,4 @@
-import { eq } from 'drizzle-orm'
+import { and, eq, ne, or } from 'drizzle-orm'
 import { D1Database } from '@cloudflare/workers-types'
 import { drizzle } from 'drizzle-orm/d1'
 import * as schema from '@/database/schema'
@@ -62,5 +62,42 @@ export class UserRepository {
       .update(schema.users)
       .set({ passwordHash, updatedAt: new Date() })
       .where(eq(schema.users.id, userId))
+  }
+
+  public async emailExists(email: string, exceptUserId: number) {
+    const results = await this.db
+      .select({ id: schema.users.id })
+      .from(schema.users)
+      .where(
+        and(
+          ne(schema.users.id, exceptUserId),
+          or(eq(schema.users.email, email), eq(schema.users.username, email))
+        )
+      )
+      .limit(1)
+
+    return results.length > 0
+  }
+
+  public async updateEmail(userId: number, email: string, updateUsername: boolean) {
+    await this.db
+      .update(schema.users)
+      .set({
+        email,
+        ...(updateUsername ? { username: email } : {}),
+        updatedAt: new Date(),
+      })
+      .where(eq(schema.users.id, userId))
+  }
+
+  public async updateTeacherProfile(userId: number, data: Partial<{ fullName: string; phone: string }>) {
+    const updates: Record<string, unknown> = {}
+    if (data.fullName !== undefined) updates.fullName = data.fullName
+    if (data.phone !== undefined) updates.phone = data.phone
+    updates.updatedAt = new Date()
+    await this.db
+      .update(schema.teacherProfiles)
+      .set(updates)
+      .where(eq(schema.teacherProfiles.userId, userId))
   }
 }

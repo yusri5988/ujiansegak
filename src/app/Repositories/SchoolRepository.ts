@@ -1,4 +1,4 @@
-import { eq } from 'drizzle-orm'
+import { and, desc, eq } from 'drizzle-orm'
 import { D1Database } from '@cloudflare/workers-types'
 import { drizzle } from 'drizzle-orm/d1'
 import * as schema from '@/database/schema'
@@ -16,6 +16,27 @@ export class SchoolRepository {
 
   public async findById(id: number) {
     const results = await this.db.select().from(schema.schools).where(eq(schema.schools.id, id)).limit(1)
+    return results[0] ?? null
+  }
+
+  public async findCurrentAcademicSession(schoolId: number) {
+    const results = await this.db
+      .select()
+      .from(schema.academicSessions)
+      .where(and(eq(schema.academicSessions.schoolId, schoolId), eq(schema.academicSessions.isCurrent, true)))
+      .orderBy(desc(schema.academicSessions.year), desc(schema.academicSessions.id))
+      .limit(1)
+
+    return results[0] ?? null
+  }
+
+  public async findAcademicSession(schoolId: number, sessionId: number) {
+    const results = await this.db
+      .select()
+      .from(schema.academicSessions)
+      .where(and(eq(schema.academicSessions.schoolId, schoolId), eq(schema.academicSessions.id, sessionId)))
+      .limit(1)
+
     return results[0] ?? null
   }
 

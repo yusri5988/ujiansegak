@@ -3,13 +3,14 @@ import type { AppEnv } from '@/app/Env'
 import { ClassController } from '@/app/Controllers/ClassController'
 import { TrainingController } from '@/app/Controllers/TrainingController'
 import { authMiddleware, requireRole } from '@/app/Middleware/AuthMiddleware'
+import { createClassRequest } from '@/app/Requests/ClassRequests'
 
 const teacherRouter = new Hono<AppEnv>()
 
 teacherRouter.use('*', authMiddleware, requireRole(['teacher', 'admin']))
 
 teacherRouter.get('/classes', (c) => ClassController.getTeacherClasses(c))
-teacherRouter.post('/classes', (c) => ClassController.createClass(c))
+teacherRouter.post('/classes', createClassRequest, (c) => ClassController.createClass(c, c.req.valid('json')))
 teacherRouter.get('/classes/:id/students', (c) => ClassController.getClassStudents(c))
 teacherRouter.post('/students', (c) => ClassController.addStudent(c))
 teacherRouter.post('/students/import-csv', (c) => ClassController.importStudentsCsv(c))

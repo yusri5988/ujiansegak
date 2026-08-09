@@ -1,6 +1,7 @@
 import { Context } from 'hono'
 import type { AppEnv } from '@/app/Env'
-import { classRepoFrom, userRepoFrom, auditRepoFrom } from '@/app/Services/AppServiceProvider'
+import type { CreateClassInput } from '@/app/Requests/ClassRequests'
+import { classRepoFrom, classServiceFrom, userRepoFrom, auditRepoFrom } from '@/app/Services/AppServiceProvider'
 import { Hash } from '@/helpers/Hash'
 
 export class ClassController {
@@ -11,18 +12,9 @@ export class ClassController {
     return c.json({ success: true, data: classes })
   }
 
-  public static async createClass(c: Context<AppEnv>) {
+  public static async createClass(c: Context<AppEnv>, input: CreateClassInput) {
     const user = c.get('user')!
-    const { schoolId, academicSessionId, name } = await c.req.json()
-    const classRepo = classRepoFrom(c.env)
-
-    const newClass = await classRepo.createClass({
-      schoolId,
-      academicSessionId,
-      teacherId: user.id,
-      name,
-      status: 'active',
-    })
+    const newClass = await classServiceFrom(c.env).createClass(user, input)
 
     return c.json({ success: true, data: newClass })
   }

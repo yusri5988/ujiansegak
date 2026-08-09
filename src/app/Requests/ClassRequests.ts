@@ -1,11 +1,26 @@
 import { z } from 'zod'
+import { zValidator } from '@hono/zod-validator'
 
 export const createClassSchema = z.object({
-  schoolId: z.number(),
-  academicSessionId: z.number(),
-  name: z.string().min(1, 'Sila masukkan nama kelas'),
-  teacherId: z.number().optional(),
+  name: z.string().trim().min(1, 'Sila masukkan nama kelas').max(100, 'Nama kelas terlalu panjang'),
+  schoolId: z.coerce.number().int().positive().optional(),
+  academicSessionId: z.coerce.number().int().positive().optional(),
 })
+
+export const createClassRequest = zValidator('json', createClassSchema, (result, c) => {
+  if (!result.success) {
+    return c.json(
+      {
+        success: false,
+        message: 'Data kelas tidak sah.',
+        errors: result.error.flatten().fieldErrors,
+      },
+      422
+    )
+  }
+})
+
+export type CreateClassInput = z.infer<typeof createClassSchema>
 
 export const createStudentSchema = z.object({
   schoolId: z.number(),

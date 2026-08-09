@@ -71,6 +71,35 @@ export const renderApp = (initialPath = '/login') => html`<!DOCTYPE html>
     #studentDashboard.hidden, #teacherDashboard.hidden, #adminDashboard.hidden { display: none !important; }
     .bottom-nav button { color: var(--segak-muted); transition: all .15s ease; }
     .bottom-nav button.active-nav-item { color: var(--segak-green) !important; font-weight: 700; }
+    .account-action { min-height: 36px; display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 8px 11px; border-radius: 10px; font-size: 11px; line-height: 1; font-weight: 700; transition: background-color .15s ease, border-color .15s ease, color .15s ease, transform .15s ease; }
+    .account-action:active { transform: translateY(1px); }
+    .account-action-profile { color: var(--segak-green); background: var(--segak-mint); border: 1px solid #b8ddd0; }
+    .account-action-profile:hover { background: #d4ebe2; border-color: #8fc9b7; }
+    .account-action-logout { color: #9d4545; background: #fff7f5; border: 1px solid #edcaca; }
+    .account-action-logout:hover { color: #843b3b; background: #fcebea; border-color: #e4adad; }
+    .account-action svg { width: 15px; height: 15px; flex: 0 0 auto; }
+    .profile-shell { max-width: 760px; margin: 0 auto; }
+    .profile-hero { position: relative; overflow: hidden; background: linear-gradient(135deg, #153b36 0%, #1d6b5c 100%); color: #fff; border-radius: 22px !important; border: 0 !important; box-shadow: 0 16px 32px rgba(21,59,54,.16) !important; }
+    .profile-hero::after { content: ''; position: absolute; width: 180px; height: 180px; right: -56px; top: -74px; border: 1px solid rgba(255,255,255,.14); border-radius: 50%; box-shadow: 0 0 0 24px rgba(255,255,255,.04), 0 0 0 48px rgba(255,255,255,.03); }
+    .profile-avatar { width: 58px; height: 58px; display: inline-flex; align-items: center; justify-content: center; border-radius: 18px; background: rgba(255,255,255,.16); border: 1px solid rgba(255,255,255,.24); color: #fff; font-size: 20px; font-weight: 800; letter-spacing: -.04em; }
+    .profile-section { border-radius: 18px !important; box-shadow: 0 8px 20px rgba(21,59,54,.045) !important; }
+    .profile-section-heading { display: flex; align-items: center; gap: 10px; }
+    .profile-section-icon { width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; border-radius: 10px; background: var(--segak-mint); color: var(--segak-green); }
+    .profile-section-icon svg { width: 17px; height: 17px; }
+    .profile-field-label { display: block; margin-bottom: 6px; color: #55716a; font-size: 11px; font-weight: 700; }
+    .profile-field input { min-height: 43px; padding: 10px 12px; font-size: 12px; font-weight: 600; }
+    .profile-readonly { background: #f1f7f4 !important; color: var(--segak-muted) !important; }
+    .profile-save-button { min-height: 43px; display: inline-flex; align-items: center; justify-content: center; gap: 7px; border-radius: 11px; background: var(--segak-green); color: #fff; font-size: 12px; font-weight: 700; box-shadow: 0 7px 15px rgba(29,107,92,.17); }
+    .profile-save-button:hover { background: var(--segak-ink); }
+    .profile-security { background: #fffdf9 !important; }
+    .profile-security .profile-section-icon { background: #fff1df; color: #a86825; }
+    .profile-password-button { min-height: 43px; border-radius: 11px; background: #fff4f2; border: 1px solid #efcbc6; color: #a54f47; font-size: 12px; font-weight: 700; }
+    .profile-password-button:hover { background: #fce9e6; color: #8d4039; }
+    @media (max-width: 420px) {
+      .account-action { padding-left: 9px; padding-right: 9px; }
+      .account-action span { display: none; }
+      .account-action svg { width: 17px; height: 17px; }
+    }
     [id^="modal"] > div { border-radius: 20px !important; }
     @keyframes pageIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
     .hide-scrollbar::-webkit-scrollbar { display: none; }
@@ -102,9 +131,18 @@ export const renderApp = (initialPath = '/login') => html`<!DOCTYPE html>
           <span class="text-[10px] text-slate-400 font-medium block">Kecergasan Sekolah</span>
         </div>
       </div>
-      <div id="userHeaderNav" class="hidden flex items-center space-x-2">
-        <button onclick="logout()" class="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-xs font-semibold transition border border-slate-700">
+      <div id="userHeaderNav" class="hidden flex items-center gap-2">
+        <button onclick="gotoProfile()" class="account-action account-action-profile" aria-label="Buka profil saya">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M15.75 6.75a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.5 20.25a7.5 7.5 0 0115 0" /></svg>
+          <span>
+          Profil Saya
+          </span>
+        </button>
+        <button onclick="logout()" class="account-action account-action-logout" aria-label="Log keluar">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 12h8.25m0 0l-3-3m3 3l-3 3" /></svg>
+          <span>
           Log Keluar
+          </span>
         </button>
       </div>
     </header>
@@ -144,7 +182,7 @@ export const renderApp = (initialPath = '/login') => html`<!DOCTYPE html>
         <div id="loginAlert" class="hidden p-3.5 rounded-xl text-xs bg-red-50 text-red-700 border border-red-200 font-medium flex items-center space-x-2 shadow-xs"></div>
 
         <!-- Main Login Card -->
-        <form id="loginForm" onsubmit="handleLogin(event)" class="bg-white p-6 sm:p-7 rounded-2xl border border-slate-200/80 shadow-xl shadow-slate-200/50 space-y-4">
+        <form id="loginForm" action="javascript:void(0);" method="POST" onsubmit="event.preventDefault(); (window.handleLogin || handleLogin)(event); return false;" class="bg-white p-6 sm:p-7 rounded-2xl border border-slate-200/80 shadow-xl shadow-slate-200/50 space-y-4">
           <div>
             <label class="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wide">ID Murid / Emel Pengguna</label>
             <div class="relative">
@@ -153,7 +191,7 @@ export const renderApp = (initialPath = '/login') => html`<!DOCTYPE html>
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                 </svg>
               </div>
-              <input type="text" id="loginUsername" required class="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold bg-slate-50/50 text-slate-900 placeholder:text-slate-400 focus:bg-white focus:border-[#1d6b5c] focus:outline-none focus:ring-4 focus:ring-emerald-600/10 transition-all" placeholder="M1001 atau cikgu.ahmad@segak.moe.edu.my">
+              <input type="text" id="loginUsername" required class="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold bg-slate-50/50 text-slate-900 placeholder:text-slate-400 focus:bg-white focus:border-[#1d6b5c] focus:outline-none focus:ring-4 focus:ring-emerald-600/10 transition-all" placeholder="M1001 atau g-60579088@moe-dl.edu.my">
             </div>
           </div>
 
@@ -196,7 +234,7 @@ export const renderApp = (initialPath = '/login') => html`<!DOCTYPE html>
               <span class="text-base mb-0.5">🛡️</span>
               <span class="text-[11px] font-bold text-slate-700 group-hover:text-emerald-900">Admin</span>
             </button>
-            <button type="button" onclick="quickLogin('cikgu.ahmad@segak.moe.edu.my', 'Guru1234!')" class="group flex flex-col items-center justify-center p-2.5 bg-slate-50 hover:bg-emerald-50/70 border border-slate-200/80 hover:border-emerald-200 rounded-xl transition-all">
+            <button type="button" onclick="quickLogin('g-60579088@moe-dl.edu.my', '123456')" class="group flex flex-col items-center justify-center p-2.5 bg-slate-50 hover:bg-emerald-50/70 border border-slate-200/80 hover:border-emerald-200 rounded-xl transition-all">
               <span class="text-base mb-0.5">👨‍🏫</span>
               <span class="text-[11px] font-bold text-slate-700 group-hover:text-emerald-900">Cikgu</span>
             </button>
@@ -324,6 +362,83 @@ export const renderApp = (initialPath = '/login') => html`<!DOCTYPE html>
         </div>
       </div>
 
+      <!-- SCREEN: PROFILE (Teacher/Student) -->
+      <div id="profileScreen" class="hidden profile-shell space-y-4">
+        <div class="flex items-center gap-3 px-1">
+          <button onclick="navigateToRoleHome()" class="w-9 h-9 inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 hover:text-[#1d6b5c] transition" aria-label="Kembali ke halaman utama">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
+          </button>
+          <div>
+            <p class="text-[10px] font-bold uppercase tracking-[.14em] text-[#1d6b5c]">Akaun</p>
+            <h1 class="text-lg font-extrabold text-slate-900 tracking-tight">Profil Saya</h1>
+          </div>
+        </div>
+
+        <div class="profile-hero p-5 sm:p-6">
+          <div class="relative z-10 flex items-center gap-4">
+            <div id="profileAvatar" class="profile-avatar">U</div>
+            <div class="min-w-0">
+              <p class="text-[10px] font-bold uppercase tracking-[.14em] text-emerald-100">Profil pengguna</p>
+              <h2 id="profileDisplayName" class="mt-1 truncate text-lg font-extrabold">Memuatkan profil...</h2>
+              <p id="profileRole" class="mt-1 text-xs font-medium text-emerald-100">Akaun SEGAK</p>
+            </div>
+          </div>
+          <p class="relative z-10 mt-5 max-w-md text-xs leading-5 text-emerald-50">Pastikan maklumat anda dikemas kini supaya rekod latihan dan komunikasi sekolah kekal tepat.</p>
+        </div>
+
+        <!-- Profile Info Section -->
+        <div class="profile-section bg-white p-5 sm:p-6 border border-slate-200 space-y-5">
+          <div class="profile-section-heading">
+            <span class="profile-section-icon"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M15.75 6.75a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.5 20.25a7.5 7.5 0 0115 0" /></svg></span>
+            <div><h3 class="font-extrabold text-sm text-slate-900">Maklumat peribadi</h3><p class="mt-0.5 text-[11px] text-slate-500">Maklumat asas akaun anda</p></div>
+          </div>
+          <div id="profileLoading" class="text-xs text-slate-400 text-center py-4">Memuatkan profil...</div>
+          <div id="profileContent" class="hidden space-y-4">
+            <div class="profile-field">
+              <label class="profile-field-label" for="profileFullName">Nama penuh</label>
+              <input type="text" id="profileFullName" class="w-full border border-slate-300 rounded-lg" placeholder="Nama penuh anda">
+            </div>
+            <div class="profile-field">
+              <label class="profile-field-label" for="profilePhone">No. telefon</label>
+              <input type="tel" id="profilePhone" class="w-full border border-slate-300 rounded-lg" placeholder="Cth: 012-3456789">
+            </div>
+            <div class="profile-field">
+              <label class="profile-field-label" for="profileUsername">Email</label>
+              <input type="email" id="profileUsername" class="w-full border border-slate-300 rounded-lg" placeholder="nama@sekolah.edu.my" autocomplete="email">
+            </div>
+            <button onclick="saveProfile()" class="profile-save-button w-full">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12l4 4L19 6" /></svg>
+              Simpan perubahan
+            </button>
+          </div>
+        </div>
+
+        <!-- Change Password Section -->
+        <div class="profile-section profile-security bg-white p-5 sm:p-6 border border-slate-200 space-y-5">
+          <div class="profile-section-heading">
+            <span class="profile-section-icon"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M16.5 10.5V6.75a4.5 4.5 0 00-9 0v3.75m-1.5 0h12a1.5 1.5 0 011.5 1.5v8.25a1.5 1.5 0 01-1.5 1.5H6a1.5 1.5 0 01-1.5-1.5V12a1.5 1.5 0 011.5-1.5z" /></svg></span>
+            <div><h3 class="font-extrabold text-sm text-slate-900">Keselamatan akaun</h3><p class="mt-0.5 text-[11px] text-slate-500">Tukar kata laluan secara berkala</p></div>
+          </div>
+          <div class="space-y-3">
+            <div class="profile-field">
+              <label class="profile-field-label" for="currentPassword">Kata laluan semasa</label>
+              <input type="password" id="currentPassword" class="w-full border border-slate-300 rounded-lg" placeholder="Masukkan kata laluan semasa">
+            </div>
+            <div class="profile-field">
+              <label class="profile-field-label" for="newPassword">Kata laluan baharu</label>
+              <input type="password" id="newPassword" class="w-full border border-slate-300 rounded-lg" placeholder="Sekurang-kurangnya 6 aksara">
+            </div>
+            <div class="profile-field">
+              <label class="profile-field-label" for="confirmNewPassword">Sahkan kata laluan baharu</label>
+              <input type="password" id="confirmNewPassword" class="w-full border border-slate-300 rounded-lg" placeholder="Taip semula kata laluan baharu">
+            </div>
+            <button onclick="changePassword()" class="profile-password-button w-full">
+              Tukar kata laluan
+            </button>
+          </div>
+        </div>
+      </div>
+
     </main>
 
     <!-- Mobile Fixed Bottom Navigation Bar (Minimal Clean Theme) -->
@@ -339,7 +454,7 @@ export const renderApp = (initialPath = '/login') => html`<!DOCTYPE html>
   <div id="modalCreateClass" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-50">
     <div class="bg-white rounded-xl p-5 max-w-xs w-full shadow-xl space-y-3 border border-slate-200">
       <h3 class="font-bold text-sm text-slate-900">Tambah Kelas Baharu</h3>
-      <form onsubmit="handleCreateClass(event)" class="space-y-3 text-xs">
+      <form action="javascript:void(0);" method="POST" onsubmit="event.preventDefault(); handleCreateClass(event); return false;" class="space-y-3 text-xs">
         <div>
           <label class="font-semibold block mb-1 text-slate-700">Nama Kelas</label>
           <input type="text" id="newClassName" required class="w-full p-2.5 border border-slate-300 rounded-lg bg-slate-50" placeholder="Contoh: 5 Cemerlang">
@@ -355,7 +470,7 @@ export const renderApp = (initialPath = '/login') => html`<!DOCTYPE html>
   <div id="modalAddStudent" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-50">
     <div class="bg-white rounded-xl p-5 max-w-xs w-full shadow-xl space-y-3 border border-slate-200">
       <h3 class="font-bold text-sm text-slate-900">Tambah Murid Baharu</h3>
-      <form onsubmit="handleAddStudent(event)" class="space-y-3 text-xs">
+      <form action="javascript:void(0);" method="POST" onsubmit="event.preventDefault(); handleAddStudent(event); return false;" class="space-y-3 text-xs">
         <div>
           <label class="font-semibold block mb-1 text-slate-700">ID / No. Matrik Murid</label>
           <input type="text" id="addStudentIdNum" required class="w-full p-2.5 border border-slate-300 rounded-lg bg-slate-50" placeholder="M1006">
@@ -385,7 +500,7 @@ export const renderApp = (initialPath = '/login') => html`<!DOCTYPE html>
   <div id="modalCreateSchedule" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-50">
     <div class="bg-white rounded-xl p-5 max-w-xs w-full shadow-xl space-y-3 border border-slate-200">
       <h3 class="font-bold text-sm text-slate-900">Beri Latihan Kepada Murid</h3>
-      <form onsubmit="handleCreateSchedule(event)" class="space-y-3 text-xs max-h-[75vh] overflow-y-auto">
+      <form action="javascript:void(0);" method="POST" onsubmit="event.preventDefault(); handleCreateSchedule(event); return false;" class="space-y-3 text-xs max-h-[75vh] overflow-y-auto">
         <div>
           <label class="font-semibold block mb-1 text-slate-700">Kelas</label>
           <select id="scheduleClassId" required class="w-full p-2.5 border border-slate-300 rounded-lg bg-slate-50"><option value="">Pilih kelas</option></select>
@@ -505,6 +620,12 @@ export const renderApp = (initialPath = '/login') => html`<!DOCTYPE html>
 
       renderRoleBottomNav();
 
+      if (path.startsWith('/profile')) {
+        showScreen('profileScreen');
+        loadProfile();
+        return;
+      }
+
       const role = currentUser.role;
       if (role === 'admin') {
         showScreen('adminDashboard');
@@ -538,7 +659,9 @@ export const renderApp = (initialPath = '/login') => html`<!DOCTYPE html>
       document.getElementById('teacherDashboard').classList.add('hidden');
       document.getElementById('studentDashboard').classList.add('hidden');
       document.getElementById('adminDashboard').classList.add('hidden');
-      document.getElementById(screenId).classList.remove('hidden');
+      document.getElementById('profileScreen')?.classList.add('hidden');
+      const target = document.getElementById(screenId);
+      if (target) target.classList.remove('hidden');
     }
 
     function toggleModal(modalId, show) {
@@ -567,9 +690,9 @@ export const renderApp = (initialPath = '/login') => html`<!DOCTYPE html>
     window.navigateTo = navigateTo;
     window.navigateToRoleHome = navigateToRoleHome;
     window.navigateToRoleActivity = navigateToRoleActivity;
+    window.gotoProfile = gotoProfile;
 
     async function handleLogin(e) {
-      window.handleLogin = handleLogin;
       if (e) e.preventDefault();
       const username = document.getElementById('loginUsername').value;
       const password = document.getElementById('loginPassword').value;
@@ -602,6 +725,7 @@ export const renderApp = (initialPath = '/login') => html`<!DOCTYPE html>
         alertEl.classList.remove('hidden');
       }
     }
+    window.handleLogin = handleLogin;
 
     async function fetchCurrentUser() {
       try {
@@ -633,6 +757,11 @@ export const renderApp = (initialPath = '/login') => html`<!DOCTYPE html>
       const roleEl = document.getElementById('navUserRole');
       if (roleEl) roleEl.textContent = currentUser.role;
     }
+
+    function gotoProfile() {
+      navigateTo('/profile');
+    }
+    window.gotoProfile = gotoProfile;
 
     function logout() {
       localStorage.removeItem('segak_token');
@@ -872,7 +1001,9 @@ export const renderApp = (initialPath = '/login') => html`<!DOCTYPE html>
             <div class="font-bold text-xs text-slate-900">\${c.name}</div>
             <div class="text-[10px] text-slate-500">Lihat senarai murid</div>
           </div>
-          <span class="text-xs text-slate-400">âž”</span>
+          <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+          </svg>
         </div>
       \`).join('');
     }
@@ -1063,15 +1194,23 @@ export const renderApp = (initialPath = '/login') => html`<!DOCTYPE html>
     async function handleCreateClass(e) {
       e.preventDefault();
       const name = document.getElementById('newClassName').value;
-      const res = await fetch('/api/teacher/classes', {
-        method: 'POST',
-        headers: { 'Authorization': 'Bearer ' + currentToken, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ schoolId: 1, academicSessionId: 1, name })
-      });
-      const data = await res.json();
-      if (data.success) {
+      try {
+        const res = await fetch('/api/teacher/classes', {
+          method: 'POST',
+          headers: { 'Authorization': 'Bearer ' + currentToken, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name })
+        });
+        const data = await res.json();
+        if (!res.ok || !data.success) {
+          const validationMessage = data.errors ? Object.values(data.errors).flat()[0] : null;
+          return alert(validationMessage || data.message || 'Gagal mencipta kelas.');
+        }
+
         toggleModal('modalCreateClass', false);
-        loadTeacherClasses();
+        await loadTeacherClasses();
+        alert('Kelas berjaya dicipta.');
+      } catch (_) {
+        alert('Tidak dapat menghubungi server. Sila cuba lagi.');
       }
     }
 
@@ -1236,6 +1375,147 @@ export const renderApp = (initialPath = '/login') => html`<!DOCTYPE html>
           <div class="text-slate-900 font-extrabold text-xs pt-0.5">Jumlah Skor: \${r.totalScore} / 20 (\${r.overallGrade})</div>
         </div>
       \`).join('');
+    }
+
+    // PROFILE LOGIC
+    async function loadProfile() {
+      const profileLoading = document.getElementById('profileLoading');
+      const profileContent = document.getElementById('profileContent');
+      
+      if (!profileLoading || !profileContent) return;
+      
+      profileLoading.classList.remove('hidden');
+      profileContent.classList.add('hidden');
+
+      const res = await fetch('/api/auth/profile', {
+        headers: { 'Authorization': 'Bearer ' + currentToken }
+      });
+      const data = await res.json();
+      
+      if (!data.success || !data.data) {
+        profileLoading.textContent = 'Gagal memuatkan profil';
+        return;
+      }
+
+      const user = data.data.user;
+      const profile = data.data.profile;
+
+      const fullNameInput = document.getElementById('profileFullName');
+      const phoneInput = document.getElementById('profilePhone');
+      const usernameInput = document.getElementById('profileUsername');
+      const displayName = profile?.fullName || user.username;
+      const displayNameEl = document.getElementById('profileDisplayName');
+      const avatarEl = document.getElementById('profileAvatar');
+      const roleEl = document.getElementById('profileRole');
+
+      if (displayNameEl) displayNameEl.textContent = displayName;
+      if (avatarEl) avatarEl.textContent = displayName.trim().slice(0, 1).toUpperCase();
+      if (roleEl) roleEl.textContent = user.role === 'teacher' ? 'Guru / Pengurusan kelas' : user.role === 'student' ? 'Murid / Rekod SEGAK' : 'Pentadbir sistem';
+
+      if (fullNameInput && profile?.fullName) {
+        fullNameInput.value = profile.fullName;
+      }
+      
+      if (phoneInput && profile?.phone) {
+        phoneInput.value = profile.phone;
+      }
+      
+      if (usernameInput) {
+        usernameInput.value = user.email || user.username;
+      }
+
+      profileLoading.classList.add('hidden');
+      profileContent.classList.remove('hidden');
+    }
+
+    async function saveProfile() {
+      const fullNameInput = document.getElementById('profileFullName');
+      const phoneInput = document.getElementById('profilePhone');
+      const emailInput = document.getElementById('profileUsername');
+      
+      const fullName = fullNameInput?.value.trim() || '';
+      const phone = phoneInput?.value.trim() || '';
+      const email = emailInput?.value.trim() || '';
+
+      if (!fullName) {
+        alert('Sila masukkan nama penuh');
+        return;
+      }
+
+      if (!email) {
+        alert('Sila masukkan email');
+        return;
+      }
+
+      const res = await fetch('/api/auth/profile', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + currentToken
+        },
+        body: JSON.stringify({ fullName, phone, email })
+      });
+
+      const data = await res.json();
+      
+      if (data.success) {
+        alert('Profil berjaya dikemas kini!');
+        const nameEl = document.getElementById('navUserName');
+        const displayNameEl = document.getElementById('profileDisplayName');
+        const avatarEl = document.getElementById('profileAvatar');
+        if (nameEl && fullName) {
+          nameEl.textContent = fullName;
+        }
+        if (displayNameEl) displayNameEl.textContent = fullName;
+        if (avatarEl) avatarEl.textContent = fullName.slice(0, 1).toUpperCase();
+        if (currentUser) {
+          currentUser.email = email;
+          if (currentUser.role !== 'student') currentUser.username = email;
+        }
+      } else {
+        alert(data.message || 'Gagal mengemas kini profil');
+      }
+    }
+
+    async function changePassword() {
+      const currentPwd = document.getElementById('currentPassword')?.value || '';
+      const newPwd = document.getElementById('newPassword')?.value || '';
+      const confirmPwd = document.getElementById('confirmNewPassword')?.value || '';
+
+      if (!currentPwd || !newPwd || !confirmPwd) {
+        alert('Sila isi semua ruang kata laluan');
+        return;
+      }
+
+      if (newPwd.length < 6) {
+        alert('Kata laluan baharu sekurang-kurangnya 6 aksara');
+        return;
+      }
+
+      if (newPwd !== confirmPwd) {
+        alert('Pengesahan kata laluan baharu tidak sepadan');
+        return;
+      }
+
+      const res = await fetch('/api/auth/password', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + currentToken
+        },
+        body: JSON.stringify({ currentPassword: currentPwd, newPassword: newPwd })
+      });
+
+      const data = await res.json();
+      
+      if (data.success) {
+        alert('Kata laluan berjaya ditukar!');
+        if (document.getElementById('currentPassword')) document.getElementById('currentPassword').value = '';
+        if (document.getElementById('newPassword')) document.getElementById('newPassword').value = '';
+        if (document.getElementById('confirmNewPassword')) document.getElementById('confirmNewPassword').value = '';
+      } else {
+        alert(data.message || 'Gagal menukar kata laluan');
+      }
     }
 
     // ADMIN LOGIC

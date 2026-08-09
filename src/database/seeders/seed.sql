@@ -9,9 +9,9 @@ INSERT OR IGNORE INTO schools (id, name, code, address, state, created_at, updat
 INSERT OR REPLACE INTO users (id, username, email, password_hash, role, status, created_at, updated_at) VALUES
 (1, 'admin@segak.moe.edu.my', 'admin@segak.moe.edu.my', 'b92b967f19cdaf8ef39681b6ad7940ffd229614de7a5153aa0e80b520b0f3c0b', 'admin', 'active', strftime('%s', 'now'), strftime('%s', 'now'));
 
--- Guru (cikgu.ahmad@segak.moe.edu.my / Guru1234!)
+-- Guru (g-60579088@moe-dl.edu.my / 123456)
 INSERT OR REPLACE INTO users (id, username, email, password_hash, role, status, created_at, updated_at) VALUES
-(2, 'cikgu.ahmad@segak.moe.edu.my', 'cikgu.ahmad@segak.moe.edu.my', 'bb27ebb8b669ef313a2b6353b46462b95fd77705e2de0145887e152571bd27d3', 'teacher', 'active', strftime('%s', 'now'), strftime('%s', 'now'));
+(2, 'g-60579088@moe-dl.edu.my', 'g-60579088@moe-dl.edu.my', 'a56c1409204e2c13705201000c367c7c0a41e59340cf5b58e7bbe9b9bdc5a091', 'teacher', 'active', strftime('%s', 'now'), strftime('%s', 'now'));
 
 INSERT OR IGNORE INTO teacher_profiles (id, user_id, school_id, full_name, phone, created_at, updated_at) VALUES
 (1, 2, 1, 'Cikgu Ahmad bin Razali', '012-3456789', strftime('%s', 'now'), strftime('%s', 'now'));
@@ -35,7 +35,7 @@ INSERT OR IGNORE INTO student_profiles (id, user_id, school_id, student_id_num, 
 INSERT OR IGNORE INTO academic_sessions (id, school_id, year, name, is_current, created_at, updated_at) VALUES
 (1, 1, 2026, 'Sesi 2026/2027', 1, strftime('%s', 'now'), strftime('%s', 'now'));
 
-INSERT OR IGNORE INTO classes (id, school_id, academic_session_id, teacher_id, name, status, created_at, updated_at) VALUES
+INSERT OR REPLACE INTO classes (id, school_id, academic_session_id, teacher_id, name, status, created_at, updated_at) VALUES
 (1, 1, 1, 2, '5 Cemerlang', 'active', strftime('%s', 'now'), strftime('%s', 'now'));
 
 INSERT OR IGNORE INTO class_students (id, class_id, student_id, status, created_at, updated_at) VALUES

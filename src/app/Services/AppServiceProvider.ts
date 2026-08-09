@@ -8,6 +8,7 @@ import { SegakRepository } from '@/app/Repositories/SegakRepository'
 import { AuditRepository } from '@/app/Repositories/AuditRepository'
 import { BmiCalculationService } from '@/app/Services/BmiCalculationService'
 import { SegakScoringService } from '@/app/Services/SegakScoringService'
+import { ClassService } from '@/app/Services/ClassService'
 
 export const factory = createFactory<AppEnv>()
 
@@ -21,6 +22,10 @@ export function schoolRepoFrom(env: AppEnv['Bindings']) {
 
 export function classRepoFrom(env: AppEnv['Bindings']) {
   return new ClassRepository(env.DB)
+}
+
+export function classServiceFrom(env: AppEnv['Bindings']) {
+  return new ClassService(classRepoFrom(env), schoolRepoFrom(env), userRepoFrom(env))
 }
 
 export function trainingRepoFrom(env: AppEnv['Bindings']) {
