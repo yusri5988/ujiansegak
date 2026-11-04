@@ -1,4 +1,4 @@
-import { and, asc, eq, inArray, ne, or } from 'drizzle-orm'
+import { and, asc, eq, inArray, ne, or, sql } from 'drizzle-orm'
 import { D1Database } from '@cloudflare/workers-types'
 import { drizzle } from 'drizzle-orm/d1'
 import * as schema from '@/database/schema'
@@ -25,10 +25,16 @@ export class UserRepository {
   }
 
   public async findByLoginIdentifier(identifier: string) {
+    const normalizedIdentifier = identifier.toLowerCase()
     const results = await this.db
       .select()
       .from(schema.users)
-      .where(or(eq(schema.users.username, identifier), eq(schema.users.email, identifier)))
+      .where(
+        or(
+          sql`lower(${schema.users.username}) = ${normalizedIdentifier}`,
+          sql`lower(${schema.users.email}) = ${normalizedIdentifier}`,
+        ),
+      )
       .limit(1)
     return results[0] ?? null
   }

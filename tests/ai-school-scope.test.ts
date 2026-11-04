@@ -27,7 +27,7 @@ beforeAll(async () => {
   }
   await db.batch([
     db.prepare("INSERT INTO schools (id,name,code,created_at,updated_at) VALUES (1,'Sekolah Satu','S1',0,0),(2,'Sekolah Dua','S2',0,0)"),
-    db.prepare("INSERT INTO smartfit_app_users (id,username,password_hash,role,status,created_at,updated_at) VALUES (1,'teacher-one','x','teacher','active',0,0),(2,'teacher-two','x','teacher','active',0,0),(3,'M001','x','student','active',0,0),(4,'M002','x','student','active',0,0),(5,'teacher-three','x','teacher','active',0,0)"),
+    db.prepare("INSERT INTO smartfit_app_users (id,username,email,password_hash,role,status,created_at,updated_at) VALUES (1,'teacher-one','teacher.one@example.test','x','teacher','active',0,0),(2,'teacher-two',NULL,'x','teacher','active',0,0),(3,'M001',NULL,'x','student','active',0,0),(4,'M002',NULL,'x','student','active',0,0),(5,'teacher-three',NULL,'x','teacher','active',0,0)"),
     db.prepare("INSERT INTO teacher_profiles (user_id,school_id,full_name,created_at,updated_at) VALUES (1,1,'Guru Satu',0,0),(2,2,'Guru Dua',0,0),(5,1,'Guru Tiga',0,0)"),
     db.prepare("INSERT INTO student_profiles (user_id,school_id,student_id_num,full_name,gender,dob,created_at,updated_at) VALUES (3,1,'M001','Ali','L','2014-01-01',0,0),(4,2,'M002','Abu','L','2014-01-01',0,0)"),
     db.prepare("INSERT INTO academic_sessions (id,school_id,year,name,is_current,created_at,updated_at) VALUES (1,1,2026,'Sesi Satu',1,0,0),(2,2,2026,'Sesi Dua',1,0,0)"),
@@ -42,6 +42,22 @@ beforeAll(async () => {
 })
 
 afterAll(async () => { await mf.dispose() })
+
+describe('case-insensitive login identifiers', () => {
+  it('finds usernames regardless of letter case', async () => {
+    const teacher = await userRepoFrom(env).findByLoginIdentifier('TEACHER-ONE')
+    const student = await userRepoFrom(env).findByLoginIdentifier('m001')
+
+    expect(teacher).toMatchObject({ id: 1, username: 'teacher-one' })
+    expect(student).toMatchObject({ id: 3, username: 'M001' })
+  })
+
+  it('finds email addresses regardless of letter case', async () => {
+    const teacher = await userRepoFrom(env).findByLoginIdentifier('TEACHER.ONE@EXAMPLE.TEST')
+
+    expect(teacher).toMatchObject({ id: 1, username: 'teacher-one', email: 'teacher.one@example.test' })
+  })
+})
 
 function toolsForSchool() {
   return new AiToolService(classRepoFrom(env), trainingServiceFrom(env), userRepoFrom(env), segakRepoFrom(env), teacherSchoolServiceFrom(env), segakServiceFrom(env))
