@@ -1,7 +1,7 @@
 import { Context } from 'hono'
 import type { AppEnv } from '@/app/Env'
 import { auditRepoFrom, classRepoFrom, trainingRepoFrom, trainingServiceFrom } from '@/app/Services/AppServiceProvider'
-import type { TrainingScheduleIdInput, TrainingScheduleInput } from '@/app/Requests/TrainingRequests'
+import type { SubmitTrainingInput, TrainingScheduleIdInput, TrainingScheduleInput } from '@/app/Requests/TrainingRequests'
 
 export class TrainingController {
   public static async getTemplates(c: Context<AppEnv>) {
@@ -62,23 +62,9 @@ export class TrainingController {
     return c.json({ success: true, data: assignments })
   }
 
-  public static async submitTraining(c: Context<AppEnv>) {
+  public static async submitTraining(c: Context<AppEnv>, input: SubmitTrainingInput) {
     const user = c.get('user')!
-    const { assignmentId, scheduleId, durationMinutes, setsCompleted, repsCompleted, studentNotes } = await c.req.json()
-
-    const trainingRepo = trainingRepoFrom(c.env)
-    const submission = await trainingRepo.submitTraining({
-      assignmentId,
-      scheduleId,
-      studentId: user.id,
-      submissionDate: new Date().toISOString(),
-      durationMinutes,
-      setsCompleted,
-      repsCompleted,
-      studentNotes,
-      reviewStatus: 'submitted',
-    })
-
+    const submission = await trainingServiceFrom(c.env).submitTraining(user, input)
     return c.json({ success: true, data: submission })
   }
 

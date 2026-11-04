@@ -28,6 +28,11 @@ export type TrainingTemplateChanges = Pick<
   | 'safetyNotes'
 >
 
+export type SubmitTrainingResult =
+  | { kind: 'created'; submission: typeof schema.trainingSubmissions.$inferSelect }
+  | { kind: 'not_found' }
+  | { kind: 'already_submitted' }
+
 export class TrainingRepository {
   private db
   private readonly d1: D1Database
@@ -326,8 +331,8 @@ export class TrainingRepository {
       ),
       this.d1
         .prepare(
-          `INSERT INTO training_assignments (schedule_id, student_id, status)
-           SELECT training_schedules.id, class_students.student_id, 'not_started'
+          `INSERT INTO training_assignments (schedule_id, student_id, status, created_at, updated_at)
+           SELECT training_schedules.id, class_students.student_id, 'not_started', ?, ?
            FROM training_schedules
            INNER JOIN classes ON classes.id = training_schedules.class_id
            INNER JOIN class_students ON class_students.class_id = training_schedules.class_id
@@ -338,7 +343,7 @@ export class TrainingRepository {
              AND class_students.status = 'active'
              AND student_profiles.school_id = ?`,
         )
-        .bind(creationRequestId, data.teacherId, schoolId, schoolId),
+        .bind(nowSeconds, nowSeconds, creationRequestId, data.teacherId, schoolId, schoolId),
     ]
 
     await this.d1.batch(statements)
@@ -421,6 +426,7 @@ export class TrainingRepository {
     activities: TrainingScheduleActivityInput[],
     reassignedStudentIds?: number[],
   ) {
+    const nowSeconds = Math.floor(Date.now() / 1000)
     const scheduleEligible = `EXISTS (
       SELECT 1 FROM training_schedules
       WHERE id = ? AND teacher_id = ?
@@ -443,7 +449,7 @@ export class TrainingRepository {
           changes.instructions ?? null,
           changes.evidenceRequired ? 1 : 0,
           changes.teacherNotes ?? null,
-          Math.floor(Date.now() / 1000),
+          nowSeconds,
           scheduleId,
           teacherId,
           scheduleId,
@@ -486,10 +492,10 @@ export class TrainingRepository {
         statements.push(
           this.d1
             .prepare(
-              `INSERT INTO training_assignments (schedule_id, student_id, status)
-               SELECT ?, ?, 'not_started' WHERE ${scheduleEligible}`,
+              `INSERT INTO training_assignments (schedule_id, student_id, status, created_at, updated_at)
+               SELECT ?, ?, 'not_started', ?, ? WHERE ${scheduleEligible}`,
             )
-            .bind(scheduleId, studentId, scheduleId, teacherId, scheduleId),
+            .bind(scheduleId, studentId, nowSeconds, nowSeconds, scheduleId, teacherId, scheduleId),
         )
       }
     }
@@ -512,6 +518,7 @@ export class TrainingRepository {
     activities: TrainingScheduleActivityInput[],
     reassignedStudentIds?: number[],
   ) {
+    const nowSeconds = Math.floor(Date.now() / 1000)
     const scheduleEligible = `EXISTS (
       SELECT 1 FROM training_schedules scoped_schedule
       INNER JOIN classes scoped_class ON scoped_class.id = scoped_schedule.class_id
@@ -537,7 +544,7 @@ export class TrainingRepository {
           changes.instructions ?? null,
           changes.evidenceRequired ? 1 : 0,
           changes.teacherNotes ?? null,
-          Math.floor(Date.now() / 1000),
+          nowSeconds,
           scheduleId,
           changes.classId,
           schoolId,
@@ -579,10 +586,10 @@ export class TrainingRepository {
         statements.push(
           this.d1
             .prepare(
-              `INSERT INTO training_assignments (schedule_id, student_id, status)
-               SELECT ?, ?, 'not_started' WHERE ${scheduleEligible}`,
+              `INSERT INTO training_assignments (schedule_id, student_id, status, created_at, updated_at)
+               SELECT ?, ?, 'not_started', ?, ? WHERE ${scheduleEligible}`,
             )
-            .bind(scheduleId, studentId, scheduleId, schoolId, scheduleId),
+            .bind(scheduleId, studentId, nowSeconds, nowSeconds, scheduleId, schoolId, scheduleId),
         )
       }
     }
@@ -694,15 +701,15 @@ export class TrainingRepository {
       ),
       this.d1
         .prepare(
-          `INSERT INTO training_assignments (schedule_id, student_id, status)
-           SELECT training_schedules.id, class_students.student_id, 'not_started'
+          `INSERT INTO training_assignments (schedule_id, student_id, status, created_at, updated_at)
+           SELECT training_schedules.id, class_students.student_id, 'not_started', ?, ?
            FROM training_schedules
            INNER JOIN class_students ON class_students.class_id = training_schedules.class_id
            WHERE training_schedules.creation_request_id = ?
              AND training_schedules.teacher_id = ?
              AND class_students.status = 'active'`,
         )
-        .bind(creationRequestId, data.teacherId),
+        .bind(nowSeconds, nowSeconds, creationRequestId, data.teacherId),
     ]
 
     await this.d1.batch(statements)
@@ -783,13 +790,80 @@ export class TrainingRepository {
       .where(eq(schema.trainingScheduleActivities.scheduleId, scheduleId))
   }
 
-  public async submitTraining(data: typeof schema.trainingSubmissions.$inferInsert) {
-    const inserted = await this.db.insert(schema.trainingSubmissions).values(data).returning()
-    await this.db
-      .update(schema.trainingAssignments)
-      .set({ status: 'submitted', updatedAt: new Date() })
-      .where(eq(schema.trainingAssignments.id, data.assignmentId))
-    return inserted[0]
+  public async submitTraining(data: typeof schema.trainingSubmissions.$inferInsert): Promise<SubmitTrainingResult> {
+    const nowSeconds = Math.floor(Date.now() / 1000)
+    const results = await this.d1.batch([
+      this.d1
+        .prepare(
+          `INSERT INTO training_submissions
+            (assignment_id, student_id, schedule_id, submission_date, duration_minutes, sets_completed,
+             reps_completed, student_notes, review_status, created_at, updated_at)
+           SELECT assignment.id, assignment.student_id, assignment.schedule_id, ?, ?, ?, ?, ?, 'submitted', ?, ?
+           FROM training_assignments AS assignment
+           WHERE assignment.id = ?
+             AND assignment.student_id = ?
+             AND assignment.schedule_id = ?
+             AND assignment.status NOT IN ('submitted', 'approved')`,
+        )
+        .bind(
+          data.submissionDate,
+          data.durationMinutes ?? null,
+          data.setsCompleted ?? null,
+          data.repsCompleted ?? null,
+          data.studentNotes ?? null,
+          nowSeconds,
+          nowSeconds,
+          data.assignmentId,
+          data.studentId,
+          data.scheduleId,
+        ),
+      this.d1
+        .prepare(
+          `UPDATE training_assignments
+           SET status = 'submitted', updated_at = ?
+           WHERE id = ?
+             AND student_id = ?
+             AND schedule_id = ?
+             AND status NOT IN ('submitted', 'approved')
+             AND EXISTS (
+               SELECT 1 FROM training_submissions
+               WHERE assignment_id = ? AND student_id = ?
+             )`,
+        )
+        .bind(
+          nowSeconds,
+          data.assignmentId,
+          data.studentId,
+          data.scheduleId,
+          data.assignmentId,
+          data.studentId,
+        ),
+    ])
+
+    const inserted = results[0]
+    if (!inserted || inserted.meta.changes !== 1) {
+      const assignment = await this.db
+        .select({ id: schema.trainingAssignments.id })
+        .from(schema.trainingAssignments)
+        .where(
+          and(
+            eq(schema.trainingAssignments.id, data.assignmentId),
+            eq(schema.trainingAssignments.studentId, data.studentId),
+            eq(schema.trainingAssignments.scheduleId, data.scheduleId),
+          ),
+        )
+        .limit(1)
+      return assignment.length > 0 ? { kind: 'already_submitted' } : { kind: 'not_found' }
+    }
+
+    const submissionId = inserted.meta.last_row_id
+    const submission = await this.db
+      .select()
+      .from(schema.trainingSubmissions)
+      .where(eq(schema.trainingSubmissions.id, submissionId))
+      .limit(1)
+    if (!submission[0]) throw new Error('Penghantaran latihan tidak dapat dibaca selepas disimpan.')
+    return { kind: 'created', submission: submission[0] }
   }
 
   public async getSubmissionsForTeacher(teacherId: number, limit = 50) {

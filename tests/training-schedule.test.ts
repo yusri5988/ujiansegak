@@ -36,6 +36,7 @@ function createTrainingService(hasSubmissions: boolean) {
     | 'createSchedule'
     | 'addScheduleActivity'
     | 'createAssignment'
+    | 'submitTraining'
     | 'findScheduleForTeacher'
     | 'hasSubmissionsForSchedule'
     | 'updateScheduleForTeacher'
@@ -62,6 +63,7 @@ function createTrainingService(hasSubmissions: boolean) {
       createdAt: new Date(),
       updatedAt: new Date(),
     })),
+    submitTraining: vi.fn(async () => ({ kind: 'already_submitted' as const })),
     findScheduleForTeacher: vi.fn(async () => existingSchedule),
     hasSubmissionsForSchedule: vi.fn(async () => hasSubmissions),
     updateScheduleForTeacher: vi.fn(async () => null),

@@ -3,6 +3,7 @@ import type { AppEnv } from '@/app/Env'
 import { TrainingController } from '@/app/Controllers/TrainingController'
 import { SegakController } from '@/app/Controllers/SegakController'
 import { authMiddleware, requireRole } from '@/app/Middleware/AuthMiddleware'
+import { submitTrainingRequest } from '@/app/Requests/TrainingRequests'
 
 const studentRouter = new Hono<AppEnv>()
 
@@ -11,7 +12,9 @@ studentRouter.use('*', authMiddleware, requireRole(['student']))
 // Tugasan & Penyerahan Latihan Murid
 studentRouter.get('/assignments', (c) => TrainingController.getStudentAssignments(c))
 studentRouter.get('/today-reminders', (c) => TrainingController.getTodayReminders(c))
-studentRouter.post('/submissions', (c) => TrainingController.submitTraining(c))
+studentRouter.post('/submissions', submitTrainingRequest, (c) =>
+  TrainingController.submitTraining(c, c.req.valid('json')),
+)
 
 // Log Latihan Harian Murid (5 Aktiviti SEGAK)
 studentRouter.post('/daily-log', (c) => TrainingController.submitDailyLog(c))

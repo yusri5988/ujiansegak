@@ -74,14 +74,16 @@ export const updateTrainingScheduleRequest = requestValidator('json', updateTrai
 export const trainingScheduleIdRequest = requestValidator('param', trainingScheduleIdSchema)
 
 export const submitTrainingSchema = z.object({
-  assignmentId: z.number(),
-  scheduleId: z.number(),
-  durationMinutes: z.number().optional(),
-  setsCompleted: z.number().optional(),
-  repsCompleted: z.number().optional(),
-  studentNotes: z.string().optional(),
+  assignmentId: z.number().int().positive(),
+  scheduleId: z.number().int().positive(),
+  durationMinutes: z.number().int().nonnegative().optional(),
+  setsCompleted: z.number().int().nonnegative().optional(),
+  repsCompleted: z.number().int().nonnegative().optional(),
+  studentNotes: z.string().trim().max(2000).optional(),
   evidenceFiles: z.array(z.string()).optional(),
 })
+export type SubmitTrainingInput = z.infer<typeof submitTrainingSchema>
+export const submitTrainingRequest = requestValidator('json', submitTrainingSchema)
 
 export const reviewSubmissionSchema = z.object({
   submissionId: z.number(),

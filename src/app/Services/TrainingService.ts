@@ -2,7 +2,7 @@ import type { AuthUser } from '@/app/Env'
 import { ConflictException } from '@/app/Exceptions/ConflictException'
 import { NotFoundException } from '@/app/Exceptions/NotFoundException'
 import { ValidationException } from '@/app/Exceptions/ValidationException'
-import type { TrainingScheduleInput, TrainingTemplateInput } from '@/app/Requests/TrainingRequests'
+import type { SubmitTrainingInput, TrainingScheduleInput, TrainingTemplateInput } from '@/app/Requests/TrainingRequests'
 import { AuditRepository } from '@/app/Repositories/AuditRepository'
 import { ClassRepository } from '@/app/Repositories/ClassRepository'
 import { TrainingRepository } from '@/app/Repositories/TrainingRepository'
@@ -18,6 +18,7 @@ type TrainingScheduleRepository = Pick<
   | 'updateScheduleForTeacher'
   | 'deleteScheduleForTeacher'
   | 'getPendingAssignmentsForStudentOnDate'
+  | 'submitTraining'
 > & Partial<
   Pick<
     TrainingRepository,
@@ -69,6 +70,34 @@ export class TrainingService {
       reminders: rows.slice(0, limit).map(({ assignmentId, title }) => ({ assignmentId, title })),
       hasMore: rows.length > limit,
     }
+  }
+
+  public async submitTraining(user: AuthUser, input: SubmitTrainingInput) {
+    const result = await this.trainingRepo.submitTraining({
+      assignmentId: input.assignmentId,
+      scheduleId: input.scheduleId,
+      studentId: user.id,
+      submissionDate: new Date().toISOString(),
+      durationMinutes: input.durationMinutes,
+      setsCompleted: input.setsCompleted,
+      repsCompleted: input.repsCompleted,
+      studentNotes: input.studentNotes,
+      reviewStatus: 'submitted',
+    })
+
+    if (result.kind === 'not_found') throw new NotFoundException('Latihan')
+    if (result.kind === 'already_submitted') {
+      throw new ConflictException('Latihan ini telah ditandakan selesai.')
+    }
+
+    await this.auditRepo.log({
+      userId: user.id,
+      action: 'SUBMIT_TRAINING',
+      entityType: 'TRAINING_SUBMISSION',
+      entityId: String(result.submission.id),
+      details: `Murid menandakan latihan ID ${input.assignmentId} sebagai selesai.`,
+    })
+    return result.submission
   }
 
   public async getSchedulesForTeacher(user: AuthUser) {

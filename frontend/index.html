@@ -430,7 +430,7 @@
       <div id="submitTrainingActivities" class="space-y-4"></div>
       <input type="hidden" id="submitAssignmentId"><input type="hidden" id="submitScheduleId">
       <div><label class="font-semibold block mb-1 text-slate-700 text-xs">Catatan (pilihan)</label><textarea id="submitTrainingNotes" rows="2" class="w-full p-2.5 border border-slate-300 rounded-lg bg-slate-50 text-xs" placeholder="Catatan untuk cikgu"></textarea></div>
-      <div class="flex justify-end gap-2 pt-1"><button type="button" onclick="toggleModal('modalSubmitTraining', false)" class="px-3.5 py-1.5 bg-slate-100 text-slate-700 rounded-lg font-semibold text-xs">Batal</button><button type="button" onclick="submitTrainingAssignment()" class="px-3.5 py-1.5 bg-slate-900 text-white rounded-lg font-semibold text-xs">Tandakan Selesai</button></div>
+      <div class="flex justify-end gap-2 pt-1"><button type="button" onclick="toggleModal('modalSubmitTraining', false)" class="px-3.5 py-1.5 bg-slate-100 text-slate-700 rounded-lg font-semibold text-xs">Batal</button><button id="submitTrainingButton" type="button" onclick="submitTrainingAssignment()" class="px-3.5 py-1.5 bg-slate-900 text-white rounded-lg font-semibold text-xs">Tandakan Selesai</button></div>
     </div>
   </div>
 
@@ -915,6 +915,10 @@
       document.getElementById('submitAssignmentId').value = assignment.assignmentId;
       document.getElementById('submitScheduleId').value = assignment.scheduleId;
       document.getElementById('submitTrainingNotes').value = '';
+      const completed = ['submitted', 'approved'].includes(assignment.status);
+      const submitButton = document.getElementById('submitTrainingButton');
+      submitButton.disabled = completed;
+      submitButton.textContent = completed ? 'Sudah ditandakan selesai' : 'Tandakan Selesai';
       /*
       document.getElementById('submitTrainingActivities').innerHTML = (assignment.activities || []).map(activity => `<div class="p-2 bg-slate-50 rounded border border-slate-200 text-[10px]"><b>${activity.title}</b><span class="text-slate-500"> · ${activity.sets || 1} set${activity.reps ? ` x ${activity.reps} ulangan` : ''}</span></div>`).join('');
       */
@@ -923,16 +927,30 @@
     }
 
     async function submitTrainingAssignment() {
-      const res = await fetch('/api/student/submissions', {
-        method: 'POST',
-        headers: { 'Authorization': 'Bearer ' + currentToken, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ assignmentId: Number(document.getElementById('submitAssignmentId').value), scheduleId: Number(document.getElementById('submitScheduleId').value), studentNotes: document.getElementById('submitTrainingNotes').value })
-      });
-      const data = await res.json();
-      if (!data.success) return alert(data.message || 'Gagal menghantar latihan.');
-      toggleModal('modalSubmitTraining', false);
-      await loadStudentAssignments();
-      alert('Latihan berjaya ditandakan sebagai selesai.');
+      const submitButton = document.getElementById('submitTrainingButton');
+      if (!submitButton || submitButton.disabled) return;
+      submitButton.disabled = true;
+      submitButton.textContent = 'Sedang menghantar...';
+      try {
+        const res = await fetch('/api/student/submissions', {
+          method: 'POST',
+          headers: { 'Authorization': 'Bearer ' + currentToken, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ assignmentId: Number(document.getElementById('submitAssignmentId').value), scheduleId: Number(document.getElementById('submitScheduleId').value), studentNotes: document.getElementById('submitTrainingNotes').value })
+        });
+        const data = await res.json();
+        if (!res.ok || !data.success) {
+          alert(data.message || 'Gagal menghantar latihan.');
+          return;
+        }
+        toggleModal('modalSubmitTraining', false);
+        await loadStudentAssignments();
+        alert('Latihan berjaya ditandakan sebagai selesai.');
+      } catch (_) {
+        alert('Tidak dapat menghantar latihan. Sila cuba lagi.');
+      } finally {
+        submitButton.disabled = false;
+        submitButton.textContent = 'Tandakan Selesai';
+      }
     }
 
     window.openStudentAssignment = openStudentAssignment;
