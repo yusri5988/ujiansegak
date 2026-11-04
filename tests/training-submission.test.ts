@@ -26,6 +26,7 @@ beforeAll(async () => {
     '0004_volatile_zzzax.sql',
     '0005_rainy_violations.sql',
     '0006_fuzzy_grey_gargoyle.sql',
+    '0007_oval_sphinx.sql',
   ]) {
     const migration = await readFile(`src/database/migrations/${filename}`, 'utf8')
     for (const statement of migration.split('--> statement-breakpoint')) {

@@ -65,13 +65,16 @@ const trainingScheduleSchema = z.object({
 export const createTrainingScheduleSchema = trainingScheduleSchema
 export const updateTrainingScheduleSchema = trainingScheduleSchema
 export const trainingScheduleIdSchema = z.object({ id: z.coerce.number().int().positive() })
+export const reorderTrainingScheduleSchema = z.object({ direction: z.enum(['up', 'down']) })
 
 export type TrainingScheduleInput = z.infer<typeof trainingScheduleSchema>
 export type TrainingScheduleIdInput = z.infer<typeof trainingScheduleIdSchema>
+export type ReorderTrainingScheduleInput = z.infer<typeof reorderTrainingScheduleSchema>
 
 export const createTrainingScheduleRequest = requestValidator('json', createTrainingScheduleSchema)
 export const updateTrainingScheduleRequest = requestValidator('json', updateTrainingScheduleSchema)
 export const trainingScheduleIdRequest = requestValidator('param', trainingScheduleIdSchema)
+export const reorderTrainingScheduleRequest = requestValidator('json', reorderTrainingScheduleSchema)
 
 export const submitTrainingSchema = z.object({
   assignmentId: z.number().int().positive(),

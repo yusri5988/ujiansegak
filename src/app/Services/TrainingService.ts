@@ -2,7 +2,12 @@ import type { AuthUser } from '@/app/Env'
 import { ConflictException } from '@/app/Exceptions/ConflictException'
 import { NotFoundException } from '@/app/Exceptions/NotFoundException'
 import { ValidationException } from '@/app/Exceptions/ValidationException'
-import type { SubmitTrainingInput, TrainingScheduleInput, TrainingTemplateInput } from '@/app/Requests/TrainingRequests'
+import type {
+  ReorderTrainingScheduleInput,
+  SubmitTrainingInput,
+  TrainingScheduleInput,
+  TrainingTemplateInput,
+} from '@/app/Requests/TrainingRequests'
 import { AuditRepository } from '@/app/Repositories/AuditRepository'
 import { ClassRepository } from '@/app/Repositories/ClassRepository'
 import { TrainingRepository } from '@/app/Repositories/TrainingRepository'
@@ -10,6 +15,8 @@ import { TrainingRepository } from '@/app/Repositories/TrainingRepository'
 type TrainingScheduleRepository = Pick<
   TrainingRepository,
   | 'getSchedulesByTeacher'
+  | 'getAssignmentsForStudent'
+  | 'reorderScheduleForTeacher'
   | 'createSchedule'
   | 'addScheduleActivity'
   | 'createAssignment'
@@ -102,6 +109,27 @@ export class TrainingService {
 
   public async getSchedulesForTeacher(user: AuthUser) {
     return this.trainingRepo.getSchedulesByTeacher(user.id)
+  }
+
+  public async getAssignmentsForStudent(user: AuthUser) {
+    return this.trainingRepo.getAssignmentsForStudent(user.id)
+  }
+
+  public async reorderSchedule(user: AuthUser, scheduleId: number, input: ReorderTrainingScheduleInput) {
+    const result = await this.trainingRepo.reorderScheduleForTeacher(scheduleId, user.id, input.direction)
+    if (!result) throw new NotFoundException('Latihan')
+
+    if (result.moved) {
+      await this.auditRepo.log({
+        userId: user.id,
+        action: 'REORDER_TRAINING_SCHEDULE',
+        entityType: 'TRAINING_SCHEDULE',
+        entityId: String(scheduleId),
+        details: `Susunan latihan "${result.schedule.title}" diubah ${input.direction === 'up' ? 'ke atas' : 'ke bawah'} dalam kelas ID ${result.schedule.classId}.`,
+      })
+    }
+
+    return result.schedule
   }
 
   public async getSchedulesForSchool(schoolId: number) {

@@ -3,7 +3,7 @@ import app from '@/app/app'
 import type { AuthUser } from '@/app/Env'
 import { ConflictException } from '@/app/Exceptions/ConflictException'
 import { NotFoundException } from '@/app/Exceptions/NotFoundException'
-import { createTrainingScheduleSchema } from '@/app/Requests/TrainingRequests'
+import { createTrainingScheduleSchema, reorderTrainingScheduleSchema } from '@/app/Requests/TrainingRequests'
 import { AuditRepository } from '@/app/Repositories/AuditRepository'
 import { ClassRepository } from '@/app/Repositories/ClassRepository'
 import { TrainingRepository } from '@/app/Repositories/TrainingRepository'
@@ -17,6 +17,7 @@ const existingSchedule = {
   creationRequestId: null,
   teacherId: teacher.id,
   classId: 1,
+  orderIndex: 0,
   title: 'Latihan SEGAK',
   trainingDate: '2026-11-04',
   dueDate: '2026-11-04',
@@ -33,6 +34,8 @@ function createTrainingService(hasSubmissions: boolean) {
   const trainingRepo: Pick<
     TrainingRepository,
     | 'getSchedulesByTeacher'
+    | 'getAssignmentsForStudent'
+    | 'reorderScheduleForTeacher'
     | 'createSchedule'
     | 'addScheduleActivity'
     | 'createAssignment'
@@ -44,6 +47,8 @@ function createTrainingService(hasSubmissions: boolean) {
     | 'getPendingAssignmentsForStudentOnDate'
   > = {
     getSchedulesByTeacher: vi.fn(async () => []),
+    getAssignmentsForStudent: vi.fn(async () => []),
+    reorderScheduleForTeacher: vi.fn(async () => ({ schedule: existingSchedule, moved: true })),
     createSchedule: vi.fn(async () => existingSchedule),
     addScheduleActivity: vi.fn(async () => ({
       id: 1,
@@ -87,6 +92,7 @@ function createTrainingService(hasSubmissions: boolean) {
   return {
     service: new TrainingService(trainingRepo, classRepo, auditRepo),
     trainingRepo,
+    auditRepo,
     deleteScheduleForTeacher,
   }
 }
@@ -108,6 +114,32 @@ describe('training schedule CRUD', () => {
     expect(
       createTrainingScheduleSchema.safeParse({ ...base, activities: [base.activities[0]] }).success,
     ).toBe(true)
+  })
+
+  it('accepts only up or down for a schedule order change', () => {
+    expect(reorderTrainingScheduleSchema.safeParse({ direction: 'up' }).success).toBe(true)
+    expect(reorderTrainingScheduleSchema.safeParse({ direction: 'down' }).success).toBe(true)
+    expect(reorderTrainingScheduleSchema.safeParse({ direction: 'sideways' }).success).toBe(false)
+  })
+
+  it('reorders a teacher-scoped schedule and audits a successful move', async () => {
+    const { service, trainingRepo, auditRepo } = createTrainingService(false)
+
+    await service.reorderSchedule(teacher, existingSchedule.id, { direction: 'up' })
+
+    expect(trainingRepo.reorderScheduleForTeacher).toHaveBeenCalledWith(existingSchedule.id, teacher.id, 'up')
+    expect(auditRepo.log).toHaveBeenCalledWith(expect.objectContaining({
+      action: 'REORDER_TRAINING_SCHEDULE',
+      entityId: String(existingSchedule.id),
+    }))
+  })
+
+  it('does not expose a schedule outside the teacher scope for reordering', async () => {
+    const { service, trainingRepo, auditRepo } = createTrainingService(false)
+    vi.mocked(trainingRepo.reorderScheduleForTeacher).mockResolvedValueOnce(null)
+
+    await expect(service.reorderSchedule(teacher, existingSchedule.id, { direction: 'up' })).rejects.toBeInstanceOf(NotFoundException)
+    expect(auditRepo.log).not.toHaveBeenCalled()
   })
 
   it('does not delete a schedule after students have submitted it', async () => {
@@ -139,6 +171,16 @@ describe('training schedule CRUD', () => {
       method,
       headers: method === 'PUT' ? { 'Content-Type': 'application/json' } : undefined,
       body: method === 'PUT' ? '{}' : undefined,
+    })
+
+    expect(response.status).toBe(401)
+  })
+
+  it('requires authentication for PATCH /api/teacher/schedules/:id/order', async () => {
+    const response = await app.request('http://localhost/api/teacher/schedules/10/order', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ direction: 'up' }),
     })
 
     expect(response.status).toBe(401)

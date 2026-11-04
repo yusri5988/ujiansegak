@@ -1,7 +1,12 @@
 import { Context } from 'hono'
 import type { AppEnv } from '@/app/Env'
 import { auditRepoFrom, classRepoFrom, trainingRepoFrom, trainingServiceFrom } from '@/app/Services/AppServiceProvider'
-import type { SubmitTrainingInput, TrainingScheduleIdInput, TrainingScheduleInput } from '@/app/Requests/TrainingRequests'
+import type {
+  ReorderTrainingScheduleInput,
+  SubmitTrainingInput,
+  TrainingScheduleIdInput,
+  TrainingScheduleInput,
+} from '@/app/Requests/TrainingRequests'
 
 export class TrainingController {
   public static async getTemplates(c: Context<AppEnv>) {
@@ -45,6 +50,15 @@ export class TrainingController {
     return c.json({ success: true, data: updated })
   }
 
+  public static async reorderSchedule(
+    c: Context<AppEnv>,
+    params: TrainingScheduleIdInput,
+    input: ReorderTrainingScheduleInput,
+  ) {
+    const reordered = await trainingServiceFrom(c.env).reorderSchedule(c.get('user')!, params.id, input)
+    return c.json({ success: true, data: reordered })
+  }
+
   public static async deleteSchedule(c: Context<AppEnv>, params: TrainingScheduleIdInput) {
     await trainingServiceFrom(c.env).deleteSchedule(c.get('user')!, params.id)
     return c.body(null, 204)
@@ -56,9 +70,7 @@ export class TrainingController {
   }
 
   public static async getStudentAssignments(c: Context<AppEnv>) {
-    const user = c.get('user')!
-    const trainingRepo = trainingRepoFrom(c.env)
-    const assignments = await trainingRepo.getAssignmentsForStudent(user.id)
+    const assignments = await trainingServiceFrom(c.env).getAssignmentsForStudent(c.get('user')!)
     return c.json({ success: true, data: assignments })
   }
 

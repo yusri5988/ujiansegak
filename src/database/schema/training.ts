@@ -32,6 +32,7 @@ export const trainingSchedules = sqliteTable('training_schedules', {
   creationRequestId: text('creation_request_id'),
   teacherId: integer('teacher_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
   classId: integer('class_id').notNull().references(() => classes.id, { onDelete: 'cascade' }),
+  orderIndex: integer('order_index').notNull().default(0),
   title: text('title').notNull(),
   trainingDate: text('training_date').notNull(), // YYYY-MM-DD
   dueDate: text('due_date').notNull(), // YYYY-MM-DD
@@ -43,6 +44,7 @@ export const trainingSchedules = sqliteTable('training_schedules', {
   updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
 }, (table) => ({
   creationRequestIdUnique: uniqueIndex('training_schedules_creation_request_id_unique').on(table.creationRequestId),
+  classOrderIdx: index('training_schedules_class_order_idx').on(table.classId, table.orderIndex, table.id),
 }))
 
 export const trainingScheduleActivities = sqliteTable('training_schedule_activities', {

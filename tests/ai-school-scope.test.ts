@@ -18,7 +18,7 @@ beforeAll(async () => {
   db = await mf.getD1Database('DB')
   for (const filename of [
     '0000_oval_doctor_spectrum.sql', '0001_past_colossus.sql', '0002_magenta_martin_li.sql',
-    '0003_wandering_dorian_gray.sql', '0004_volatile_zzzax.sql', '0005_rainy_violations.sql', '0006_fuzzy_grey_gargoyle.sql',
+    '0003_wandering_dorian_gray.sql', '0004_volatile_zzzax.sql', '0005_rainy_violations.sql', '0006_fuzzy_grey_gargoyle.sql', '0007_oval_sphinx.sql',
   ]) {
     const migration = await readFile(`src/database/migrations/${filename}`, 'utf8')
     for (const statement of migration.split('--> statement-breakpoint')) {

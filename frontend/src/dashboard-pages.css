@@ -68,3 +68,9 @@
   .dashboard-page .dashboard-card { flex-wrap: wrap; gap: 12px; padding: 16px; }
   .dashboard-page .dashboard-card-actions { width: 100%; padding-left: 56px; flex-direction: row; align-items: center; justify-content: space-between; flex-wrap: wrap; }
 }
+
+.student-assignment-group { display: grid; gap: 9px; }
+.student-assignment-heading { margin: 2px 0 0; color: #173d31; font-size: 15px; font-weight: 800; letter-spacing: -.02em; }
+@media (max-width: 640px) {
+  .student-assignment-heading { font-size: 14px; }
+}

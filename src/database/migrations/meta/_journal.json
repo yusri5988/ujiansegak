@@ -50,6 +50,13 @@
       "when": 1793788403323,
       "tag": "0006_fuzzy_grey_gargoyle",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "6",
+      "when": 1793832379522,
+      "tag": "0007_oval_sphinx",
+      "breakpoints": true
     }
   ]
 }

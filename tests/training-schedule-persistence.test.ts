@@ -8,6 +8,7 @@ import { TrainingRepository } from '@/app/Repositories/TrainingRepository'
 import { AuthService } from '@/app/Services/AuthService'
 
 const teacher: AuthUser = { id: 2, username: 'teacher', role: 'teacher' }
+const student: AuthUser = { id: 3, username: 'student-1', role: 'student' }
 const miniflare = new Miniflare({
   modules: true,
   script: 'export default { fetch() { return new Response() } }',
@@ -37,6 +38,7 @@ beforeAll(async () => {
     '0004_volatile_zzzax.sql',
     '0005_rainy_violations.sql',
     '0006_fuzzy_grey_gargoyle.sql',
+    '0007_oval_sphinx.sql',
   ]) {
     const migration = await readFile(`src/database/migrations/${filename}`, 'utf8')
     for (const statement of migration.split('--> statement-breakpoint')) {
@@ -48,8 +50,8 @@ beforeAll(async () => {
     db.prepare("INSERT INTO schools (id, name, code, created_at, updated_at) VALUES (1, 'Sekolah', 'S1', 0, 0)"),
     db.prepare("INSERT INTO smartfit_app_users (id, username, password_hash, role, status, created_at, updated_at) VALUES (2, 'teacher', 'test', 'teacher', 'active', 0, 0), (3, 'student-1', 'test', 'student', 'active', 0, 0), (4, 'student-2', 'test', 'student', 'active', 0, 0)"),
     db.prepare("INSERT INTO academic_sessions (id, school_id, year, name, created_at, updated_at) VALUES (1, 1, 2026, 'Sesi 2026', 0, 0)"),
-    db.prepare("INSERT INTO classes (id, school_id, academic_session_id, teacher_id, name, status, created_at, updated_at) VALUES (1, 1, 1, 2, '5 Cemerlang', 'active', 0, 0)"),
-    db.prepare("INSERT INTO class_students (class_id, student_id, status, created_at, updated_at) VALUES (1, 3, 'active', 0, 0), (1, 4, 'active', 0, 0)"),
+    db.prepare("INSERT INTO classes (id, school_id, academic_session_id, teacher_id, name, status, created_at, updated_at) VALUES (1, 1, 1, 2, '5 Cemerlang', 'active', 0, 0), (2, 1, 1, 2, '6 Cemerlang', 'active', 0, 0)"),
+    db.prepare("INSERT INTO class_students (class_id, student_id, status, created_at, updated_at) VALUES (1, 3, 'active', 0, 0), (1, 4, 'active', 0, 0), (2, 3, 'active', 0, 0), (2, 4, 'active', 0, 0)"),
     db.prepare("INSERT INTO student_profiles (user_id, school_id, student_id_num, full_name, gender, dob, created_at, updated_at) VALUES (3, 1, 'S001', 'Murid Satu', 'L', '2014-01-01', 0, 0), (4, 1, 'S002', 'Murid Dua', 'P', '2014-01-01', 0, 0)"),
   ])
 
@@ -124,7 +126,7 @@ describe('teacher training schedule persistence', () => {
         videoUrl: 'https://youtu.be/nagbnY3Na-U?si=example',
       }
       const changes = {
-        classId: 1,
+        classId: 2,
         title: 'Latihan guru dikemas kini',
         trainingDate: '2026-11-04',
         dueDate: '2026-11-04',
@@ -141,6 +143,7 @@ describe('teacher training schedule persistence', () => {
         [3, 4],
       )
       expect(updatedTeacherSchedule).not.toBeNull()
+      expect(updatedTeacherSchedule).toMatchObject({ classId: 2, orderIndex: 0 })
       await expectAssignmentTimestamps(createdTeacherSchedule.id)
 
       const createdSchoolSchedule = await trainingRepo.createScheduleAtomicallyForSchool(
@@ -168,7 +171,106 @@ describe('teacher training schedule persistence', () => {
         [3, 4],
       )
       expect(updatedSchoolSchedule).not.toBeNull()
+      expect(updatedSchoolSchedule).toMatchObject({ classId: 2, orderIndex: 1 })
       await expectAssignmentTimestamps(createdSchoolSchedule.id)
+    } finally {
+      authenticate.mockRestore()
+    }
+  })
+
+  it('keeps manual order separate by class for teachers and students', async () => {
+    const authenticate = vi.spyOn(AuthService.prototype, 'authenticate').mockResolvedValue({
+      user: teacher,
+      jti: 'test-session',
+    })
+
+    const createSchedule = async (classId: number, title: string) => {
+      const response = await app.request(
+        'http://localhost/api/teacher/schedules',
+        {
+          method: 'POST',
+          headers: { Authorization: 'Bearer test-token', 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            classId,
+            title,
+            trainingDate: '2026-11-05',
+            evidenceRequired: false,
+            activities: [{ title, sets: 1, reps: null, videoUrl: 'https://youtu.be/nagbnY3Na-U' }],
+          }),
+        },
+        env,
+      )
+      expect(response.status).toBe(200)
+      const payload = await response.json() as { data: { id: number } }
+      return payload.data.id
+    }
+
+    try {
+      const firstId = await createSchedule(1, 'Latihan pertama')
+      const secondId = await createSchedule(1, 'Latihan kedua')
+      const otherClassId = await createSchedule(2, 'Latihan kelas lain')
+
+      const invalidOrder = await app.request(
+        `http://localhost/api/teacher/schedules/${secondId}/order`,
+        {
+          method: 'PATCH',
+          headers: { Authorization: 'Bearer test-token', 'Content-Type': 'application/json' },
+          body: JSON.stringify({ direction: 'sisi' }),
+        },
+        env,
+      )
+      expect(invalidOrder.status).toBe(422)
+      expect(await invalidOrder.json()).toMatchObject({ message: expect.any(String), errors: expect.any(Object) })
+
+      await db
+        .prepare("UPDATE training_assignments SET status = 'needs_correction' WHERE schedule_id = ? AND student_id = ?")
+        .bind(firstId, student.id)
+        .run()
+
+      const moveResponse = await app.request(
+        `http://localhost/api/teacher/schedules/${secondId}/order`,
+        {
+          method: 'PATCH',
+          headers: { Authorization: 'Bearer test-token', 'Content-Type': 'application/json' },
+          body: JSON.stringify({ direction: 'up' }),
+        },
+        env,
+      )
+      expect(moveResponse.status).toBe(200)
+
+      const teacherResponse = await app.request(
+        'http://localhost/api/teacher/schedules',
+        { headers: { Authorization: 'Bearer test-token' } },
+        env,
+      )
+      const teacherPayload = await teacherResponse.json() as {
+        data: Array<{ id: number; classId: number; className: string; orderIndex: number; title: string }>
+      }
+      const firstClassSchedules = teacherPayload.data.filter((schedule) => schedule.classId === 1)
+      expect(firstClassSchedules.slice(-2).map((schedule) => schedule.id)).toEqual([secondId, firstId])
+      expect(firstClassSchedules.find((schedule) => schedule.id === firstId)?.className).toBe('5 Cemerlang')
+      expect(teacherPayload.data.find((schedule) => schedule.id === otherClassId)).toMatchObject({
+        classId: 2,
+        className: '6 Cemerlang',
+        orderIndex: 2,
+      })
+
+      authenticate.mockResolvedValue({ user: student, jti: 'student-session' })
+      const studentResponse = await app.request(
+        'http://localhost/api/student/assignments',
+        { headers: { Authorization: 'Bearer test-token' } },
+        env,
+      )
+      const studentPayload = await studentResponse.json() as {
+        data: Array<{ scheduleId: number; classId: number; className: string; orderIndex: number; status: string }>
+      }
+      const firstClassAssignments = studentPayload.data.filter((assignment) => assignment.classId === 1)
+      expect(firstClassAssignments.slice(-2).map((assignment) => assignment.scheduleId)).toEqual([secondId, firstId])
+      expect(firstClassAssignments.find((assignment) => assignment.scheduleId === firstId)).toMatchObject({
+        className: '5 Cemerlang',
+        status: 'needs_correction',
+      })
+      expect(studentPayload.data.find((assignment) => assignment.scheduleId === otherClassId)?.className).toBe('6 Cemerlang')
     } finally {
       authenticate.mockRestore()
     }

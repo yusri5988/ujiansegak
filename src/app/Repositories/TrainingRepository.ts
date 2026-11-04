@@ -180,14 +180,17 @@ export class TrainingRepository {
   // Jadual Latihan
   public async getSchedulesByTeacher(teacherId: number, limit = 50) {
     const scheduleRows = await this.db
-      .select()
+      .select({ schedule: schema.trainingSchedules, className: schema.classes.name })
       .from(schema.trainingSchedules)
+      .innerJoin(schema.classes, eq(schema.trainingSchedules.classId, schema.classes.id))
       .where(eq(schema.trainingSchedules.teacherId, teacherId))
       .orderBy(
-        desc(schema.trainingSchedules.trainingDate),
-        desc(schema.trainingSchedules.id),
+        asc(schema.trainingSchedules.classId),
+        asc(schema.trainingSchedules.orderIndex),
+        asc(schema.trainingSchedules.id),
       )
       .limit(limit)
+      .then((rows) => rows.map(({ schedule, className }) => ({ ...schedule, className })))
 
     if (scheduleRows.length === 0) return []
     const scheduleIds = scheduleRows.map((schedule) => schedule.id)
@@ -216,7 +219,11 @@ export class TrainingRepository {
       .from(schema.trainingSchedules)
       .innerJoin(schema.classes, eq(schema.trainingSchedules.classId, schema.classes.id))
       .where(eq(schema.classes.schoolId, schoolId))
-      .orderBy(desc(schema.trainingSchedules.trainingDate), desc(schema.trainingSchedules.id))
+      .orderBy(
+        asc(schema.trainingSchedules.classId),
+        asc(schema.trainingSchedules.orderIndex),
+        asc(schema.trainingSchedules.id),
+      )
       .limit(limit)
       .then((rows) => rows.map((row) => row.schedule))
 
@@ -248,6 +255,63 @@ export class TrainingRepository {
       .where(and(eq(schema.trainingSchedules.id, scheduleId), eq(schema.trainingSchedules.teacherId, teacherId)))
       .limit(1)
     return rows[0] ?? null
+  }
+
+  public async reorderScheduleForTeacher(scheduleId: number, teacherId: number, direction: 'up' | 'down') {
+    const schedule = await this.findScheduleForTeacher(scheduleId, teacherId)
+    if (!schedule) return null
+
+    const classSchedules = await this.db
+      .select({ id: schema.trainingSchedules.id, orderIndex: schema.trainingSchedules.orderIndex })
+      .from(schema.trainingSchedules)
+      .where(
+        and(
+          eq(schema.trainingSchedules.teacherId, teacherId),
+          eq(schema.trainingSchedules.classId, schedule.classId),
+        ),
+      )
+      .orderBy(asc(schema.trainingSchedules.orderIndex), asc(schema.trainingSchedules.id))
+
+    const currentIndex = classSchedules.findIndex((item) => item.id === scheduleId)
+    if (currentIndex < 0) return null
+    const neighborIndex = currentIndex + (direction === 'up' ? -1 : 1)
+    const neighbor = classSchedules[neighborIndex]
+    if (!neighbor) return { schedule, moved: false }
+
+    const result = await this.d1
+      .prepare(
+        `UPDATE training_schedules
+         SET order_index = CASE id WHEN ? THEN ? WHEN ? THEN ? ELSE order_index END,
+             updated_at = ?
+         WHERE teacher_id = ? AND class_id = ? AND id IN (?, ?)
+           AND (
+             SELECT COUNT(*) FROM training_schedules
+             WHERE teacher_id = ? AND class_id = ?
+               AND ((id = ? AND order_index = ?) OR (id = ? AND order_index = ?))
+           ) = 2`,
+      )
+      .bind(
+        scheduleId,
+        neighbor.orderIndex,
+        neighbor.id,
+        schedule.orderIndex,
+        Math.floor(Date.now() / 1000),
+        teacherId,
+        schedule.classId,
+        scheduleId,
+        neighbor.id,
+        teacherId,
+        schedule.classId,
+        scheduleId,
+        schedule.orderIndex,
+        neighbor.id,
+        neighbor.orderIndex,
+      )
+      .run()
+
+    const updatedSchedule = await this.findScheduleForTeacher(scheduleId, teacherId)
+    if (!updatedSchedule) return null
+    return { schedule: updatedSchedule, moved: result.meta.changes === 2 }
   }
 
   public async findScheduleForSchool(scheduleId: number, schoolId: number) {
@@ -290,8 +354,10 @@ export class TrainingRepository {
         .prepare(
           `INSERT INTO training_schedules
             (creation_request_id, teacher_id, class_id, title, training_date, due_date, instructions,
-             evidence_required, teacher_notes, status, created_at, updated_at)
-           SELECT ?, ?, classes.id, ?, ?, ?, ?, ?, ?, ?, ?, ?
+             evidence_required, teacher_notes, status, order_index, created_at, updated_at)
+           SELECT ?, ?, classes.id, ?, ?, ?, ?, ?, ?, ?,
+                  COALESCE((SELECT MAX(order_index) + 1 FROM training_schedules WHERE class_id = classes.id), 0),
+                  ?, ?
            FROM classes
            WHERE classes.id = ? AND classes.school_id = ? AND classes.status = 'active'`,
         )
@@ -436,12 +502,19 @@ export class TrainingRepository {
       this.d1
         .prepare(
           `UPDATE training_schedules
-           SET class_id = ?, title = ?, training_date = ?, due_date = ?, instructions = ?,
+           SET class_id = ?,
+               order_index = CASE WHEN class_id <> ?
+                 THEN COALESCE((SELECT MAX(order_index) + 1 FROM training_schedules WHERE class_id = ?), 0)
+                 ELSE order_index
+               END,
+               title = ?, training_date = ?, due_date = ?, instructions = ?,
                evidence_required = ?, teacher_notes = ?, updated_at = ?
            WHERE id = ? AND teacher_id = ?
              AND NOT EXISTS (SELECT 1 FROM training_submissions WHERE schedule_id = ?)`,
         )
         .bind(
+          changes.classId,
+          changes.classId,
           changes.classId,
           changes.title,
           changes.trainingDate,
@@ -529,7 +602,12 @@ export class TrainingRepository {
       this.d1
         .prepare(
           `UPDATE training_schedules
-           SET class_id = ?, title = ?, training_date = ?, due_date = ?, instructions = ?,
+           SET class_id = ?,
+               order_index = CASE WHEN class_id <> ?
+                 THEN COALESCE((SELECT MAX(order_index) + 1 FROM training_schedules WHERE class_id = ?), 0)
+                 ELSE order_index
+               END,
+               title = ?, training_date = ?, due_date = ?, instructions = ?,
                evidence_required = ?, teacher_notes = ?, updated_at = ?
            WHERE id = ?
              AND EXISTS (SELECT 1 FROM classes WHERE classes.id = ? AND classes.school_id = ?)
@@ -537,6 +615,8 @@ export class TrainingRepository {
              AND NOT EXISTS (SELECT 1 FROM training_submissions WHERE schedule_id = ?)`,
         )
         .bind(
+          changes.classId,
+          changes.classId,
           changes.classId,
           changes.title,
           changes.trainingDate,
@@ -639,10 +719,21 @@ export class TrainingRepository {
       .select()
       .from(schema.trainingSchedules)
       .where(and(eq(schema.trainingSchedules.classId, classId), eq(schema.trainingSchedules.status, 'published')))
+      .orderBy(asc(schema.trainingSchedules.orderIndex), asc(schema.trainingSchedules.id))
   }
 
   public async createSchedule(data: typeof schema.trainingSchedules.$inferInsert) {
-    const inserted = await this.db.insert(schema.trainingSchedules).values(data).returning()
+    const currentSchedules = await this.db
+      .select({ orderIndex: schema.trainingSchedules.orderIndex })
+      .from(schema.trainingSchedules)
+      .where(eq(schema.trainingSchedules.classId, data.classId))
+      .orderBy(desc(schema.trainingSchedules.orderIndex))
+      .limit(1)
+    const nextOrderIndex = (currentSchedules[0]?.orderIndex ?? -1) + 1
+    const inserted = await this.db
+      .insert(schema.trainingSchedules)
+      .values({ ...data, orderIndex: data.orderIndex ?? nextOrderIndex })
+      .returning()
     return inserted[0]
   }
 
@@ -660,8 +751,10 @@ export class TrainingRepository {
         .prepare(
           `INSERT INTO training_schedules
             (creation_request_id, teacher_id, class_id, title, training_date, due_date, instructions,
-             evidence_required, teacher_notes, status, created_at, updated_at)
-           SELECT ?, ?, classes.id, ?, ?, ?, ?, ?, ?, ?, ?, ?
+             evidence_required, teacher_notes, status, order_index, created_at, updated_at)
+           SELECT ?, ?, classes.id, ?, ?, ?, ?, ?, ?, ?,
+                  COALESCE((SELECT MAX(order_index) + 1 FROM training_schedules WHERE class_id = classes.id), 0),
+                  ?, ?
            FROM classes
            WHERE classes.id = ? AND classes.teacher_id = ? AND classes.status = 'active'`,
         )
@@ -749,7 +842,12 @@ export class TrainingRepository {
         eq(schema.trainingSchedules.status, 'published'),
         notInArray(schema.trainingAssignments.status, ['submitted', 'approved']),
       ))
-      .orderBy(asc(schema.trainingSchedules.id), asc(schema.trainingAssignments.id))
+      .orderBy(
+        asc(schema.trainingSchedules.classId),
+        asc(schema.trainingSchedules.orderIndex),
+        asc(schema.trainingSchedules.id),
+        asc(schema.trainingAssignments.id),
+      )
       .limit(limit)
   }
 
@@ -767,6 +865,9 @@ export class TrainingRepository {
         assignmentId: schema.trainingAssignments.id,
         status: schema.trainingAssignments.status,
         scheduleId: schema.trainingSchedules.id,
+        classId: schema.trainingSchedules.classId,
+        className: schema.classes.name,
+        orderIndex: schema.trainingSchedules.orderIndex,
         title: schema.trainingSchedules.title,
         trainingDate: schema.trainingSchedules.trainingDate,
         dueDate: schema.trainingSchedules.dueDate,
@@ -775,7 +876,15 @@ export class TrainingRepository {
       })
       .from(schema.trainingAssignments)
       .innerJoin(schema.trainingSchedules, eq(schema.trainingAssignments.scheduleId, schema.trainingSchedules.id))
+      .innerJoin(schema.classes, eq(schema.trainingSchedules.classId, schema.classes.id))
       .where(eq(schema.trainingAssignments.studentId, studentId))
+      .orderBy(
+        asc(schema.classes.name),
+        asc(schema.trainingSchedules.classId),
+        asc(schema.trainingSchedules.orderIndex),
+        asc(schema.trainingSchedules.id),
+        asc(schema.trainingAssignments.id),
+      )
 
     return await Promise.all(assignments.map(async (assignment) => ({
       ...assignment,

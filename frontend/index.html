@@ -177,7 +177,7 @@
       <!-- SCREEN 2B: STUDENT ACTIVITIES -->
       <div id="studentActivity" class="hidden dashboard-page">
         <div class="dashboard-heading">
-          <div><p class="dashboard-eyebrow">RUANG MURID <span>/</span> AKTIVITI</p><h1>Aktiviti saya<span class="dashboard-dot">.</span></h1><p>Buka latihan mengikut tarikh dan tandakan selepas selesai.</p></div>
+          <div><p class="dashboard-eyebrow">RUANG MURID <span>/</span> AKTIVITI</p><h1>Aktiviti saya<span class="dashboard-dot">.</span></h1><p>Ikuti susunan latihan yang cikgu tetapkan dan tandakan selepas selesai.</p></div>
         </div>
         <section class="dashboard-section" aria-labelledby="studentAssignmentTitle">
           <div class="dashboard-section-heading"><div><p class="dashboard-eyebrow">LATIHAN DARIPADA CIKGU</p><h2 id="studentAssignmentTitle">Latihan saya</h2><p>Ikuti setiap arahan latihan dengan selamat.</p></div></div>
@@ -220,7 +220,7 @@
             <button type="button" onclick="openCreateScheduleModal()" class="training-primary"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><path d="M12 5v14M5 12h14" stroke-width="2" stroke-linecap="round"/></svg><span>Beri latihan</span></button>
           </div>
           <section class="training-section" aria-labelledby="trainingListTitle">
-            <div class="training-section-heading"><div><p class="training-eyebrow">AKTIVITI KELAS</p><h2 id="trainingListTitle">Senarai latihan</h2><p>Urus latihan yang telah diberikan kepada murid.</p></div><span id="trainingScheduleCount" class="training-count" hidden></span></div>
+            <div class="training-section-heading"><div><p class="training-eyebrow">AKTIVITI KELAS</p><h2 id="trainingListTitle">Senarai latihan</h2><p>Susun latihan mengikut kelas; murid akan ikut turutan ini.</p></div><span id="trainingScheduleCount" class="training-count" hidden></span></div>
             <div id="trainingScheduleList" class="training-list" aria-live="polite"><p class="training-empty">Memuatkan jadual...</p></div>
           </section>
         </div>
@@ -885,16 +885,37 @@
         container.innerHTML = '<div class="dashboard-empty"><span class="dashboard-empty-icon" aria-hidden="true">✳</span><strong>Belum ada latihan lagi</strong><p>Latihan daripada cikgu akan dipaparkan di sini.</p></div>';
         return;
       }
-      container.innerHTML = data.data.sort((a, b) => String(a.trainingDate).localeCompare(String(b.trainingDate))).map(assignment => {
-        const done = ['submitted', 'approved'].includes(assignment.status);
-        return `
-          <article class="dashboard-card">
-            <div class="dashboard-card-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7" d="M8 3v4m8-4v4M4 10h16M5 5h14a1 1 0 011 1v13a2 2 0 01-2 2H6a2 2 0 01-2-2V6a1 1 0 011-1z"/></svg></div>
-            <div class="dashboard-card-content"><div class="dashboard-card-label">LATIHAN KELAS</div><h3>${escapeHtml(assignment.title)}</h3><div class="dashboard-card-meta">Tarikh latihan: ${escapeHtml(formatDate(assignment.trainingDate))}</div>${assignment.instructions ? `<p>${escapeHtml(assignment.instructions)}</p>` : ''}</div>
-            <div class="dashboard-card-actions"><span class="dashboard-status ${done ? 'is-done' : 'is-pending'}">${done ? 'Selesai' : 'Belum selesai'}</span><button type="button" onclick="openStudentAssignment(${escapeHtml(JSON.stringify(assignment))})">${done ? 'Lihat latihan' : 'Buka &amp; tandakan selesai'}</button></div>
-          </article>
-        `;
-      }).join('');
+      const assignmentsByClass = new Map();
+      data.data.forEach(assignment => {
+        const classId = Number(assignment.classId);
+        const group = assignmentsByClass.get(classId) || {
+          classId,
+          className: assignment.className || 'Kelas ' + classId,
+          assignments: []
+        };
+        group.assignments.push(assignment);
+        assignmentsByClass.set(classId, group);
+      });
+      const classGroups = Array.from(assignmentsByClass.values()).sort((a, b) =>
+        a.className.localeCompare(b.className, 'ms') || a.classId - b.classId
+      );
+      classGroups.forEach(group => group.assignments.sort((a, b) => Number(a.orderIndex) - Number(b.orderIndex) || Number(a.scheduleId) - Number(b.scheduleId)));
+
+      container.innerHTML = classGroups.map(group => `
+        <section class="student-assignment-group" aria-labelledby="studentClassTitle-${group.classId}">
+          <h3 id="studentClassTitle-${group.classId}" class="student-assignment-heading">${escapeHtml(group.className)}</h3>
+          <div class="dashboard-list">${group.assignments.map((assignment, index) => {
+            const done = ['submitted', 'approved'].includes(assignment.status);
+            return `
+              <article class="dashboard-card">
+                <div class="dashboard-card-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7" d="M8 3v4m8-4v4M4 10h16M5 5h14a1 1 0 011 1v13a2 2 0 01-2 2H6a2 2 0 01-2-2V6a1 1 0 011-1z"/></svg></div>
+                <div class="dashboard-card-content"><div class="dashboard-card-label">LATIHAN ${index + 1}</div><h3>${escapeHtml(assignment.title)}</h3><div class="dashboard-card-meta">Tarikh latihan: ${escapeHtml(formatDate(assignment.trainingDate))}</div>${assignment.instructions ? `<p>${escapeHtml(assignment.instructions)}</p>` : ''}</div>
+                <div class="dashboard-card-actions"><span class="dashboard-status ${done ? 'is-done' : 'is-pending'}">${done ? 'Selesai' : 'Belum selesai'}</span><button type="button" onclick="openStudentAssignment(${escapeHtml(JSON.stringify(assignment))})">${done ? 'Lihat latihan' : 'Buka &amp; tandakan selesai'}</button></div>
+              </article>
+            `;
+          }).join('')}</div>
+        </section>
+      `).join('');
     }
 
     function youtubeEmbedUrl(url) {
@@ -1123,21 +1144,59 @@
         container.innerHTML = '<div class="training-empty"><span class="training-empty-icon" aria-hidden="true">✳</span><strong>Belum ada latihan lagi</strong><p>Mulakan dengan memberikan latihan pertama kepada kelas anda.</p><button type="button" onclick="openCreateScheduleModal()">+ Beri latihan</button></div>';
         return;
       }
-      container.innerHTML = teacherSchedules.map(schedule => `
-        <article class="training-card">
-          <div class="training-card-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7" d="M8 3v4m8-4v4M4 10h16M5 5h14a1 1 0 011 1v13a2 2 0 01-2 2H6a2 2 0 01-2-2V6a1 1 0 011-1z"/></svg></div>
-          <div class="training-card-content"><div class="training-card-label">LATIHAN KELAS</div><h3>${escapeHtml(schedule.title)}</h3><div class="training-card-meta"><span>${escapeHtml(formatDate(schedule.trainingDate))}</span><span>Kelas ID: ${Number(schedule.classId)}</span></div></div>
-          <div class="training-card-actions"><button type="button" data-schedule-action="edit" data-schedule-id="${Number(schedule.id)}">Edit</button><button type="button" data-schedule-action="delete" data-schedule-id="${Number(schedule.id)}" class="training-delete">Padam</button></div>
-        </article>
+      const schedulesByClass = new Map();
+      teacherSchedules.forEach(schedule => {
+        const classId = Number(schedule.classId);
+        const group = schedulesByClass.get(classId) || {
+          classId,
+          className: schedule.className || 'Kelas ' + classId,
+          schedules: []
+        };
+        group.schedules.push(schedule);
+        schedulesByClass.set(classId, group);
+      });
+      const classGroups = Array.from(schedulesByClass.values()).sort((a, b) =>
+        a.className.localeCompare(b.className, 'ms') || a.classId - b.classId
+      );
+      classGroups.forEach(group => group.schedules.sort((a, b) => Number(a.orderIndex) - Number(b.orderIndex) || Number(a.id) - Number(b.id)));
+
+      container.innerHTML = classGroups.map(group => `
+        <section class="training-class-group" aria-labelledby="trainingClassTitle-${group.classId}">
+          <h3 id="trainingClassTitle-${group.classId}" class="training-class-heading">${escapeHtml(group.className)}</h3>
+          <div class="training-list">${group.schedules.map((schedule, index) => `
+            <article class="training-card">
+              <div class="training-card-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7" d="M8 3v4m8-4v4M4 10h16M5 5h14a1 1 0 011 1v13a2 2 0 01-2 2H6a2 2 0 01-2-2V6a1 1 0 011-1z"/></svg></div>
+              <div class="training-card-content"><div class="training-card-label">LATIHAN ${index + 1}</div><h3>${escapeHtml(schedule.title)}</h3><div class="training-card-meta"><span>${escapeHtml(formatDate(schedule.trainingDate))}</span></div></div>
+              <div class="training-card-actions"><button class="training-order-action" type="button" data-schedule-action="move-up" data-schedule-id="${Number(schedule.id)}" aria-label="Alihkan ${escapeHtml(schedule.title)} ke atas" title="Alih ke atas" ${index === 0 ? 'disabled' : ''}>↑</button><button class="training-order-action" type="button" data-schedule-action="move-down" data-schedule-id="${Number(schedule.id)}" aria-label="Alihkan ${escapeHtml(schedule.title)} ke bawah" title="Alih ke bawah" ${index === group.schedules.length - 1 ? 'disabled' : ''}>↓</button><button type="button" data-schedule-action="edit" data-schedule-id="${Number(schedule.id)}">Edit</button><button type="button" data-schedule-action="delete" data-schedule-id="${Number(schedule.id)}" class="training-delete">Padam</button></div>
+            </article>
+          `).join('')}</div>
+        </section>
       `).join('');
 
       container.querySelectorAll('[data-schedule-action]').forEach(button => {
         button.addEventListener('click', () => {
           const scheduleId = Number(button.dataset.scheduleId);
-          if (button.dataset.scheduleAction === 'edit') void openEditScheduleModal(scheduleId);
-          else void handleDeleteSchedule(scheduleId);
+          const action = button.dataset.scheduleAction;
+          if (action === 'edit') void openEditScheduleModal(scheduleId);
+          else if (action === 'delete') void handleDeleteSchedule(scheduleId);
+          else if (action === 'move-up' || action === 'move-down') void handleReorderSchedule(scheduleId, action === 'move-up' ? 'up' : 'down');
         });
       });
+    }
+
+    async function handleReorderSchedule(scheduleId, direction) {
+      try {
+        const res = await fetch('/api/teacher/schedules/' + scheduleId + '/order', {
+          method: 'PATCH',
+          headers: { 'Authorization': 'Bearer ' + currentToken, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ direction })
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok || !data.success) return alert(data.message || 'Gagal mengubah susunan latihan.');
+        await loadTeacherSchedules();
+      } catch (_) {
+        alert('Tidak dapat mengubah susunan latihan. Sila cuba lagi.');
+      }
     }
 
     function openCreateScheduleModal() {

@@ -11,6 +11,7 @@ import {
 import { resetPasswordRequest } from '@/app/Requests/AuthRequests'
 import {
   createTrainingScheduleRequest,
+  reorderTrainingScheduleRequest,
   trainingScheduleIdRequest,
   updateTrainingScheduleRequest,
 } from '@/app/Requests/TrainingRequests'
@@ -40,6 +41,9 @@ teacherRouter.post('/schedules', createTrainingScheduleRequest, (c) =>
 )
 teacherRouter.put('/schedules/:id', trainingScheduleIdRequest, updateTrainingScheduleRequest, (c) =>
   TrainingController.updateSchedule(c, c.req.valid('param'), c.req.valid('json')),
+)
+teacherRouter.patch('/schedules/:id/order', trainingScheduleIdRequest, reorderTrainingScheduleRequest, (c) =>
+  TrainingController.reorderSchedule(c, c.req.valid('param'), c.req.valid('json')),
 )
 teacherRouter.delete('/schedules/:id', trainingScheduleIdRequest, (c) =>
   TrainingController.deleteSchedule(c, c.req.valid('param')),
