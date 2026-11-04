@@ -1,11 +1,4 @@
-import { D1Database } from '@cloudflare/workers-types'
-
-export type Bindings = {
-  DB: D1Database
-  APP_NAME?: string
-  CORS_ORIGIN?: string
-  JWT_SECRET?: string
-}
+export type Bindings = Cloudflare.Env
 
 export type AuthUser = {
   id: number
@@ -15,6 +8,7 @@ export type AuthUser = {
 
 export type Variables = {
   user?: AuthUser
+  sessionJti?: string
 }
 
 export type AppEnv = {

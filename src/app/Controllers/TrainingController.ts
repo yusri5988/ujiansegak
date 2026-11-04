@@ -1,6 +1,7 @@
 import { Context } from 'hono'
 import type { AppEnv } from '@/app/Env'
-import { trainingRepoFrom, classRepoFrom, auditRepoFrom } from '@/app/Services/AppServiceProvider'
+import { auditRepoFrom, classRepoFrom, trainingRepoFrom, trainingServiceFrom } from '@/app/Services/AppServiceProvider'
+import type { TrainingScheduleIdInput, TrainingScheduleInput } from '@/app/Requests/TrainingRequests'
 
 export class TrainingController {
   public static async getTemplates(c: Context<AppEnv>) {
@@ -25,63 +26,33 @@ export class TrainingController {
 
   public static async getTeacherSchedules(c: Context<AppEnv>) {
     const user = c.get('user')!
-    const trainingRepo = trainingRepoFrom(c.env)
-    const schedules = await trainingRepo.getSchedulesByTeacher(user.id)
+    const schedules = await trainingServiceFrom(c.env).getSchedulesForTeacher(user)
     return c.json({ success: true, data: schedules })
   }
 
-  public static async createSchedule(c: Context<AppEnv>) {
+  public static async createSchedule(c: Context<AppEnv>, input: TrainingScheduleInput) {
     const user = c.get('user')!
-    const { classId, title, trainingDate, instructions, evidenceRequired, teacherNotes, activities } = await c.req.json()
-
-    const trainingRepo = trainingRepoFrom(c.env)
-    const classRepo = classRepoFrom(c.env)
-    const auditRepo = auditRepoFrom(c.env)
-
-    const schedule = await trainingRepo.createSchedule({
-      teacherId: user.id,
-      classId,
-      title,
-      trainingDate,
-      // Latihan ditetapkan untuk satu tarikh sahaja; due_date dikekalkan untuk keserasian schema lama.
-      dueDate: trainingDate,
-      instructions,
-      evidenceRequired,
-      teacherNotes,
-      status: 'published',
-    })
-
-    if (!schedule) throw new Error('Gagal mencipta jadual latihan')
-
-    if (activities && Array.isArray(activities)) {
-      let idx = 0
-      for (const act of activities) {
-        await trainingRepo.addScheduleActivity({
-          scheduleId: schedule.id,
-          templateId: act.templateId,
-          title: act.title,
-          sets: act.sets,
-          reps: act.reps,
-          videoUrl: act.videoUrl,
-          orderIndex: idx++,
-        })
-      }
-    }
-
-    const classStudents = await classRepo.getClassStudents(classId)
-    for (const student of classStudents) {
-      await trainingRepo.createAssignment(schedule.id, student.studentUserId)
-    }
-
-    await auditRepo.log({
-      userId: user.id,
-      action: 'CREATE_TRAINING_SCHEDULE',
-      entityType: 'TRAINING_SCHEDULE',
-      entityId: String(schedule.id),
-      details: `Jadual Latihan "${title}" diterbitkan.`,
-    })
-
+    const schedule = await trainingServiceFrom(c.env).createSchedule(user, input)
     return c.json({ success: true, data: schedule })
+  }
+
+  public static async updateSchedule(
+    c: Context<AppEnv>,
+    params: TrainingScheduleIdInput,
+    input: TrainingScheduleInput,
+  ) {
+    const updated = await trainingServiceFrom(c.env).updateSchedule(c.get('user')!, params.id, input)
+    return c.json({ success: true, data: updated })
+  }
+
+  public static async deleteSchedule(c: Context<AppEnv>, params: TrainingScheduleIdInput) {
+    await trainingServiceFrom(c.env).deleteSchedule(c.get('user')!, params.id)
+    return c.body(null, 204)
+  }
+
+  public static async getTodayReminders(c: Context<AppEnv>) {
+    const reminders = await trainingServiceFrom(c.env).getTodayRemindersForStudent(c.get('user')!)
+    return c.json({ data: reminders })
   }
 
   public static async getStudentAssignments(c: Context<AppEnv>) {

@@ -1,0 +1,31 @@
+/* Shared account and dialog styling, aligned with the training workspace. */
+#appHeader { padding-top: 14px; padding-bottom: 14px; }
+#bottomNav { border-color: #e0ebe4 !important; box-shadow: 0 -8px 24px rgba(21, 59, 54, .06); }
+#bottomNavInner { height: 64px; }
+#bottomNavInner button { gap: 3px; min-height: 48px; font-size: 10px; }
+#bottomNavInner button.active-nav-item { color: #194d39 !important; }
+#bottomNavInner button:focus-visible, .account-action:focus-visible { outline: 3px solid #91bb53; outline-offset: -3px; }
+.profile-shell { max-width: 1050px; }
+.profile-shell > .flex:first-child { margin-bottom: 24px; }
+.profile-shell > .flex:first-child h1 { font-size: clamp(28px, 4vw, 40px); line-height: 1.15; letter-spacing: -.05em; }
+.profile-hero { padding: 30px !important; border-radius: 20px !important; background: #163e31; }
+.profile-hero p { line-height: 1.8; }
+.profile-avatar { color: #173e31; background: #d4f36a; border: 0; }
+.profile-section { padding: 26px !important; border-color: #e0ebe4 !important; border-radius: 18px !important; }
+.profile-section-heading h3 { font-size: 16px; letter-spacing: -.03em; }
+.profile-section-heading p { font-size: 12px; }
+.profile-section-icon { width: 42px; height: 42px; border-radius: 13px; }
+.profile-field-label { font-size: 12px; }
+.profile-field input { min-height: 46px; font-size: 13px; }
+.profile-save-button, .profile-password-button { min-height: 46px; font-size: 12px; }
+.profile-save-button { background: #194d39; }
+[id^="modal"] > div { border-radius: 20px !important; box-shadow: 0 24px 70px rgba(14, 49, 35, .2) !important; }
+[id^="modal"] h3 { color: #173d31; font-weight: 800; letter-spacing: -.025em; }
+[id^="modal"] label { color: #365a49; }
+[id^="modal"] input, [id^="modal"] select, [id^="modal"] textarea { min-height: 43px; border: 1px solid #d4e4da; border-radius: 10px; font-size: 12px; }
+[id^="modal"] textarea { resize: vertical; }
+[id^="modal"] button { min-height: 38px; }
+@media (max-width: 640px) {
+  .profile-hero { padding: 24px !important; }
+  .profile-section { padding: 20px !important; }
+}

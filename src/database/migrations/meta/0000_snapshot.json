@@ -175,10 +175,10 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "student_profiles_user_id_users_id_fk": {
-          "name": "student_profiles_user_id_users_id_fk",
+        "student_profiles_user_id_smartfit_app_users_id_fk": {
+          "name": "student_profiles_user_id_smartfit_app_users_id_fk",
           "tableFrom": "student_profiles",
-          "tableTo": "users",
+          "tableTo": "smartfit_app_users",
           "columnsFrom": [
             "user_id"
           ],
@@ -261,10 +261,10 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "teacher_profiles_user_id_users_id_fk": {
-          "name": "teacher_profiles_user_id_users_id_fk",
+        "teacher_profiles_user_id_smartfit_app_users_id_fk": {
+          "name": "teacher_profiles_user_id_smartfit_app_users_id_fk",
           "tableFrom": "teacher_profiles",
-          "tableTo": "users",
+          "tableTo": "smartfit_app_users",
           "columnsFrom": [
             "user_id"
           ],
@@ -292,8 +292,8 @@
       "uniqueConstraints": {},
       "checkConstraints": {}
     },
-    "users": {
-      "name": "users",
+    "smartfit_app_users": {
+      "name": "smartfit_app_users",
       "columns": {
         "id": {
           "name": "id",
@@ -354,8 +354,8 @@
         }
       },
       "indexes": {
-        "users_username_unique": {
-          "name": "users_username_unique",
+        "smartfit_app_users_username_unique": {
+          "name": "smartfit_app_users_username_unique",
           "columns": [
             "username"
           ],
@@ -503,10 +503,10 @@
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
-        "class_students_student_id_users_id_fk": {
-          "name": "class_students_student_id_users_id_fk",
+        "class_students_student_id_smartfit_app_users_id_fk": {
+          "name": "class_students_student_id_smartfit_app_users_id_fk",
           "tableFrom": "class_students",
-          "tableTo": "users",
+          "tableTo": "smartfit_app_users",
           "columnsFrom": [
             "student_id"
           ],
@@ -610,10 +610,10 @@
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
-        "classes_teacher_id_users_id_fk": {
-          "name": "classes_teacher_id_users_id_fk",
+        "classes_teacher_id_smartfit_app_users_id_fk": {
+          "name": "classes_teacher_id_smartfit_app_users_id_fk",
           "tableFrom": "classes",
-          "tableTo": "users",
+          "tableTo": "smartfit_app_users",
           "columnsFrom": [
             "teacher_id"
           ],
@@ -756,10 +756,10 @@
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
-        "training_assignments_student_id_users_id_fk": {
-          "name": "training_assignments_student_id_users_id_fk",
+        "training_assignments_student_id_smartfit_app_users_id_fk": {
+          "name": "training_assignments_student_id_smartfit_app_users_id_fk",
           "tableFrom": "training_assignments",
-          "tableTo": "users",
+          "tableTo": "smartfit_app_users",
           "columnsFrom": [
             "student_id"
           ],
@@ -962,10 +962,10 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "training_schedules_teacher_id_users_id_fk": {
-          "name": "training_schedules_teacher_id_users_id_fk",
+        "training_schedules_teacher_id_smartfit_app_users_id_fk": {
+          "name": "training_schedules_teacher_id_smartfit_app_users_id_fk",
           "tableFrom": "training_schedules",
-          "tableTo": "users",
+          "tableTo": "smartfit_app_users",
           "columnsFrom": [
             "teacher_id"
           ],
@@ -1118,10 +1118,10 @@
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
-        "training_submissions_student_id_users_id_fk": {
-          "name": "training_submissions_student_id_users_id_fk",
+        "training_submissions_student_id_smartfit_app_users_id_fk": {
+          "name": "training_submissions_student_id_smartfit_app_users_id_fk",
           "tableFrom": "training_submissions",
-          "tableTo": "users",
+          "tableTo": "smartfit_app_users",
           "columnsFrom": [
             "student_id"
           ],
@@ -1144,10 +1144,10 @@
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
-        "training_submissions_reviewed_by_users_id_fk": {
-          "name": "training_submissions_reviewed_by_users_id_fk",
+        "training_submissions_reviewed_by_smartfit_app_users_id_fk": {
+          "name": "training_submissions_reviewed_by_smartfit_app_users_id_fk",
           "tableFrom": "training_submissions",
-          "tableTo": "users",
+          "tableTo": "smartfit_app_users",
           "columnsFrom": [
             "reviewed_by"
           ],
@@ -1285,10 +1285,10 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "training_templates_teacher_id_users_id_fk": {
-          "name": "training_templates_teacher_id_users_id_fk",
+        "training_templates_teacher_id_smartfit_app_users_id_fk": {
+          "name": "training_templates_teacher_id_smartfit_app_users_id_fk",
           "tableFrom": "training_templates",
-          "tableTo": "users",
+          "tableTo": "smartfit_app_users",
           "columnsFrom": [
             "teacher_id"
           ],
@@ -1495,10 +1495,10 @@
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
-        "assessment_results_student_id_users_id_fk": {
-          "name": "assessment_results_student_id_users_id_fk",
+        "assessment_results_student_id_smartfit_app_users_id_fk": {
+          "name": "assessment_results_student_id_smartfit_app_users_id_fk",
           "tableFrom": "assessment_results",
-          "tableTo": "users",
+          "tableTo": "smartfit_app_users",
           "columnsFrom": [
             "student_id"
           ],
@@ -1508,10 +1508,10 @@
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
-        "assessment_results_created_by_users_id_fk": {
-          "name": "assessment_results_created_by_users_id_fk",
+        "assessment_results_created_by_smartfit_app_users_id_fk": {
+          "name": "assessment_results_created_by_smartfit_app_users_id_fk",
           "tableFrom": "assessment_results",
-          "tableTo": "users",
+          "tableTo": "smartfit_app_users",
           "columnsFrom": [
             "created_by"
           ],
@@ -1521,10 +1521,10 @@
           "onDelete": "no action",
           "onUpdate": "no action"
         },
-        "assessment_results_updated_by_users_id_fk": {
-          "name": "assessment_results_updated_by_users_id_fk",
+        "assessment_results_updated_by_smartfit_app_users_id_fk": {
+          "name": "assessment_results_updated_by_smartfit_app_users_id_fk",
           "tableFrom": "assessment_results",
-          "tableTo": "users",
+          "tableTo": "smartfit_app_users",
           "columnsFrom": [
             "updated_by"
           ],
@@ -1662,10 +1662,10 @@
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
-        "assessment_sessions_teacher_id_users_id_fk": {
-          "name": "assessment_sessions_teacher_id_users_id_fk",
+        "assessment_sessions_teacher_id_smartfit_app_users_id_fk": {
+          "name": "assessment_sessions_teacher_id_smartfit_app_users_id_fk",
           "tableFrom": "assessment_sessions",
-          "tableTo": "users",
+          "tableTo": "smartfit_app_users",
           "columnsFrom": [
             "teacher_id"
           ],
@@ -1950,10 +1950,10 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "audit_logs_user_id_users_id_fk": {
-          "name": "audit_logs_user_id_users_id_fk",
+        "audit_logs_user_id_smartfit_app_users_id_fk": {
+          "name": "audit_logs_user_id_smartfit_app_users_id_fk",
           "tableFrom": "audit_logs",
-          "tableTo": "users",
+          "tableTo": "smartfit_app_users",
           "columnsFrom": [
             "user_id"
           ],
@@ -2032,10 +2032,10 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "notifications_user_id_users_id_fk": {
-          "name": "notifications_user_id_users_id_fk",
+        "notifications_user_id_smartfit_app_users_id_fk": {
+          "name": "notifications_user_id_smartfit_app_users_id_fk",
           "tableFrom": "notifications",
-          "tableTo": "users",
+          "tableTo": "smartfit_app_users",
           "columnsFrom": [
             "user_id"
           ],

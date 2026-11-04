@@ -1,4 +1,4 @@
-import { sqliteTable, integer, text, real } from 'drizzle-orm/sqlite-core'
+import { sqliteTable, integer, text, real, uniqueIndex } from 'drizzle-orm/sqlite-core'
 import { schools } from './schools'
 import { academicSessions, classes } from './classes'
 import { users } from './users'
@@ -48,6 +48,7 @@ export const assessmentSessions = sqliteTable('assessment_sessions', {
 
 export const assessmentResults = sqliteTable('assessment_results', {
   id: integer('id').primaryKey({ autoIncrement: true }),
+  creationRequestId: text('creation_request_id'),
   sessionId: integer('session_id').notNull().references(() => assessmentSessions.id, { onDelete: 'cascade' }),
   studentId: integer('student_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
   heightCm: real('height_cm').notNull(),
@@ -61,7 +62,9 @@ export const assessmentResults = sqliteTable('assessment_results', {
   updatedBy: integer('updated_by').references(() => users.id),
   createdAt: integer('created_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
   updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
-})
+}, (table) => ({
+  creationRequestIdUnique: uniqueIndex('assessment_results_creation_request_id_unique').on(table.creationRequestId),
+}))
 
 export const assessmentResultItems = sqliteTable('assessment_result_items', {
   id: integer('id').primaryKey({ autoIncrement: true }),

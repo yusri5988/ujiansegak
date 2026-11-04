@@ -1,7 +1,7 @@
 import { Context } from 'hono'
 import type { AppEnv } from '@/app/Env'
-import { userRepoFrom, auditRepoFrom } from '@/app/Services/AppServiceProvider'
-import { Hash } from '@/helpers/Hash'
+import { authServiceFrom, userRepoFrom, auditRepoFrom } from '@/app/Services/AppServiceProvider'
+import type { UpdatePasswordInput } from '@/app/Requests/ProfileRequests'
 import { eq } from 'drizzle-orm'
 import * as schema from '@/database/schema'
 import { drizzle } from 'drizzle-orm/d1'
@@ -132,60 +132,14 @@ export class ProfileController {
   /**
    * Update password
    */
-  public static async updatePassword(c: Context<AppEnv>) {
+  public static async updatePassword(c: Context<AppEnv>, input: UpdatePasswordInput) {
     const authUser = c.get('user')
     if (!authUser) {
       return c.json({ success: false, message: 'Tidak diotentikasi' }, 401)
     }
 
-    const body = await c.req.json()
-    const { currentPassword, newPassword } = body
-
-    if (!currentPassword || !newPassword) {
-      return c.json(
-        { success: false, message: 'Kata laluan semasa dan baru diperlukan' },
-        400
-      )
-    }
-
-    if (newPassword.length < 6) {
-      return c.json(
-        { success: false, message: 'Kata laluan baru mestilah sekurang-kurangnya 6 aksara' },
-        400
-      )
-    }
-
-    const userRepo = userRepoFrom(c.env)
-    const auditRepo = auditRepoFrom(c.env)
-
-    // Get current user
-    const user = await userRepo.findById(authUser.id)
-    if (!user) {
-      return c.json({ success: false, message: 'Pengguna tidak ditemui' }, 404)
-    }
-
-    // Verify current password
-    const isValidPassword = await Hash.verify(currentPassword, user.passwordHash)
-    if (!isValidPassword) {
-      return c.json(
-        { success: false, message: 'Kata laluan semasa tidak sah' },
-        401
-      )
-    }
-
-    // Generate new hash
-    const newHash = await Hash.make(newPassword)
-
-    // Update password
-    await userRepo.updatePassword(authUser.id, newHash)
-
-    await auditRepo.log({
-      userId: authUser.id,
-      action: 'UPDATE_PASSWORD',
-      entityType: 'USER',
-      entityId: String(authUser.id),
-      details: `Pengguna telah menukar kata laluan.`,
-    })
+    const { currentPassword, newPassword } = input
+    await authServiceFrom(c.env).updatePassword(authUser.id, currentPassword, newPassword)
 
     return c.json({
       success: true,

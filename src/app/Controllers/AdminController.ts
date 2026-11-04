@@ -1,7 +1,8 @@
 import { Context } from 'hono'
 import type { AppEnv } from '@/app/Env'
 import { schoolRepoFrom, userRepoFrom, auditRepoFrom } from '@/app/Services/AppServiceProvider'
-import { Hash } from '@/helpers/Hash'
+import { passwordServiceFrom } from '@/app/Services/AppServiceProvider'
+import type { CreateTeacherInput } from '@/app/Requests/UserRequest'
 
 export class AdminController {
   public static async getSchools(c: Context<AppEnv>) {
@@ -17,12 +18,12 @@ export class AdminController {
     return c.json({ success: true, data: school })
   }
 
-  public static async createTeacher(c: Context<AppEnv>) {
-    const { schoolId, fullName, email, password, phone } = await c.req.json()
+  public static async createTeacher(c: Context<AppEnv>, input: CreateTeacherInput) {
+    const { schoolId, fullName, email, password, phone } = input
     const userRepo = userRepoFrom(c.env)
     const auditRepo = auditRepoFrom(c.env)
 
-    const passwordHash = await Hash.make(password || 'Guru1234!')
+    const passwordHash = await passwordServiceFrom().hash(password || '123456')
     const user = await userRepo.createUser({
       username: email,
       email,

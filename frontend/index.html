@@ -1,11 +1,4 @@
-import { html } from 'hono/html'
-
-// Placeholders prevent legacy commented template fragments from being evaluated while the page is rendered.
-const formatDate = (_date?: string) => ''
-const schedule = { trainingDate: '', dueDate: '' }
-const item = { studentName: '', scheduleTitle: '', submissionDate: '', studentNotes: '', reviewStatus: '' }
-
-export const renderApp = (initialPath = '/login') => html`<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ms" class="h-full bg-[#edf4f1]">
 <head>
   <meta charset="UTF-8">
@@ -14,6 +7,7 @@ export const renderApp = (initialPath = '/login') => html`<!DOCTYPE html>
 
   <!-- PWA Metadata & Icons -->
   <link rel="manifest" href="/manifest.json">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
   <meta name="theme-color" content="#153b36">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -34,86 +28,12 @@ export const renderApp = (initialPath = '/login') => html`<!DOCTYPE html>
         }
       }
     }
-    window.initialPath = "${initialPath}";
   </script>
-  <style>
-    :root {
-      --segak-ink: #153b36;
-      --segak-green: #1d6b5c;
-      --segak-mint: #e3f2ec;
-      --segak-cream: #fffaf0;
-      --segak-line: #d9e7e1;
-      --segak-muted: #71817c;
-    }
-    * { box-sizing: border-box; }
-    body { font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; background: #edf4f1 !important; }
-    .mobile-container { max-width: 1280px; margin: 0 auto; min-height: 100vh; background: #f7faf8; box-shadow: 0 0 50px rgba(21,59,54,.08); border-color: var(--segak-line); }
-    .bottom-nav { max-width: 1280px; margin: 0 auto; background: rgba(255,255,255,.96) !important; color: var(--segak-ink) !important; border-color: var(--segak-line) !important; box-shadow: 0 -8px 24px rgba(21,59,54,.08); }
-    header.bg-slate-900 { background: rgba(255,255,255,.96) !important; color: var(--segak-ink) !important; border-color: var(--segak-line) !important; box-shadow: 0 1px 0 rgba(21,59,54,.08); }
-    header .bg-slate-800 { background: var(--segak-ink) !important; border-color: var(--segak-ink) !important; color: #fff !important; }
-    header .text-white, header .text-slate-200 { color: var(--segak-ink) !important; }
-    header .text-slate-400 { color: var(--segak-muted) !important; }
-    main { width: 100%; max-width: 1180px; margin: 0 auto; padding: 28px 24px 100px !important; }
-    .bg-white { border-color: var(--segak-line) !important; border-radius: 18px !important; box-shadow: 0 10px 25px rgba(21,59,54,.045) !important; }
-    .bg-slate-50 { background: #f3f8f5 !important; border-color: var(--segak-line) !important; }
-    .bg-slate-100, .bg-slate-200 { background: var(--segak-mint) !important; border-color: var(--segak-line) !important; }
-    .bg-slate-900, .bg-slate-800 { background: var(--segak-ink) !important; }
-    .text-slate-900, .text-slate-800 { color: var(--segak-ink) !important; }
-    .text-slate-700, .text-slate-600 { color: #36554e !important; }
-    .text-slate-500, .text-slate-400 { color: var(--segak-muted) !important; }
-    input, select { border-color: #c8d9d2 !important; background: #fff !important; border-radius: 10px !important; }
-    input:focus, select:focus { border-color: var(--segak-green) !important; box-shadow: 0 0 0 3px rgba(29,107,92,.12); }
-    button.bg-slate-900, button.bg-slate-800 { background: var(--segak-green) !important; box-shadow: 0 6px 14px rgba(29,107,92,.18); }
-    button.bg-slate-900:hover, button.bg-slate-800:hover { background: var(--segak-ink) !important; }
-    #loginScreen { max-width: 480px; margin: 0 auto; padding-top: 12px; }
-    #loginForm button { min-height: 44px; }
-    #studentDashboard, #teacherDashboard, #adminDashboard { animation: pageIn .35s ease-out; }
-    #studentDashboard.hidden, #teacherDashboard.hidden, #adminDashboard.hidden { display: none !important; }
-    .bottom-nav button { color: var(--segak-muted); transition: all .15s ease; }
-    .bottom-nav button.active-nav-item { color: var(--segak-green) !important; font-weight: 700; }
-    .account-action { min-height: 36px; display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 8px 11px; border-radius: 10px; font-size: 11px; line-height: 1; font-weight: 700; transition: background-color .15s ease, border-color .15s ease, color .15s ease, transform .15s ease; }
-    .account-action:active { transform: translateY(1px); }
-    .account-action-profile { color: var(--segak-green); background: var(--segak-mint); border: 1px solid #b8ddd0; }
-    .account-action-profile:hover { background: #d4ebe2; border-color: #8fc9b7; }
-    .account-action-logout { color: #9d4545; background: #fff7f5; border: 1px solid #edcaca; }
-    .account-action-logout:hover { color: #843b3b; background: #fcebea; border-color: #e4adad; }
-    .account-action svg { width: 15px; height: 15px; flex: 0 0 auto; }
-    .profile-shell { max-width: 760px; margin: 0 auto; }
-    .profile-hero { position: relative; overflow: hidden; background: linear-gradient(135deg, #153b36 0%, #1d6b5c 100%); color: #fff; border-radius: 22px !important; border: 0 !important; box-shadow: 0 16px 32px rgba(21,59,54,.16) !important; }
-    .profile-hero::after { content: ''; position: absolute; width: 180px; height: 180px; right: -56px; top: -74px; border: 1px solid rgba(255,255,255,.14); border-radius: 50%; box-shadow: 0 0 0 24px rgba(255,255,255,.04), 0 0 0 48px rgba(255,255,255,.03); }
-    .profile-avatar { width: 58px; height: 58px; display: inline-flex; align-items: center; justify-content: center; border-radius: 18px; background: rgba(255,255,255,.16); border: 1px solid rgba(255,255,255,.24); color: #fff; font-size: 20px; font-weight: 800; letter-spacing: -.04em; }
-    .profile-section { border-radius: 18px !important; box-shadow: 0 8px 20px rgba(21,59,54,.045) !important; }
-    .profile-section-heading { display: flex; align-items: center; gap: 10px; }
-    .profile-section-icon { width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; border-radius: 10px; background: var(--segak-mint); color: var(--segak-green); }
-    .profile-section-icon svg { width: 17px; height: 17px; }
-    .profile-field-label { display: block; margin-bottom: 6px; color: #55716a; font-size: 11px; font-weight: 700; }
-    .profile-field input { min-height: 43px; padding: 10px 12px; font-size: 12px; font-weight: 600; }
-    .profile-readonly { background: #f1f7f4 !important; color: var(--segak-muted) !important; }
-    .profile-save-button { min-height: 43px; display: inline-flex; align-items: center; justify-content: center; gap: 7px; border-radius: 11px; background: var(--segak-green); color: #fff; font-size: 12px; font-weight: 700; box-shadow: 0 7px 15px rgba(29,107,92,.17); }
-    .profile-save-button:hover { background: var(--segak-ink); }
-    .profile-security { background: #fffdf9 !important; }
-    .profile-security .profile-section-icon { background: #fff1df; color: #a86825; }
-    .profile-password-button { min-height: 43px; border-radius: 11px; background: #fff4f2; border: 1px solid #efcbc6; color: #a54f47; font-size: 12px; font-weight: 700; }
-    .profile-password-button:hover { background: #fce9e6; color: #8d4039; }
-    @media (max-width: 420px) {
-      .account-action { padding-left: 9px; padding-right: 9px; }
-      .account-action span { display: none; }
-      .account-action svg { width: 17px; height: 17px; }
-    }
-    [id^="modal"] > div { border-radius: 20px !important; }
-    @keyframes pageIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-    .hide-scrollbar::-webkit-scrollbar { display: none; }
-    .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-    @media (min-width: 768px) {
-      #studentDashboard { display: grid; grid-template-columns: 1fr 1.35fr; align-items: start; gap: 18px; }
-      #studentDashboard > :first-child, #studentDashboard > :nth-child(2) { grid-column: 1 / -1; }
-      #adminDashboard { max-width: 900px; }
-    }
-    @media (max-width: 640px) {
-      main { padding: 18px 14px 88px !important; }
-      #loginScreen { padding-top: 28px; }
-    }
-  </style>
+  <link rel="stylesheet" href="/src/styles.css">
+  <link rel="stylesheet" href="/src/shared-pages.css">
+  <link rel="stylesheet" href="/src/teacher-pages.css">
+  <link rel="stylesheet" href="/src/dashboard-pages.css">
+  <link rel="stylesheet" href="/src/ai-chat.css">
 </head>
 <body class="bg-slate-900 text-slate-800 antialiased h-full">
 
@@ -147,81 +67,56 @@ export const renderApp = (initialPath = '/login') => html`<!DOCTYPE html>
       </div>
     </header>
 
-    <!-- PWA Install Banner (Minimal Slate Accent) -->
-    <style>#pwaInstallBanner > div:first-child > span:first-child { display: none; }</style>
-    <div id="pwaInstallBanner" class="hidden bg-slate-800 text-slate-200 px-4 py-2.5 flex justify-between items-center border-b border-slate-700">
-      <div class="flex items-center space-x-2 text-xs font-medium">
-        <span>ðŸ“²</span>
-        <span>Pasang Aplikasi SEGAK pada peranti anda</span>
-      </div>
-      <button onclick="installPWA()" class="px-3 py-1 bg-white text-slate-900 rounded-lg text-xs font-bold shadow-sm">
-        Pasang
-      </button>
-    </div>
-
     <!-- Main Content Area -->
-    <main class="flex-grow p-4 space-y-4">
+    <main class="flex-grow p-4">
 
-      <!-- SCREEN 1: LOGIN SCREEN (Redesigned Modern Clean & Professional) -->
-      <div id="loginScreen" class="py-6 max-w-md mx-auto space-y-5">
-        
-        <!-- Header Branding Card -->
-        <div class="text-center space-y-2">
-          <div class="w-14 h-14 bg-gradient-to-tr from-[#153b36] to-[#1d6b5c] text-white rounded-2xl flex items-center justify-center mx-auto shadow-md shadow-emerald-900/20 border border-emerald-600/30 ring-4 ring-emerald-500/10">
-            <svg class="w-7 h-7 text-emerald-100" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-            </svg>
-          </div>
-          <div class="space-y-1 pt-1">
-            <h2 class="text-2xl font-extrabold text-[#153b36] tracking-tight">Log Masuk Sistem</h2>
-            <p class="text-xs font-medium text-slate-500 max-w-xs mx-auto">Sistem Pengurusan Ujian SEGAK & Rekod Latihan Harian KPM</p>
-          </div>
+      <!-- SCREEN 1: LOGIN SCREEN -->
+      <div id="loginScreen" class="login-screen">
+        <div class="login-layout">
+          <section class="login-hero" aria-labelledby="loginHeroTitle">
+            <div class="login-brand">
+              <span class="login-brand-mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none"><path d="M5 21 13 11l5 6 4-5 5 9" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 25h20" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg></span>
+              <span><strong>SEGAK</strong><small>KECERGASAN SEKOLAH</small></span>
+            </div>
+            <div class="login-hero-content">
+              <h1 id="loginHeroTitle">Setiap langkah<br><em>lebih bermakna.</em></h1>
+              <p class="login-hero-description">Perjalanan kecergasan bermula di sini. Pantau latihan dan terus bergerak ke arah yang lebih sihat.</p>
+            </div>
+            <div class="login-track" aria-hidden="true">
+              <div class="login-track-lines"></div>
+              <span class="login-track-number">01 / AKTIF</span>
+            </div>
+            <div class="login-hero-footer"><span>USAHA HARI INI.</span><span>LEBIH CERGAS ESOK. ↗</span></div>
+          </section>
+
+          <section class="login-panel" aria-labelledby="loginTitle">
+            <div class="login-panel-content">
+              <span class="login-kicker">SELAMAT KEMBALI</span>
+              <h2 id="loginTitle">Mari mula<br>bergerak<span>.</span></h2>
+
+              <div id="loginAlert" class="login-alert hidden" role="alert"></div>
+
+              <form id="loginForm" action="javascript:void(0);" method="POST" onsubmit="event.preventDefault(); (window.handleLogin || handleLogin)(event); return false;" class="login-form">
+                <div class="login-field">
+                  <label for="loginUsername">ID Murid / Emel Pengguna</label>
+                  <div class="login-input-wrap">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                    <input type="text" id="loginUsername" name="username" autocomplete="username" required placeholder="ID murid atau emel anda">
+                  </div>
+                </div>
+                <div class="login-field">
+                  <label for="loginPassword">Kata Laluan</label>
+                  <div class="login-input-wrap">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                    <input type="password" id="loginPassword" name="password" autocomplete="current-password" required placeholder="Masukkan kata laluan">
+                    <button type="button" class="login-password-toggle" onclick="togglePasswordVisibility()" aria-label="Tunjukkan kata laluan" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7" d="M15 12a3 3 0 11-6 0 3 3 0 016 0zM2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg></button>
+                  </div>
+                </div>
+                <button type="submit" class="login-submit"><span>Log masuk</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14m-6-6 6 6-6 6"/></svg></button>
+              </form>
+            </div>
+          </section>
         </div>
-
-        <!-- Alert Container -->
-        <div id="loginAlert" class="hidden p-3.5 rounded-xl text-xs bg-red-50 text-red-700 border border-red-200 font-medium flex items-center space-x-2 shadow-xs"></div>
-
-        <!-- Main Login Card -->
-        <form id="loginForm" action="javascript:void(0);" method="POST" onsubmit="event.preventDefault(); (window.handleLogin || handleLogin)(event); return false;" class="bg-white p-6 sm:p-7 rounded-2xl border border-slate-200/80 shadow-xl shadow-slate-200/50 space-y-4">
-          <div>
-            <label class="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wide">ID Murid / Emel Pengguna</label>
-            <div class="relative">
-              <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                </svg>
-              </div>
-              <input type="text" id="loginUsername" required class="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold bg-slate-50/50 text-slate-900 placeholder:text-slate-400 focus:bg-white focus:border-[#1d6b5c] focus:outline-none focus:ring-4 focus:ring-emerald-600/10 transition-all" placeholder="M1001 atau g-60579088@moe-dl.edu.my">
-            </div>
-          </div>
-
-          <div>
-            <div class="flex justify-between items-center mb-1.5">
-              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wide">Kata Laluan</label>
-            </div>
-            <div class="relative">
-              <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                </svg>
-              </div>
-              <input type="password" id="loginPassword" required class="w-full pl-10 pr-10 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold bg-slate-50/50 text-slate-900 placeholder:text-slate-400 focus:bg-white focus:border-[#1d6b5c] focus:outline-none focus:ring-4 focus:ring-emerald-600/10 transition-all" placeholder="••••••••">
-              <button type="button" onclick="togglePasswordVisibility()" class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600 focus:outline-none">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                </svg>
-              </button>
-            </div>
-          </div>
-
-          <button type="submit" class="w-full py-3 bg-gradient-to-r from-[#1d6b5c] to-[#153b36] hover:from-[#153b36] hover:to-[#0f2d29] active:scale-[0.99] text-white font-bold rounded-xl text-xs shadow-md shadow-emerald-900/15 transition-all flex items-center justify-center space-x-2 group">
-            <span>Log Masuk Akaun</span>
-            <svg class="w-4 h-4 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-            </svg>
-          </button>
-        </form>
 
         <!-- Quick Demo Login Card -->
         <div class="hidden bg-white/80 backdrop-blur-sm p-4 rounded-2xl border border-slate-200/80 shadow-sm space-y-2.5">
@@ -230,7 +125,7 @@ export const renderApp = (initialPath = '/login') => html`<!DOCTYPE html>
             <p class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Log Masuk Pantas (Demo)</p>
           </div>
           <div class="grid grid-cols-3 gap-2">
-            <button type="button" onclick="quickLogin('admin@segak.moe.edu.my', 'Admin1234!')" class="group flex flex-col items-center justify-center p-2.5 bg-slate-50 hover:bg-emerald-50/70 border border-slate-200/80 hover:border-emerald-200 rounded-xl transition-all">
+            <button type="button" onclick="quickLogin('admin@segak.moe.edu.my', '123456')" class="group flex flex-col items-center justify-center p-2.5 bg-slate-50 hover:bg-emerald-50/70 border border-slate-200/80 hover:border-emerald-200 rounded-xl transition-all">
               <span class="text-base mb-0.5">🛡️</span>
               <span class="text-[11px] font-bold text-slate-700 group-hover:text-emerald-900">Admin</span>
             </button>
@@ -238,7 +133,7 @@ export const renderApp = (initialPath = '/login') => html`<!DOCTYPE html>
               <span class="text-base mb-0.5">👨‍🏫</span>
               <span class="text-[11px] font-bold text-slate-700 group-hover:text-emerald-900">Cikgu</span>
             </button>
-            <button type="button" onclick="quickLogin('M1001', 'Murid1234!')" class="group flex flex-col items-center justify-center p-2.5 bg-slate-50 hover:bg-emerald-50/70 border border-slate-200/80 hover:border-emerald-200 rounded-xl transition-all">
+            <button type="button" onclick="quickLogin('M1001', '123456')" class="group flex flex-col items-center justify-center p-2.5 bg-slate-50 hover:bg-emerald-50/70 border border-slate-200/80 hover:border-emerald-200 rounded-xl transition-all">
               <span class="text-base mb-0.5">🎓</span>
               <span class="text-[11px] font-bold text-slate-700 group-hover:text-emerald-900">Murid</span>
             </button>
@@ -252,114 +147,120 @@ export const renderApp = (initialPath = '/login') => html`<!DOCTYPE html>
 
       </div>
 
-      <!-- SCREEN 2: STUDENT DASHBOARD -->
-      <div id="studentDashboard" class="hidden space-y-4">
-        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-xs flex justify-between items-center">
-          <div>
-            <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Selamat Datang</span>
-            <h1 class="text-base font-bold text-slate-900"><span id="studentDashboardName">Murid</span></h1>
-          </div>
-          <span id="todayDateBadge" class="text-[10px] font-semibold text-slate-600 bg-slate-100 px-2.5 py-1 rounded-md border border-slate-200">Hari Ini</span>
+      <!-- SCREEN 2: STUDENT HOME -->
+      <div id="studentDashboard" class="hidden dashboard-page">
+        <div class="dashboard-heading">
+          <div><p class="dashboard-eyebrow">RUANG MURID <span>/</span> UTAMA</p><h1>Hai, <span id="studentDashboardName">Murid</span><span class="dashboard-dot">.</span></h1><p>Selamat datang. Terus bergerak dan kekal cergas setiap hari.</p></div>
+          <span id="todayDateBadge" class="dashboard-date">Hari Ini</span>
         </div>
+        <section class="student-reminders" aria-labelledby="studentRemindersTitle">
+          <div class="student-reminders-heading"><div><p class="dashboard-eyebrow">PERINGATAN HARI INI</p><h2 id="studentRemindersTitle">Latihan belum selesai</h2></div><span class="student-reminders-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 8v4l2.5 2.5M20 12a8 8 0 11-16 0 8 8 0 0116 0Z" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div>
+          <div id="studentReminders" aria-live="polite"><p class="student-reminders-message">Memuatkan peringatan...</p></div>
+        </section>
+        <section class="student-home-feature" aria-labelledby="studentHomeTitle">
+          <div class="student-home-copy">
+            <p class="student-home-eyebrow">LANGKAH SETERUSNYA</p>
+            <h2 id="studentHomeTitle">Sudah bersedia untuk bergerak?</h2>
+            <p>Semak latihan yang cikgu berikan, ikut arahan aktiviti dan tandakan latihan selepas selesai.</p>
+          </div>
+          <button type="button" class="student-home-action" onclick="navigateTo('/student/activity')">
+            Lihat aktiviti
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg>
+          </button>
+        </section>
+        <section class="student-home-note" aria-label="Panduan latihan">
+          <span class="student-home-note-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 8v4l2.5 2.5M20 12a8 8 0 11-16 0 8 8 0 0116 0Z" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" /></svg></span>
+          <div><strong>Buat ikut kemampuan</strong><p>Berhenti dan maklumkan kepada cikgu jika berasa sakit atau pening.</p></div>
+        </section>
+      </div>
 
-        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-xs space-y-3">
-          <div class="border-b border-slate-100 pb-2">
-            <h3 class="font-bold text-sm text-slate-900">Latihan Saya</h3>
-            <p class="text-[10px] text-slate-500">Buka latihan yang cikgu tetapkan mengikut tarikh dan tandakan selepas selesai.</p>
-          </div>
-          <div id="studentAssignmentList" class="space-y-2">
-            <p class="text-xs text-slate-400 text-center py-3">Memuatkan latihan...</p>
-          </div>
+      <!-- SCREEN 2B: STUDENT ACTIVITIES -->
+      <div id="studentActivity" class="hidden dashboard-page">
+        <div class="dashboard-heading">
+          <div><p class="dashboard-eyebrow">RUANG MURID <span>/</span> AKTIVITI</p><h1>Aktiviti saya<span class="dashboard-dot">.</span></h1><p>Buka latihan mengikut tarikh dan tandakan selepas selesai.</p></div>
         </div>
+        <section class="dashboard-section" aria-labelledby="studentAssignmentTitle">
+          <div class="dashboard-section-heading"><div><p class="dashboard-eyebrow">LATIHAN DARIPADA CIKGU</p><h2 id="studentAssignmentTitle">Latihan saya</h2><p>Ikuti setiap arahan latihan dengan selamat.</p></div></div>
+          <div id="studentAssignmentList" class="dashboard-list" aria-live="polite"><p class="dashboard-empty">Memuatkan latihan...</p></div>
+        </section>
       </div>
 
       <!-- SCREEN 3: TEACHER DASHBOARD (Minimal Theme) -->
-      <div id="teacherDashboard" class="hidden space-y-4">
+      <div id="teacherDashboard" class="hidden">
 
         <!-- TAB 1: SENARAI KELAS -->
-        <div id="tabTeacherClasses" class="space-y-4">
-          <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-xs space-y-3">
-            <div class="flex justify-between items-center">
-              <h3 class="font-bold text-sm text-slate-900">Senarai Kelas Guru</h3>
-              <button onclick="toggleModal('modalCreateClass', true)" class="px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-xs font-semibold">
-                + Tambah Kelas
-              </button>
-            </div>
-            <div id="classListContainer" class="space-y-2">
-              <p class="text-xs text-slate-400 text-center">Memuatkan senarai kelas...</p>
-            </div>
+        <div id="tabTeacherClasses" class="training-page teacher-page">
+          <div class="training-heading">
+            <div><p class="training-eyebrow">RUANG GURU <span>/</span> KELAS</p><h1>Kelas saya<span>.</span></h1><p>Urus kelas dan senarai murid anda di satu tempat.</p></div>
+            <button type="button" onclick="toggleModal('modalCreateClass', true)" class="training-primary"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><path d="M12 5v14M5 12h14" stroke-width="2" stroke-linecap="round"/></svg><span>Tambah kelas</span></button>
           </div>
-
-          <div id="studentListSection" class="hidden bg-white p-4 rounded-xl border border-slate-200 shadow-xs space-y-3">
-            <div class="flex justify-between items-center border-b border-slate-100 pb-2">
-              <h3 id="currentClassName" class="font-bold text-sm text-slate-900">Senarai Murid</h3>
-              <button onclick="toggleModal('modalAddStudent', true)" class="px-3 py-1.5 bg-slate-900 text-white rounded-lg text-xs font-semibold">
-                + Murid
-              </button>
-            </div>
-            <div id="studentCardsContainer" class="space-y-2">
-              <!-- Dynamic Minimal Student Cards -->
-            </div>
-          </div>
+          <section class="training-section" aria-labelledby="teacherClassListTitle">
+            <div class="training-section-heading"><div><p class="training-eyebrow">KELAS ANDA</p><h2 id="teacherClassListTitle">Senarai kelas</h2><p>Pilih kelas untuk melihat dan mengurus murid.</p></div></div>
+            <div id="classListContainer" class="training-list" aria-live="polite"><p class="training-empty">Memuatkan senarai kelas...</p></div>
+          </section>
+          <section id="studentListSection" class="hidden training-section" aria-labelledby="currentClassName">
+            <div class="training-section-heading"><div><p class="training-eyebrow">SENARAI MURID</p><h2 id="currentClassName">Senarai Murid</h2><p>Urus murid dalam kelas yang dipilih.</p></div><button type="button" onclick="toggleModal('modalAddStudent', true)" class="training-primary">+ Murid</button></div>
+            <div id="studentCardsContainer" class="training-list" aria-live="polite"></div>
+          </section>
         </div>
 
         <!-- TAB 2: PANTAUAN LATIHAN -->
-        <div id="tabTeacherDailyLogs" class="hidden space-y-4">
-          <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-xs space-y-3">
-            <div>
-              <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Pemantauan tugasan</span>
-              <h3 class="font-bold text-base text-slate-900">Penghantaran latihan murid</h3>
-              <p class="text-[11px] text-slate-500">Semak latihan yang sudah dihantar oleh murid.</p>
-            </div>
-          </div>
-          <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-xs space-y-3">
-            <div class="flex justify-between items-center border-b border-slate-100 pb-2">
-              <h3 class="font-bold text-sm text-slate-900">Senarai penghantaran</h3>
-              <button onclick="loadTeacherSubmissions()" class="text-[10px] font-semibold text-emerald-700">Muat semula</button>
-            </div>
-            <div id="teacherSubmissionList" class="space-y-2">
-              <p class="text-xs text-slate-400 text-center py-3">Memuatkan penghantaran...</p>
-            </div>
-          </div>
+        <div id="tabTeacherDailyLogs" class="hidden training-page teacher-page">
+          <div class="training-heading"><div><p class="training-eyebrow">RUANG GURU <span>/</span> PANTAUAN</p><h1>Pantauan latihan<span>.</span></h1><p>Semak latihan yang sudah dihantar oleh murid.</p></div><button type="button" onclick="loadTeacherSubmissions()" class="training-primary">Muat semula</button></div>
+          <section class="training-section" aria-labelledby="teacherSubmissionTitle">
+            <div class="training-section-heading"><div><p class="training-eyebrow">AKTIVITI MURID</p><h2 id="teacherSubmissionTitle">Senarai penghantaran</h2><p>Penghantaran latihan daripada murid anda.</p></div></div>
+            <div id="teacherSubmissionList" class="training-list" aria-live="polite"><p class="training-empty">Memuatkan penghantaran...</p></div>
+          </section>
         </div>
 
         <!-- TAB 3: PENGURUSAN LATIHAN GURU -->
-        <div id="tabTeacherTraining" class="hidden space-y-4">
-          <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-xs space-y-3">
-            <div class="flex justify-between items-center">
-              <div>
-                <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Latihan mengikut tarikh</span>
-                <h3 class="font-bold text-sm text-slate-900">Latihan Murid</h3>
-              </div>
-              <button onclick="toggleModal('modalCreateSchedule', true)" class="px-3 py-1.5 bg-slate-900 text-white rounded-lg text-xs font-semibold">
-                + Beri Latihan
-              </button>
-            </div>
-            <div id="trainingScheduleList" class="space-y-2">
-              <p class="text-xs text-slate-400 text-center">Memuatkan jadual...</p>
-            </div>
+        <div id="tabTeacherTraining" class="hidden training-page">
+          <div class="training-heading">
+            <div><p class="training-eyebrow">RUANG GURU <span>/</span> LATIHAN</p><h1>Latihan murid<span>.</span></h1><p>Rancang aktiviti dan bantu murid kekal aktif, satu latihan pada satu masa.</p></div>
+            <button type="button" onclick="openCreateScheduleModal()" class="training-primary"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><path d="M12 5v14M5 12h14" stroke-width="2" stroke-linecap="round"/></svg><span>Beri latihan</span></button>
+          </div>
+          <section class="training-section" aria-labelledby="trainingListTitle">
+            <div class="training-section-heading"><div><p class="training-eyebrow">AKTIVITI KELAS</p><h2 id="trainingListTitle">Senarai latihan</h2><p>Urus latihan yang telah diberikan kepada murid.</p></div><span id="trainingScheduleCount" class="training-count" hidden></span></div>
+            <div id="trainingScheduleList" class="training-list" aria-live="polite"><p class="training-empty">Memuatkan jadual...</p></div>
+          </section>
+        </div>
+
+        <!-- TAB 4: AI CHAT FOR TEACHERS ONLY -->
+        <div id="tabTeacherAi" class="hidden ai-chat-page">
+          <div class="ai-chat-layout">
+            <aside class="ai-chat-sidebar" aria-label="Senarai perbualan">
+              <button id="aiNewConversation" type="button" class="ai-new-chat" aria-label="Perbualan baharu" title="Perbualan baharu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
+              <button id="aiHistoryToggle" type="button" class="ai-history-toggle" aria-label="Sejarah perbualan" title="Sejarah perbualan" aria-expanded="false" aria-controls="aiConversationList"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8M3 3v5h5M12 7v5l3 2"/></svg></button>
+              <button id="aiDeleteConversation" type="button" class="ai-delete-chat" aria-label="Padam perbualan ini" title="Padam perbualan ini" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M10 11v6m4-6v6M5 7l1 13h12l1-13M9 7V4h6v3"/></svg></button>
+              <div id="aiConversationList" class="ai-conversation-list" aria-live="polite" hidden></div>
+            </aside>
+            <section class="ai-chat-panel" aria-label="Chat dengan Pembantu SmartFit">
+              <div id="aiChatMessages" class="ai-chat-messages" aria-live="polite" aria-relevant="additions text"></div>
+              <div id="aiPendingActions" class="ai-pending-actions"></div>
+              <div id="aiSensitiveOutput" class="ai-sensitive-output" aria-live="polite"></div>
+              <form id="aiChatForm" class="ai-chat-form">
+                <label class="sr-only" for="aiChatInput">Mesej untuk pembantu AI</label>
+                <input id="aiCsvInput" type="file" accept=".csv,text/csv" hidden>
+                <button id="aiCsvAttach" class="ai-csv-attach" type="button" aria-label="Pilih fail CSV murid" title="Pilih fail CSV murid"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5 12.6 20a5.4 5.4 0 0 1-7.6-7.6l8.7-8.7a3.6 3.6 0 0 1 5.1 5.1l-8.7 8.6a1.8 1.8 0 0 1-2.5-2.5l8-8"/></svg></button>
+                <textarea id="aiChatInput" rows="1" maxlength="4000" placeholder="Mesej..." required></textarea>
+                <button id="aiSendMessage" type="submit" aria-label="Hantar mesej" title="Hantar mesej"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M6 11l6-6 6 6"/></svg></button>
+              </form>
+              <p id="aiChatStatus" class="ai-chat-status" role="status" aria-live="polite"></p>
+            </section>
           </div>
         </div>
       </div>
 
       <!-- SCREEN 4: ADMIN DASHBOARD (Minimal Theme) -->
-      <div id="adminDashboard" class="hidden space-y-4">
-        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-xs flex justify-between items-center">
-          <div>
-            <h1 class="text-base font-bold text-slate-900">Dashboard Pentadbir</h1>
-            <p class="text-[10px] text-slate-500">Pengurusan Sekolah & Akaun Guru</p>
-          </div>
-          <button onclick="toggleModal('modalCreateSchool', true)" class="px-3 py-1.5 bg-slate-900 text-white rounded-lg text-xs font-semibold">
-            + Sekolah
-          </button>
+      <div id="adminDashboard" class="hidden dashboard-page">
+        <div class="dashboard-heading">
+          <div><p class="dashboard-eyebrow">RUANG PENTADBIR <span>/</span> SEKOLAH</p><h1>Pengurusan sekolah<span class="dashboard-dot">.</span></h1><p>Urus sekolah dan akaun guru dalam satu tempat.</p></div>
+          <button type="button" onclick="toggleModal('modalCreateSchool', true)" class="dashboard-primary"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><path d="M12 5v14M5 12h14" stroke-width="2" stroke-linecap="round"/></svg><span>Tambah sekolah</span></button>
         </div>
-
-        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-xs space-y-3">
-          <h3 class="font-bold text-sm text-slate-900">Senarai Sekolah Didaftarkan</h3>
-          <div id="adminSchoolList" class="space-y-2 text-xs">
-            <p class="text-slate-400 text-center">Memuatkan senarai sekolah...</p>
-          </div>
-        </div>
+        <section class="dashboard-section" aria-labelledby="adminSchoolTitle">
+          <div class="dashboard-section-heading"><div><p class="dashboard-eyebrow">DIREKTORI SEKOLAH</p><h2 id="adminSchoolTitle">Sekolah berdaftar</h2><p>Senarai sekolah yang telah didaftarkan dalam sistem.</p></div></div>
+          <div id="adminSchoolList" class="dashboard-list" aria-live="polite"><p class="dashboard-empty">Memuatkan senarai sekolah...</p></div>
+        </section>
       </div>
 
       <!-- SCREEN: PROFILE (Teacher/Student) -->
@@ -499,8 +400,8 @@ export const renderApp = (initialPath = '/login') => html`<!DOCTYPE html>
 
   <div id="modalCreateSchedule" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-50">
     <div class="bg-white rounded-xl p-5 max-w-xs w-full shadow-xl space-y-3 border border-slate-200">
-      <h3 class="font-bold text-sm text-slate-900">Beri Latihan Kepada Murid</h3>
-      <form action="javascript:void(0);" method="POST" onsubmit="event.preventDefault(); handleCreateSchedule(event); return false;" class="space-y-3 text-xs max-h-[75vh] overflow-y-auto">
+      <h3 id="scheduleModalTitle" class="font-bold text-sm text-slate-900">Beri Latihan Kepada Murid</h3>
+      <form id="scheduleForm" action="javascript:void(0);" method="POST" onsubmit="event.preventDefault(); handleCreateSchedule(event); return false;" class="space-y-3 text-xs max-h-[75vh] overflow-y-auto">
         <div>
           <label class="font-semibold block mb-1 text-slate-700">Kelas</label>
           <select id="scheduleClassId" required class="w-full p-2.5 border border-slate-300 rounded-lg bg-slate-50"><option value="">Pilih kelas</option></select>
@@ -513,10 +414,10 @@ export const renderApp = (initialPath = '/login') => html`<!DOCTYPE html>
           <div><label class="font-semibold block mb-1 text-slate-700">Tarikh latihan</label><input type="date" id="scheduleTrainingDate" required class="w-full p-2.5 border border-slate-300 rounded-lg bg-slate-50"></div>
         </div>
         <div><label class="font-semibold block mb-1 text-slate-700">Arahan</label><textarea id="scheduleInstructions" rows="2" class="w-full p-2.5 border border-slate-300 rounded-lg bg-slate-50" placeholder="Terangkan cara murid perlu buat latihan."></textarea></div>
-        <div><label class="font-semibold block mb-1 text-slate-700">Link Video YouTube</label><textarea id="scheduleActivities" rows="3" required class="w-full p-2.5 border border-slate-300 rounded-lg bg-slate-50" placeholder="Satu link setiap baris:\nhttps://youtu.be/...\nhttps://www.youtube.com/watch?v=..."></textarea><p class="text-[9px] text-slate-400 mt-1">Masukkan satu link YouTube bagi setiap aktiviti. Video akan dimainkan terus di halaman murid.</p></div>
+        <div><label class="font-semibold block mb-1 text-slate-700" for="scheduleActivityVideo">Link Video YouTube</label><input type="url" id="scheduleActivityVideo" required class="w-full p-2.5 border border-slate-300 rounded-lg bg-slate-50" placeholder="https://www.youtube.com/watch?v=..."><p class="text-[9px] text-slate-400 mt-1">Satu borang untuk satu aktiviti. Video akan dimainkan terus di halaman murid.</p></div>
         <div class="flex justify-end gap-2 pt-1">
           <button type="button" onclick="toggleModal('modalCreateSchedule', false)" class="px-3.5 py-1.5 bg-slate-100 text-slate-700 rounded-lg font-semibold">Batal</button>
-          <button type="submit" class="px-3.5 py-1.5 bg-slate-900 text-white rounded-lg font-semibold">Terbitkan Latihan</button>
+          <button id="scheduleSubmitButton" type="submit" class="px-3.5 py-1.5 bg-slate-900 text-white rounded-lg font-semibold">Terbitkan Latihan</button>
         </div>
       </form>
     </div>
@@ -538,9 +439,11 @@ export const renderApp = (initialPath = '/login') => html`<!DOCTYPE html>
     let currentUser = null;
     let currentToken = localStorage.getItem('segak_token');
     let activeClassId = null;
-    let deferredPrompt = null;
+    let editingScheduleId = null;
+    let teacherSchedules = [];
 
-    if ('serviceWorker' in navigator) {
+    const isLocalDev = ['localhost', '127.0.0.1'].includes(window.location.hostname);
+    if ('serviceWorker' in navigator && !isLocalDev) {
       window.addEventListener('load', function() {
         navigator.serviceWorker.register('/sw.js').then(function(reg) {
           console.log('PWA ServiceWorker ready:', reg.scope);
@@ -550,25 +453,8 @@ export const renderApp = (initialPath = '/login') => html`<!DOCTYPE html>
       });
     }
 
-    window.addEventListener('beforeinstallprompt', (e) => {
-      e.preventDefault();
-      deferredPrompt = e;
-      const banner = document.getElementById('pwaInstallBanner');
-      if (banner) banner.classList.remove('hidden');
-    });
-
-    function installPWA() {
-      if (!deferredPrompt) return;
-      deferredPrompt.prompt();
-      deferredPrompt.userChoice.then(() => {
-        deferredPrompt = null;
-        const banner = document.getElementById('pwaInstallBanner');
-        if (banner) banner.classList.add('hidden');
-      });
-    }
-
     window.onload = function() {
-      const today = new Date().toISOString().split('T')[0];
+      const today = new Date(Date.now() + 8 * 60 * 60 * 1000).toISOString().split('T')[0];
       const todayBadge = document.getElementById('todayDateBadge');
       if (todayBadge) todayBadge.textContent = 'Tarikh: ' + today;
 
@@ -600,7 +486,7 @@ export const renderApp = (initialPath = '/login') => html`<!DOCTYPE html>
     function navigateToRoleActivity() {
       if (!currentUser) return navigateTo('/login');
       if (currentUser.role === 'teacher') navigateTo('/teacher/training');
-      else if (currentUser.role === 'student') navigateTo('/student/dashboard');
+      else if (currentUser.role === 'student') navigateTo('/student/activity');
     }
 
     function routeToPath(path) {
@@ -635,6 +521,8 @@ export const renderApp = (initialPath = '/login') => html`<!DOCTYPE html>
         showScreen('teacherDashboard');
         if (path === '/teacher/segak' || path === '/teacher/training') {
           showTab('teacherTraining');
+        } else if (path === '/teacher/ai') {
+          showTab('teacherAi');
         } else if (path === '/teacher/daily-log') {
           showTab('teacherDailyLogs');
         } else {
@@ -647,10 +535,15 @@ export const renderApp = (initialPath = '/login') => html`<!DOCTYPE html>
         if (path === '/teacher/segak' || path === '/teacher/training') loadTeacherSchedules();
         if (path === '/teacher/daily-log') loadTeacherSubmissions();
       } else if (role === 'student') {
-        showScreen('studentDashboard');
-        if (!path.startsWith('/student')) history.replaceState(null, '', '/student/dashboard');
-        document.getElementById('studentDashboardName').textContent = currentUser.profile?.fullName || currentUser.username;
-        loadStudentAssignments();
+        const studentPath = path === '/student/activity' ? '/student/activity' : '/student/dashboard';
+        if (path !== studentPath) history.replaceState(null, '', studentPath);
+        const isActivityPage = studentPath === '/student/activity';
+        showScreen(isActivityPage ? 'studentActivity' : 'studentDashboard');
+        const studentName = currentUser.profile?.fullName || currentUser.username;
+        document.getElementById('studentDashboardName').textContent = studentName;
+        updateStudentBottomNav(studentPath);
+        if (isActivityPage) loadStudentAssignments();
+        else loadStudentReminders();
       }
     }
 
@@ -658,6 +551,7 @@ export const renderApp = (initialPath = '/login') => html`<!DOCTYPE html>
       document.getElementById('loginScreen').classList.add('hidden');
       document.getElementById('teacherDashboard').classList.add('hidden');
       document.getElementById('studentDashboard').classList.add('hidden');
+      document.getElementById('studentActivity').classList.add('hidden');
       document.getElementById('adminDashboard').classList.add('hidden');
       document.getElementById('profileScreen')?.classList.add('hidden');
       const target = document.getElementById(screenId);
@@ -674,6 +568,12 @@ export const renderApp = (initialPath = '/login') => html`<!DOCTYPE html>
       const pwd = document.getElementById('loginPassword');
       if (pwd) {
         pwd.type = pwd.type === 'password' ? 'text' : 'password';
+        const toggle = document.querySelector('.login-password-toggle');
+        if (toggle) {
+          const visible = pwd.type === 'text';
+          toggle.setAttribute('aria-pressed', String(visible));
+          toggle.setAttribute('aria-label', visible ? 'Sembunyikan kata laluan' : 'Tunjukkan kata laluan');
+        }
       }
     }
 
@@ -764,6 +664,12 @@ export const renderApp = (initialPath = '/login') => html`<!DOCTYPE html>
     window.gotoProfile = gotoProfile;
 
     function logout() {
+      if (currentToken) {
+        fetch('/api/auth/logout', {
+          method: 'POST',
+          headers: { 'Authorization': 'Bearer ' + currentToken }
+        }).catch(() => undefined);
+      }
       localStorage.removeItem('segak_token');
       currentToken = null;
       currentUser = null;
@@ -782,12 +688,13 @@ export const renderApp = (initialPath = '/login') => html`<!DOCTYPE html>
       if (!navInner || !currentUser) return;
 
       if (currentUser.role === 'teacher') {
-        navInner.className = 'grid grid-cols-3 h-14 items-center text-center text-[10px] font-semibold max-w-lg mx-auto';
+        navInner.className = 'grid grid-cols-4 h-14 items-center text-center text-[10px] font-semibold max-w-lg mx-auto';
         navInner.innerHTML = 
           '<button id="bNavClasses" class="flex flex-col items-center justify-center space-y-0.5 py-1 text-slate-400 hover:text-[#1d6b5c]"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5m0 0h4m-4 0V11m0 0M7 7h10" /></svg><span>Kelas</span></button>' +
           '<button id="bNavDailyLogs" class="flex flex-col items-center justify-center space-y-0.5 py-1 text-slate-400 hover:text-[#1d6b5c]"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg><span>Pantauan</span></button>' +
           '<button id="bNavSegak" class="flex flex-col items-center justify-center space-y-0.5 py-1 text-slate-400 hover:text-[#1d6b5c]"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" /></svg><span>Skor SEGAK</span></button>' +
-          '<button id="bNavTraining" class="flex flex-col items-center justify-center space-y-0.5 py-1 text-slate-400 hover:text-[#1d6b5c]"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg><span>Jadual</span></button>';
+          '<button id="bNavTraining" class="flex flex-col items-center justify-center space-y-0.5 py-1 text-slate-400 hover:text-[#1d6b5c]"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg><span>Jadual</span></button>' +
+          '<button id="bNavAi" class="flex flex-col items-center justify-center space-y-0.5 py-1 text-slate-400 hover:text-[#1d6b5c]"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v2m0 14v2m9-9h-2M5 12H3m15.364-6.364-1.414 1.414M7.05 16.95l-1.414 1.414m12.728 0-1.414-1.414M7.05 7.05 5.636 5.636M16 12a4 4 0 1 1-8 0 4 4 0 0 1 8 0Z" /></svg><span>AI</span></button>';
 
         const legacySegakNav = document.getElementById('bNavSegak');
         if (legacySegakNav) legacySegakNav.style.display = 'none';
@@ -796,6 +703,7 @@ export const renderApp = (initialPath = '/login') => html`<!DOCTYPE html>
         const b1 = document.getElementById('bNavClasses'); if (b1) b1.onclick = function() { navigateTo('/teacher/classes'); };
         const b2 = document.getElementById('bNavDailyLogs'); if (b2) b2.onclick = function() { navigateTo('/teacher/daily-log'); };
         const b3 = document.getElementById('bNavTraining'); if (b3) b3.onclick = function() { navigateTo('/teacher/training'); };
+        const b4 = document.getElementById('bNavAi'); if (b4) b4.onclick = function() { navigateTo('/teacher/ai'); };
       } else {
         navInner.className = 'grid grid-cols-3 h-14 items-center text-center text-[10px] font-semibold max-w-lg mx-auto';
         navInner.innerHTML = 
@@ -809,12 +717,29 @@ export const renderApp = (initialPath = '/login') => html`<!DOCTYPE html>
       }
     }
 
+    function updateStudentBottomNav(path) {
+      const navItems = [
+        { id: 'navBtnHome', path: '/student/dashboard' },
+        { id: 'navBtnActivity', path: '/student/activity' },
+      ];
+
+      navItems.forEach(({ id, path: itemPath }) => {
+        const button = document.getElementById(id);
+        if (!button) return;
+        const isCurrent = itemPath === path;
+        button.classList.toggle('active-nav-item', isCurrent);
+        if (isCurrent) button.setAttribute('aria-current', 'page');
+        else button.removeAttribute('aria-current');
+      });
+    }
+
     function showTab(tabName) {
       document.getElementById('tabTeacherClasses').classList.add('hidden');
       document.getElementById('tabTeacherDailyLogs').classList.add('hidden');
       document.getElementById('tabTeacherTraining').classList.add('hidden');
+      document.getElementById('tabTeacherAi').classList.add('hidden');
 
-      ['bNavClasses', 'bNavDailyLogs', 'bNavTraining'].forEach(id => {
+      ['bNavClasses', 'bNavDailyLogs', 'bNavTraining', 'bNavAi'].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.classList.remove('active-nav-item');
       });
@@ -835,6 +760,12 @@ export const renderApp = (initialPath = '/login') => html`<!DOCTYPE html>
         const activeEl = document.getElementById('bNavTraining');
         if (activeEl) activeEl.classList.add('active-nav-item');
         loadTeacherSchedules();
+      }
+      if (tabName === 'teacherAi') {
+        document.getElementById('tabTeacherAi').classList.remove('hidden');
+        const activeEl = document.getElementById('bNavAi');
+        if (activeEl) activeEl.classList.add('active-nav-item');
+        if (window.loadAiConversations) window.loadAiConversations();
       }
       if (tabName === 'teacherDailyLogs') {
         loadTeacherSubmissions();
@@ -878,7 +809,7 @@ export const renderApp = (initialPath = '/login') => html`<!DOCTYPE html>
       });
       const data = await res.json();
       if (data.success) {
-        alert(\`Log \${titles[actType] || 'Aktiviti'} Berjaya Dihantar!\`);
+        alert(`Log ${titles[actType] || 'Aktiviti'} Berjaya Dihantar!`);
         loadStudentDailyLogs();
       }
     }
@@ -900,22 +831,49 @@ export const renderApp = (initialPath = '/login') => html`<!DOCTYPE html>
         return;
       }
 
-      container.innerHTML = data.data.map(l => \`
+      container.innerHTML = data.data.map(l => `
         <div class="p-3 bg-slate-50 border border-slate-200 rounded-lg space-y-1">
           <div class="flex justify-between items-center">
-            <span class="font-bold text-slate-900">\${l.logDate}</span>
+            <span class="font-bold text-slate-900">${l.logDate}</span>
             <span class="text-[9px] font-bold bg-slate-200 text-slate-800 px-2 py-0.5 rounded-full">Disimpan</span>
           </div>
           <div class="grid grid-cols-2 gap-1 text-[10px] text-slate-700 pt-0.5">
-            <div>Warm-up: <b>\${l.warmupCompleted ? 'Selesai' : 'Tidak'}</b></div>
-            <div>Bangkit: <b>\${l.curlUpReps} reps</b></div>
-            <div>Kardio: <b>\${l.cardioDurationMinutes}m (\${l.cardioPulseOrReps})</b></div>
-            <div>Tekan: <b>\${l.pushUpReps} reps</b></div>
-            <div class="col-span-2">Jangkauan: <b>\${l.sitReachCm} cm</b></div>
+            <div>Warm-up: <b>${l.warmupCompleted ? 'Selesai' : 'Tidak'}</b></div>
+            <div>Bangkit: <b>${l.curlUpReps} reps</b></div>
+            <div>Kardio: <b>${l.cardioDurationMinutes}m (${l.cardioPulseOrReps})</b></div>
+            <div>Tekan: <b>${l.pushUpReps} reps</b></div>
+            <div class="col-span-2">Jangkauan: <b>${l.sitReachCm} cm</b></div>
           </div>
-          \${l.notes ? \`<div class="text-[9px] text-slate-500 italic pt-0.5">"\${l.notes}"</div>\` : ''}
+          ${l.notes ? `<div class="text-[9px] text-slate-500 italic pt-0.5">"${l.notes}"</div>` : ''}
         </div>
-      \`).join('');
+      `).join('');
+    }
+
+    let studentReminderRequest = 0;
+    async function loadStudentReminders() {
+      const container = document.getElementById('studentReminders');
+      const token = currentToken;
+      const request = ++studentReminderRequest;
+      container.innerHTML = '<p class="student-reminders-message">Memuatkan peringatan...</p>';
+      try {
+        const res = await fetch('/api/student/today-reminders', { headers: { 'Authorization': 'Bearer ' + token } });
+        if (!res.ok) throw new Error('Tidak dapat memuatkan peringatan');
+        const result = await res.json();
+        if (request !== studentReminderRequest || token !== currentToken) return;
+        const { date, reminders, hasMore } = result.data;
+        document.getElementById('todayDateBadge').textContent = 'Tarikh: ' + date;
+        if (!reminders.length) {
+          container.innerHTML = '<p class="student-reminders-message">Tiada latihan yang belum selesai untuk hari ini.</p>';
+          return;
+        }
+        container.innerHTML = '<ul class="student-reminders-list">' + reminders.map(reminder =>
+          '<li><span class="student-reminders-dot" aria-hidden="true"></span><span>' + escapeHtml(reminder.title) + '</span></li>'
+        ).join('') + '</ul>' + (hasMore ? '<p class="student-reminders-message">Ada lagi latihan untuk hari ini.</p>' : '') +
+          '<button type="button" class="student-reminders-action" onclick="navigateTo(\'/student/activity\')">Lihat dan siapkan latihan <span aria-hidden="true">→</span></button>';
+      } catch (_) {
+        if (request !== studentReminderRequest || token !== currentToken) return;
+        container.innerHTML = '<p class="student-reminders-message">Peringatan tidak dapat dimuatkan. Sila cuba lagi.</p><button type="button" class="student-reminders-action" onclick="loadStudentReminders()">Cuba lagi</button>';
+      }
     }
 
     async function loadStudentAssignments() {
@@ -924,18 +882,18 @@ export const renderApp = (initialPath = '/login') => html`<!DOCTYPE html>
       const res = await fetch('/api/student/assignments', { headers: { 'Authorization': 'Bearer ' + currentToken } });
       const data = await res.json();
       if (!data.success || !data.data?.length) {
-        container.innerHTML = '<p class="text-xs text-slate-400 text-center py-3">Tiada latihan diberikan buat masa ini.</p>';
+        container.innerHTML = '<div class="dashboard-empty"><span class="dashboard-empty-icon" aria-hidden="true">✳</span><strong>Belum ada latihan lagi</strong><p>Latihan daripada cikgu akan dipaparkan di sini.</p></div>';
         return;
       }
       container.innerHTML = data.data.sort((a, b) => String(a.trainingDate).localeCompare(String(b.trainingDate))).map(assignment => {
         const done = ['submitted', 'approved'].includes(assignment.status);
-        return \`
-          <div class="p-3 bg-slate-50 border border-slate-200 rounded-lg space-y-2">
-            <div class="flex justify-between gap-2"><div><div class="font-bold text-xs text-slate-900">\${assignment.title}</div><div class="text-[10px] text-slate-500">Tarikh latihan: \${formatDate(assignment.trainingDate)}</div></div><span class="shrink-0 text-[9px] font-bold px-2 py-1 rounded-full \${done ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}">\${done ? 'Selesai' : 'Belum selesai'}</span></div>
-            \${assignment.instructions ? \`<p class="text-[10px] text-slate-600">\${assignment.instructions}</p>\` : ''}
-            <button onclick="openStudentAssignment(\${JSON.stringify(assignment).replace(/"/g, '&quot;')})" class="w-full py-1.5 bg-slate-900 text-white rounded-md text-[11px] font-semibold \${done ? 'opacity-60' : ''}">\${done ? 'Lihat latihan' : 'Buka & tandakan selesai'}</button>
-          </div>
-        \`;
+        return `
+          <article class="dashboard-card">
+            <div class="dashboard-card-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7" d="M8 3v4m8-4v4M4 10h16M5 5h14a1 1 0 011 1v13a2 2 0 01-2 2H6a2 2 0 01-2-2V6a1 1 0 011-1z"/></svg></div>
+            <div class="dashboard-card-content"><div class="dashboard-card-label">LATIHAN KELAS</div><h3>${escapeHtml(assignment.title)}</h3><div class="dashboard-card-meta">Tarikh latihan: ${escapeHtml(formatDate(assignment.trainingDate))}</div>${assignment.instructions ? `<p>${escapeHtml(assignment.instructions)}</p>` : ''}</div>
+            <div class="dashboard-card-actions"><span class="dashboard-status ${done ? 'is-done' : 'is-pending'}">${done ? 'Selesai' : 'Belum selesai'}</span><button type="button" onclick="openStudentAssignment(${escapeHtml(JSON.stringify(assignment))})">${done ? 'Lihat latihan' : 'Buka &amp; tandakan selesai'}</button></div>
+          </article>
+        `;
       }).join('');
     }
 
@@ -958,7 +916,7 @@ export const renderApp = (initialPath = '/login') => html`<!DOCTYPE html>
       document.getElementById('submitScheduleId').value = assignment.scheduleId;
       document.getElementById('submitTrainingNotes').value = '';
       /*
-      document.getElementById('submitTrainingActivities').innerHTML = (assignment.activities || []).map(activity => \`<div class="p-2 bg-slate-50 rounded border border-slate-200 text-[10px]"><b>\${activity.title}</b><span class="text-slate-500"> · \${activity.sets || 1} set\${activity.reps ? \` x \${activity.reps} ulangan\` : ''}</span></div>\`).join('');
+      document.getElementById('submitTrainingActivities').innerHTML = (assignment.activities || []).map(activity => `<div class="p-2 bg-slate-50 rounded border border-slate-200 text-[10px]"><b>${activity.title}</b><span class="text-slate-500"> · ${activity.sets || 1} set${activity.reps ? ` x ${activity.reps} ulangan` : ''}</span></div>`).join('');
       */
       document.getElementById('submitTrainingActivities').innerHTML = (assignment.activities || []).map((activity, index) => { const embedUrl = youtubeEmbedUrl(activity.videoUrl || ''); return '<div class="space-y-2"><div class="text-xs font-bold text-slate-900">Aktiviti ' + (index + 1) + '</div>' + (embedUrl ? '<div class="w-full aspect-video min-h-[220px] sm:min-h-[420px] md:min-h-[560px] overflow-hidden rounded-xl bg-slate-900"><iframe class="w-full h-full border-0" src="' + embedUrl + '?rel=0&playsinline=1" title="Video latihan ' + (index + 1) + '" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe></div><a href="' + activity.videoUrl + '" target="_blank" rel="noopener noreferrer" class="inline-block text-xs text-emerald-700 underline">Buka di YouTube jika video tidak dimainkan</a>' : '<p class="text-xs text-amber-700">Link YouTube tidak sah.</p>') + '</div>'; }).join('');
       toggleModal('modalSubmitTraining', true);
@@ -992,27 +950,23 @@ export const renderApp = (initialPath = '/login') => html`<!DOCTYPE html>
         populateScheduleClassOptions(data.data);
       }
       if (!data.success || data.data.length === 0) {
-        container.innerHTML = '<p class="text-xs text-slate-400 text-center">Tiada kelas didaftarkan.</p>';
+        container.innerHTML = '<div class="training-empty"><strong>Tiada kelas didaftarkan.</strong><p>Tambah kelas untuk mula mengurus murid.</p></div>';
         return;
       }
-      container.innerHTML = data.data.map(c => \`
-        <div onclick="selectClass(\${c.id}, '\${c.name}')" class="p-3 bg-slate-50 border border-slate-200 hover:bg-slate-100 rounded-lg cursor-pointer transition flex justify-between items-center">
-          <div>
-            <div class="font-bold text-xs text-slate-900">\${c.name}</div>
-            <div class="text-[10px] text-slate-500">Lihat senarai murid</div>
-          </div>
-          <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-          </svg>
-        </div>
-      \`).join('');
+      container.innerHTML = data.data.map(c => `
+        <button type="button" onclick="selectClass(${Number(c.id)}, ${escapeHtml(JSON.stringify(c.name))})" class="training-card teacher-class-card">
+          <span class="training-card-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7" d="M4 21V5a2 2 0 012-2h12a2 2 0 012 2v16M3 21h18M8 7h8M8 11h8M10 21v-6h4v6"/></svg></span>
+          <span class="training-card-content"><span class="training-card-label">KELAS</span><h3>${escapeHtml(c.name)}</h3><span class="training-card-meta">Lihat senarai murid</span></span>
+          <svg class="teacher-card-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+        </button>
+      `).join('');
     }
 
     function populateDailyLogClassOptions(classes) {
       const select = document.getElementById('dailyLogClassSelect');
       if (!select) return;
       const currentValue = select.value;
-      select.innerHTML = '<option value="">Pilih kelas</option>' + classes.map(c => \`<option value="\${c.id}">\${c.name}</option>\`).join('');
+      select.innerHTML = '<option value="">Pilih kelas</option>' + classes.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
       if (currentValue && classes.some(c => String(c.id) === currentValue)) select.value = currentValue;
     }
 
@@ -1036,12 +990,12 @@ export const renderApp = (initialPath = '/login') => html`<!DOCTYPE html>
       }
 
       container.innerHTML = '<p class="text-xs text-slate-400 text-center py-3">Memuatkan status murid...</p>';
-      const res = await fetch(\`/api/teacher/classes/\${classId}/daily-logs?date=\${date}\`, {
+      const res = await fetch(`/api/teacher/classes/${classId}/daily-logs?date=${date}`, {
         headers: { 'Authorization': 'Bearer ' + currentToken }
       });
       const data = await res.json();
       if (!data.success) {
-        container.innerHTML = \`<p class="text-xs text-red-500 text-center py-3">\${data.message || 'Gagal memuatkan rekod.'}</p>\`;
+        container.innerHTML = `<p class="text-xs text-red-500 text-center py-3">${data.message || 'Gagal memuatkan rekod.'}</p>`;
         return;
       }
 
@@ -1059,26 +1013,26 @@ export const renderApp = (initialPath = '/login') => html`<!DOCTYPE html>
       container.innerHTML = data.data.students.map(student => {
         const completed = student.status === 'completed';
         const log = student.log;
-        return \`
+        return `
           <details class="group p-3 bg-slate-50 border border-slate-200 rounded-xl">
             <summary class="list-none cursor-pointer flex items-center justify-between gap-3">
               <div class="min-w-0">
-                <div class="font-bold text-xs text-slate-900 truncate">\${student.fullName}</div>
-                <div class="text-[10px] text-slate-500">ID: \${student.studentIdNum} Â· \${student.gender === 'L' ? 'Lelaki' : 'Perempuan'}</div>
+                <div class="font-bold text-xs text-slate-900 truncate">${student.fullName}</div>
+                <div class="text-[10px] text-slate-500">ID: ${student.studentIdNum} Â· ${student.gender === 'L' ? 'Lelaki' : 'Perempuan'}</div>
               </div>
-              <span class="shrink-0 text-[10px] font-bold px-2 py-1 rounded-full \${completed ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}">\${completed ? 'Sudah buat' : 'Belum buat'}</span>
+              <span class="shrink-0 text-[10px] font-bold px-2 py-1 rounded-full ${completed ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}">${completed ? 'Sudah buat' : 'Belum buat'}</span>
             </summary>
-            \${completed ? \`<div class="mt-3 pt-3 border-t border-slate-200 grid grid-cols-2 gap-1 text-[10px] text-slate-700">
-              <div>Warm-up: <b>\${log.warmupCompleted ? 'Selesai' : 'Tidak'}</b></div>
-              <div>Bangkit tubi: <b>\${log.curlUpReps ?? 0} reps</b></div>
-              <div>Kardio: <b>\${log.cardioDurationMinutes ?? 0} min</b></div>
-              <div>Nadi/ulangan: <b>\${log.cardioPulseOrReps ?? 0}</b></div>
-              <div>Tekan tubi: <b>\${log.pushUpReps ?? 0} reps</b></div>
-              <div>Jangkauan: <b>\${log.sitReachCm ?? 0} cm</b></div>
-              \${log.notes ? \`<div class="col-span-2 text-slate-500 italic pt-1">Catatan: "\${log.notes}"</div>\` : ''}
-            </div>\` : '<div class="mt-2 text-[10px] text-slate-500">Murid belum menghantar rekod untuk tarikh ini.</div>'}
+            ${completed ? `<div class="mt-3 pt-3 border-t border-slate-200 grid grid-cols-2 gap-1 text-[10px] text-slate-700">
+              <div>Warm-up: <b>${log.warmupCompleted ? 'Selesai' : 'Tidak'}</b></div>
+              <div>Bangkit tubi: <b>${log.curlUpReps ?? 0} reps</b></div>
+              <div>Kardio: <b>${log.cardioDurationMinutes ?? 0} min</b></div>
+              <div>Nadi/ulangan: <b>${log.cardioPulseOrReps ?? 0}</b></div>
+              <div>Tekan tubi: <b>${log.pushUpReps ?? 0} reps</b></div>
+              <div>Jangkauan: <b>${log.sitReachCm ?? 0} cm</b></div>
+              ${log.notes ? `<div class="col-span-2 text-slate-500 italic pt-1">Catatan: "${log.notes}"</div>` : ''}
+            </div>` : '<div class="mt-2 text-[10px] text-slate-500">Murid belum menghantar rekod untuk tarikh ini.</div>'}
           </details>
-        \`;
+        `;
       }).join('');
     }
 
@@ -1088,26 +1042,22 @@ export const renderApp = (initialPath = '/login') => html`<!DOCTYPE html>
       document.getElementById('studentListSection').classList.remove('hidden');
 
       const container = document.getElementById('studentCardsContainer');
-      const res = await fetch(\`/api/teacher/classes/\${classId}/students\`, {
+      const res = await fetch(`/api/teacher/classes/${classId}/students`, {
         headers: { 'Authorization': 'Bearer ' + currentToken }
       });
       const data = await res.json();
       if (!data.success || data.data.length === 0) {
-        container.innerHTML = '<p class="text-xs text-slate-400 text-center py-2">Tiada murid dalam kelas ini.</p>';
+        container.innerHTML = '<div class="training-empty"><strong>Tiada murid dalam kelas ini.</strong><p>Tambah murid untuk mula membina senarai kelas.</p></div>';
         return;
       }
 
-      container.innerHTML = data.data.map(s => \`
-        <div class="p-3 bg-slate-50 border border-slate-200 rounded-lg flex justify-between items-center text-xs">
-          <div>
-            <div class="font-bold text-slate-900">\${s.fullName}</div>
-            <div class="text-[10px] text-slate-500">ID: \${s.studentIdNum} | Jantina: \${s.gender}</div>
-          </div>
-          <button onclick="resetPassword(\${s.studentUserId})" class="text-[10px] text-slate-700 font-semibold bg-white px-2 py-1 rounded-md border border-slate-300 hover:bg-slate-100">
-            Reset Pass
-          </button>
-        </div>
-      \`).join('');
+      container.innerHTML = data.data.map(s => `
+        <article class="training-card">
+          <span class="training-card-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7" d="M12 12a4 4 0 100-8 4 4 0 000 8zM5 20a7 7 0 0114 0"/></svg></span>
+          <div class="training-card-content"><div class="training-card-label">MURID</div><h3>${escapeHtml(s.fullName)}</h3><div class="training-card-meta"><span>ID: ${escapeHtml(s.studentIdNum)}</span><span>Jantina: ${escapeHtml(s.gender)}</span></div></div>
+          <button type="button" onclick="resetPassword(${Number(s.studentUserId)})" class="teacher-action">Reset Pass</button>
+        </article>
+      `).join('');
     }
 
     function populateScheduleClassOptions(classes) {
@@ -1123,53 +1073,148 @@ export const renderApp = (initialPath = '/login') => html`<!DOCTYPE html>
       return new Date(date + 'T00:00:00').toLocaleDateString('ms-MY', { day: '2-digit', month: 'short', year: 'numeric' });
     }
 
+    function escapeHtml(value) {
+      return String(value ?? '').replace(/[&<>"']/g, character => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#39;'
+      })[character]);
+    }
+
     async function loadTeacherSchedules() {
       const container = document.getElementById('trainingScheduleList');
       if (!container) return;
-      const res = await fetch('/api/teacher/schedules', { headers: { 'Authorization': 'Bearer ' + currentToken } });
-      const data = await res.json();
-      if (!data.success || !data.data?.length) {
-        container.innerHTML = '<p class="text-xs text-slate-400 text-center py-3">Belum ada latihan diberikan.</p>';
+      const count = document.getElementById('trainingScheduleCount');
+      let data;
+      try {
+        const res = await fetch('/api/teacher/schedules', { headers: { 'Authorization': 'Bearer ' + currentToken } });
+        data = await res.json();
+        if (!res.ok || !data.success) throw new Error('Gagal memuatkan latihan');
+      } catch (_) {
+        teacherSchedules = [];
+        count.hidden = true;
+        container.innerHTML = '<div class="training-empty"><strong>Latihan tidak dapat dimuatkan.</strong><p>Semak sambungan anda dan cuba lagi.</p><button type="button" onclick="loadTeacherSchedules()">Cuba lagi</button></div>';
         return;
       }
-      /*
-      container.innerHTML = data.data.map(schedule => \`
-        <div class="p-3 bg-slate-50 border border-slate-200 rounded-lg space-y-1">
-          <div class="flex justify-between gap-2"><span class="font-bold text-xs text-slate-900">\${schedule.title}</span><span class="text-[9px] font-bold bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full">\${schedule.status === 'published' ? 'Diterbitkan' : schedule.status}</span></div>
-          <div class="text-[10px] text-slate-500">Tarikh latihan: <b>${formatDate(schedule.trainingDate)}</b> · Tarikh akhir: <b>${formatDate(schedule.dueDate)}</b></div>
-          <div class="text-[10px] text-slate-500">Kelas ID: \${schedule.classId}</div>
-          \${schedule.instructions ? \`<p class="text-[10px] text-slate-600 pt-1">\${schedule.instructions}</p>\` : ''}
-        </div>
-      \`).join('');
-      */
-      container.innerHTML = data.data.map(schedule => '<div class="p-3 bg-slate-50 border border-slate-200 rounded-lg space-y-1"><div class="font-bold text-xs text-slate-900">' + schedule.title + '</div><div class="text-[10px] text-slate-500">Tarikh latihan: ' + formatDate(schedule.trainingDate) + '</div><div class="text-[10px] text-slate-500">Kelas ID: ' + schedule.classId + '</div>' + (schedule.instructions ? '<p class="text-[10px] text-slate-600 pt-1">' + schedule.instructions + '</p>' : '') + '</div>').join('');
+      teacherSchedules = data.data || [];
+      count.hidden = false;
+      count.textContent = teacherSchedules.length + ' latihan';
+      if (!teacherSchedules.length) {
+        container.innerHTML = '<div class="training-empty"><span class="training-empty-icon" aria-hidden="true">✳</span><strong>Belum ada latihan lagi</strong><p>Mulakan dengan memberikan latihan pertama kepada kelas anda.</p><button type="button" onclick="openCreateScheduleModal()">+ Beri latihan</button></div>';
+        return;
+      }
+      container.innerHTML = teacherSchedules.map(schedule => `
+        <article class="training-card">
+          <div class="training-card-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7" d="M8 3v4m8-4v4M4 10h16M5 5h14a1 1 0 011 1v13a2 2 0 01-2 2H6a2 2 0 01-2-2V6a1 1 0 011-1z"/></svg></div>
+          <div class="training-card-content"><div class="training-card-label">LATIHAN KELAS</div><h3>${escapeHtml(schedule.title)}</h3><div class="training-card-meta"><span>${escapeHtml(formatDate(schedule.trainingDate))}</span><span>Kelas ID: ${Number(schedule.classId)}</span></div>${schedule.instructions ? `<p>${escapeHtml(schedule.instructions)}</p>` : ''}</div>
+          <div class="training-card-actions"><button type="button" data-schedule-action="edit" data-schedule-id="${Number(schedule.id)}">Edit</button><button type="button" data-schedule-action="delete" data-schedule-id="${Number(schedule.id)}" class="training-delete">Padam</button></div>
+        </article>
+      `).join('');
+
+      container.querySelectorAll('[data-schedule-action]').forEach(button => {
+        button.addEventListener('click', () => {
+          const scheduleId = Number(button.dataset.scheduleId);
+          if (button.dataset.scheduleAction === 'edit') void openEditScheduleModal(scheduleId);
+          else void handleDeleteSchedule(scheduleId);
+        });
+      });
+    }
+
+    function openCreateScheduleModal() {
+      editingScheduleId = null;
+      document.getElementById('scheduleForm').reset();
+      document.getElementById('scheduleModalTitle').textContent = 'Beri Latihan Kepada Murid';
+      document.getElementById('scheduleSubmitButton').textContent = 'Terbitkan Latihan';
+      toggleModal('modalCreateSchedule', true);
+    }
+
+    async function openEditScheduleModal(scheduleId) {
+      const schedule = teacherSchedules.find(item => Number(item.id) === scheduleId);
+      if (!schedule) return alert('Maklumat latihan tidak ditemui. Muat semula halaman dan cuba lagi.');
+      if (!Array.isArray(schedule.activities) || schedule.activities.length !== 1) {
+        return alert('Latihan ini tidak mempunyai satu aktiviti sahaja, jadi ia tidak boleh diedit melalui borang ini.');
+      }
+
+      await loadTeacherClasses();
+      editingScheduleId = scheduleId;
+      document.getElementById('scheduleForm').reset();
+      document.getElementById('scheduleModalTitle').textContent = 'Edit Latihan Murid';
+      document.getElementById('scheduleSubmitButton').textContent = 'Simpan Perubahan';
+
+      const classSelect = document.getElementById('scheduleClassId');
+      if (!Array.from(classSelect.options).some(option => Number(option.value) === Number(schedule.classId))) {
+        const archivedClassOption = document.createElement('option');
+        archivedClassOption.value = String(schedule.classId);
+        archivedClassOption.textContent = 'Kelas terdahulu (ID ' + Number(schedule.classId) + ')';
+        classSelect.appendChild(archivedClassOption);
+      }
+      classSelect.value = String(schedule.classId);
+      document.getElementById('scheduleTitle').value = schedule.title || '';
+      document.getElementById('scheduleTrainingDate').value = schedule.trainingDate || '';
+      document.getElementById('scheduleInstructions').value = schedule.instructions || '';
+      document.getElementById('scheduleActivityVideo').value = schedule.activities[0].videoUrl || '';
+      toggleModal('modalCreateSchedule', true);
+    }
+
+    async function handleDeleteSchedule(scheduleId) {
+      const schedule = teacherSchedules.find(item => Number(item.id) === scheduleId);
+      if (!schedule) return alert('Maklumat latihan tidak ditemui. Muat semula halaman dan cuba lagi.');
+      if (!window.confirm('Padam latihan “' + schedule.title + '”? Tugasan ini akan dibuang daripada senarai murid. Latihan yang sudah dihantar tidak boleh dipadam.')) return;
+
+      const res = await fetch('/api/teacher/schedules/' + scheduleId, {
+        method: 'DELETE',
+        headers: { 'Authorization': 'Bearer ' + currentToken }
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) return alert(data.message || 'Gagal memadam latihan.');
+
+      await loadTeacherSchedules();
+      alert('Latihan berjaya dipadam.');
     }
 
     async function handleCreateSchedule(e) {
       e.preventDefault();
-      const lines = document.getElementById('scheduleActivities').value.split(/\\r?\\n/).map(line => line.trim()).filter(Boolean);
-      if (!lines.length) return alert('Sila masukkan sekurang-kurangnya satu aktiviti.');
-      const activities = lines.map((linkText, index) => {
-        try {
-          const parsedUrl = new URL(linkText);
-          if (!['youtube.com', 'www.youtube.com', 'youtu.be', 'www.youtu.be'].includes(parsedUrl.hostname)) throw new Error('not-youtube');
-          return { title: 'Video Latihan ' + (index + 1), sets: 1, reps: null, videoUrl: linkText };
-        } catch (_) {
-          return null;
-        }
-      });
-      if (activities.some(activity => !activity)) return alert('Semua aktiviti mesti menggunakan link YouTube yang sah.');
-      const res = await fetch('/api/teacher/schedules', {
-        method: 'POST',
+      const videoUrl = document.getElementById('scheduleActivityVideo').value.trim();
+      let videoHostname = '';
+      try {
+        videoHostname = new URL(videoUrl).hostname.toLowerCase();
+      } catch (_) {
+        return alert('Sila masukkan pautan YouTube yang sah.');
+      }
+      if (!['youtube.com', 'www.youtube.com', 'm.youtube.com', 'youtu.be', 'www.youtu.be'].includes(videoHostname)) {
+        return alert('Pautan video mestilah daripada YouTube.');
+      }
+
+      const classId = Number(document.getElementById('scheduleClassId').value);
+      const title = document.getElementById('scheduleTitle').value.trim();
+      const currentSchedule = editingScheduleId === null ? null : teacherSchedules.find(item => Number(item.id) === editingScheduleId);
+      if (currentSchedule && Number(currentSchedule.classId) !== classId && !window.confirm('Kelas ditukar. Tugasan akan diagih semula kepada murid dalam kelas baharu. Teruskan?')) return;
+
+      const payload = {
+        classId,
+        title,
+        trainingDate: document.getElementById('scheduleTrainingDate').value,
+        instructions: document.getElementById('scheduleInstructions').value,
+        evidenceRequired: false,
+        activities: [{ title, sets: 1, reps: null, videoUrl }]
+      };
+      const isEditing = editingScheduleId !== null;
+      const url = isEditing ? '/api/teacher/schedules/' + editingScheduleId : '/api/teacher/schedules';
+      const res = await fetch(url, {
+        method: isEditing ? 'PUT' : 'POST',
         headers: { 'Authorization': 'Bearer ' + currentToken, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ classId: Number(document.getElementById('scheduleClassId').value), title: document.getElementById('scheduleTitle').value, trainingDate: document.getElementById('scheduleTrainingDate').value, instructions: document.getElementById('scheduleInstructions').value, activities })
+        body: JSON.stringify(payload)
       });
-      const data = await res.json();
-      if (!data.success) return alert(data.message || 'Gagal menerbitkan latihan.');
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.success) return alert(data.message || (isEditing ? 'Gagal mengemas kini latihan.' : 'Gagal menerbitkan latihan.'));
+
       toggleModal('modalCreateSchedule', false);
       e.target.reset();
+      editingScheduleId = null;
       await loadTeacherSchedules();
-      alert('Latihan berjaya diberikan kepada murid dalam kelas.');
+      alert(isEditing ? 'Latihan berjaya dikemas kini.' : 'Latihan berjaya diberikan kepada murid dalam kelas.');
     }
 
     async function loadTeacherSubmissions() {
@@ -1178,17 +1223,17 @@ export const renderApp = (initialPath = '/login') => html`<!DOCTYPE html>
       const res = await fetch('/api/teacher/submissions', { headers: { 'Authorization': 'Bearer ' + currentToken } });
       const data = await res.json();
       if (!data.success || !data.data?.length) {
-        container.innerHTML = '<p class="text-xs text-slate-400 text-center py-3">Belum ada murid menghantar latihan.</p>';
+        container.innerHTML = '<div class="training-empty"><strong>Belum ada penghantaran lagi.</strong><p>Latihan yang dihantar oleh murid akan dipaparkan di sini.</p></div>';
         return;
       }
       /*
-      container.innerHTML = data.data.map(item => \`
-        <div class="p-3 bg-slate-50 border border-slate-200 rounded-lg flex justify-between gap-2 items-start"><div><div class="font-bold text-xs text-slate-900">${item.studentName}</div><div class="text-[10px] text-slate-500">${item.scheduleTitle} · ${formatDate(item.submissionDate?.slice(0, 10))}</div>${item.studentNotes ? `<div class="text-[10px] text-slate-600 pt-1">Catatan: ${item.studentNotes}</div>` : ''}</div><span class="shrink-0 text-[9px] font-bold px-2 py-1 rounded-full ${item.reviewStatus === 'approved' ? 'bg-emerald-100 text-emerald-700' : 'bg-blue-100 text-blue-700'}">${item.reviewStatus === 'approved' ? 'Diluluskan' : 'Dihantar'}</span></div>
-      \`).join('');
+      container.innerHTML = data.data.map(item => `
+        <div class="p-3 bg-slate-50 border border-slate-200 rounded-lg flex justify-between gap-2 items-start"><div><div class="font-bold text-xs text-slate-900"></div><div class="text-[10px] text-slate-500"> · </div></div><span class="shrink-0 text-[9px] font-bold px-2 py-1 rounded-full bg-blue-100 text-blue-700">Dihantar</span></div>
+      `).join('');
     }
 
       */
-      container.innerHTML = data.data.map(item => '<div class="p-3 bg-slate-50 border border-slate-200 rounded-lg flex justify-between gap-2 items-start"><div><div class="font-bold text-xs text-slate-900">' + item.studentName + '</div><div class="text-[10px] text-slate-500">' + item.scheduleTitle + ' - ' + formatDate(item.submissionDate?.slice(0, 10)) + '</div>' + (item.studentNotes ? '<div class="text-[10px] text-slate-600 pt-1">Catatan: ' + item.studentNotes + '</div>' : '') + '</div><span class="shrink-0 text-[9px] font-bold px-2 py-1 rounded-full ' + (item.reviewStatus === 'approved' ? 'bg-emerald-100 text-emerald-700' : 'bg-blue-100 text-blue-700') + '">' + (item.reviewStatus === 'approved' ? 'Diluluskan' : 'Dihantar') + '</span></div>').join('');
+      container.innerHTML = data.data.map(item => `<article class="training-card"><span class="training-card-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7" d="M9 12l2 2 4-4M5 5h14v14H5z"/></svg></span><div class="training-card-content"><div class="training-card-label">PENGHANTARAN MURID</div><h3>${escapeHtml(item.studentName)}</h3><div class="training-card-meta"><span>${escapeHtml(item.scheduleTitle)}</span><span>${escapeHtml(formatDate(item.submissionDate?.slice(0, 10)))}</span></div>${item.studentNotes ? `<p>Catatan: ${escapeHtml(item.studentNotes)}</p>` : ''}</div><span class="teacher-status ${item.reviewStatus === 'approved' ? '' : 'teacher-status-pending'}">${item.reviewStatus === 'approved' ? 'Diluluskan' : 'Dihantar'}</span></article>`).join('');
     }
 
     async function handleCreateClass(e) {
@@ -1235,11 +1280,11 @@ export const renderApp = (initialPath = '/login') => html`<!DOCTYPE html>
     }
 
     async function resetPassword(userId) {
-      if (!confirm('Reset kata laluan murid ke Murid1234!?')) return;
+      if (!confirm('Reset kata laluan murid ke 123456?')) return;
       await fetch('/api/teacher/students/reset-password', {
         method: 'POST',
         headers: { 'Authorization': 'Bearer ' + currentToken, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId, newPassword: 'Murid1234!' })
+        body: JSON.stringify({ userId, newPassword: '123456' })
       });
       alert('Kata laluan murid berjaya direset.');
     }
@@ -1255,15 +1300,15 @@ export const renderApp = (initialPath = '/login') => html`<!DOCTYPE html>
         container.innerHTML = '<p class="text-xs text-slate-400 text-center">Tiada sesi SEGAK.</p>';
         return;
       }
-      container.innerHTML = data.data.map(s => \`
+      container.innerHTML = data.data.map(s => `
         <div class="p-3 bg-slate-50 border border-slate-200 rounded-lg space-y-2">
-          <div class="font-bold text-xs text-slate-900">\${s.title}</div>
-          <div class="text-[10px] text-slate-500">Tarikh: \${s.assessmentDate} | \${s.phase}</div>
-          <button onclick="openSegakScoreEntry(\${s.id}, '\${s.title}')" class="w-full py-1.5 bg-slate-900 text-white text-xs font-semibold rounded-md">
+          <div class="font-bold text-xs text-slate-900">${s.title}</div>
+          <div class="text-[10px] text-slate-500">Tarikh: ${s.assessmentDate} | ${s.phase}</div>
+          <button onclick="openSegakScoreEntry(${s.id}, '${s.title}')" class="w-full py-1.5 bg-slate-900 text-white text-xs font-semibold rounded-md">
             Isi Skor Murid
           </button>
         </div>
-      \`).join('');
+      `).join('');
     }
 
     async function handleCreateSegakSession(e) {
@@ -1291,7 +1336,7 @@ export const renderApp = (initialPath = '/login') => html`<!DOCTYPE html>
       const resStudents = await fetch('/api/teacher/classes/1/students', { headers: { 'Authorization': 'Bearer ' + currentToken } });
       const dataStudents = await resStudents.json();
 
-      const resResults = await fetch(\`/api/segak/sessions/\${sessionId}/results\`, { headers: { 'Authorization': 'Bearer ' + currentToken } });
+      const resResults = await fetch(`/api/segak/sessions/${sessionId}/results`, { headers: { 'Authorization': 'Bearer ' + currentToken } });
       const dataResults = await resResults.json();
       const resultMap = {};
       (dataResults.data || []).forEach(r => { resultMap[r.studentId] = r; });
@@ -1299,33 +1344,33 @@ export const renderApp = (initialPath = '/login') => html`<!DOCTYPE html>
       const container = document.getElementById('mobileSegakScoreList');
       container.innerHTML = dataStudents.data.map(s => {
         const r = resultMap[s.studentUserId] || {};
-        return \`
+        return `
           <div class="p-3 bg-slate-50 border border-slate-200 rounded-lg space-y-2 text-xs">
-            <div class="font-bold text-slate-900 border-b border-slate-200 pb-1">\${s.fullName} (\${s.gender})</div>
+            <div class="font-bold text-slate-900 border-b border-slate-200 pb-1">${s.fullName} (${s.gender})</div>
             <div class="grid grid-cols-2 gap-2">
-              <div><label class="text-[10px] text-slate-500 font-semibold block">Tinggi (cm):</label><input type="number" id="height_\${s.studentUserId}" value="\${r.heightCm || s.heightCm || 138}" class="w-full p-1.5 border border-slate-300 rounded text-xs bg-white"></div>
-              <div><label class="text-[10px] text-slate-500 font-semibold block">Berat (kg):</label><input type="number" id="weight_\${s.studentUserId}" value="\${r.weightKg || s.weightKg || 34}" class="w-full p-1.5 border border-slate-300 rounded text-xs bg-white"></div>
-              <div><label class="text-[10px] text-slate-500 font-semibold block">Naik Turun Bangku:</label><input type="number" id="step_\${s.studentUserId}" value="100" class="w-full p-1.5 border border-slate-300 rounded text-xs bg-white"></div>
-              <div><label class="text-[10px] text-slate-500 font-semibold block">Tekan Tubi:</label><input type="number" id="push_\${s.studentUserId}" value="15" class="w-full p-1.5 border border-slate-300 rounded text-xs bg-white"></div>
-              <div><label class="text-[10px] text-slate-500 font-semibold block">Ringkuk Tubi:</label><input type="number" id="curl_\${s.studentUserId}" value="12" class="w-full p-1.5 border border-slate-300 rounded text-xs bg-white"></div>
-              <div><label class="text-[10px] text-slate-500 font-semibold block">Jangkauan (cm):</label><input type="number" id="reach_\${s.studentUserId}" value="25" class="w-full p-1.5 border border-slate-300 rounded text-xs bg-white"></div>
+              <div><label class="text-[10px] text-slate-500 font-semibold block">Tinggi (cm):</label><input type="number" id="height_${s.studentUserId}" value="${r.heightCm || s.heightCm || 138}" class="w-full p-1.5 border border-slate-300 rounded text-xs bg-white"></div>
+              <div><label class="text-[10px] text-slate-500 font-semibold block">Berat (kg):</label><input type="number" id="weight_${s.studentUserId}" value="${r.weightKg || s.weightKg || 34}" class="w-full p-1.5 border border-slate-300 rounded text-xs bg-white"></div>
+              <div><label class="text-[10px] text-slate-500 font-semibold block">Naik Turun Bangku:</label><input type="number" id="step_${s.studentUserId}" value="100" class="w-full p-1.5 border border-slate-300 rounded text-xs bg-white"></div>
+              <div><label class="text-[10px] text-slate-500 font-semibold block">Tekan Tubi:</label><input type="number" id="push_${s.studentUserId}" value="15" class="w-full p-1.5 border border-slate-300 rounded text-xs bg-white"></div>
+              <div><label class="text-[10px] text-slate-500 font-semibold block">Ringkuk Tubi:</label><input type="number" id="curl_${s.studentUserId}" value="12" class="w-full p-1.5 border border-slate-300 rounded text-xs bg-white"></div>
+              <div><label class="text-[10px] text-slate-500 font-semibold block">Jangkauan (cm):</label><input type="number" id="reach_${s.studentUserId}" value="25" class="w-full p-1.5 border border-slate-300 rounded text-xs bg-white"></div>
             </div>
-            <button onclick="saveStudentSegakScore(\${sessionId}, \${s.studentUserId}, '\${s.gender}')" class="w-full py-1.5 bg-slate-900 text-white rounded-md font-semibold text-xs mt-1">
+            <button onclick="saveStudentSegakScore(${sessionId}, ${s.studentUserId}, '${s.gender}')" class="w-full py-1.5 bg-slate-900 text-white rounded-md font-semibold text-xs mt-1">
               Simpan & Kira Skor
             </button>
-            \${r.totalScore ? \`<div class="text-center font-bold text-slate-800 text-[11px]">Skor: \${r.totalScore} (\${r.overallGrade})</div>\` : ''}
+            ${r.totalScore ? `<div class="text-center font-bold text-slate-800 text-[11px]">Skor: ${r.totalScore} (${r.overallGrade})</div>` : ''}
           </div>
-        \`;
+        `;
       }).join('');
     }
 
     async function saveStudentSegakScore(sessionId, studentId, gender) {
-      const heightCm = Number(document.getElementById(\`height_\${studentId}\`).value);
-      const weightKg = Number(document.getElementById(\`weight_\${studentId}\`).value);
-      const step = Number(document.getElementById(\`step_\${studentId}\`).value);
-      const push = Number(document.getElementById(\`push_\${studentId}\`).value);
-      const curl = Number(document.getElementById(\`curl_\${studentId}\`).value);
-      const reach = Number(document.getElementById(\`reach_\${studentId}\`).value);
+      const heightCm = Number(document.getElementById(`height_${studentId}`).value);
+      const weightKg = Number(document.getElementById(`weight_${studentId}`).value);
+      const step = Number(document.getElementById(`step_${studentId}`).value);
+      const push = Number(document.getElementById(`push_${studentId}`).value);
+      const curl = Number(document.getElementById(`curl_${studentId}`).value);
+      const reach = Number(document.getElementById(`reach_${studentId}`).value);
 
       const payload = {
         sessionId,
@@ -1350,7 +1395,7 @@ export const renderApp = (initialPath = '/login') => html`<!DOCTYPE html>
       });
       const data = await res.json();
       if (data.success) {
-        alert(\`Skor Dikira!\\nJumlah Skor: \${data.data.totalScore}\\nGred: \${data.data.overallGrade}\\nBMI: \${data.data.bmiCategory}\`);
+        alert(`Skor Dikira!\nJumlah Skor: ${data.data.totalScore}\nGred: ${data.data.overallGrade}\nBMI: ${data.data.bmiCategory}`);
       }
     }
 
@@ -1366,15 +1411,15 @@ export const renderApp = (initialPath = '/login') => html`<!DOCTYPE html>
         return;
       }
 
-      container.innerHTML = data.data.map(r => \`
+      container.innerHTML = data.data.map(r => `
         <div class="p-3 bg-slate-50 border border-slate-200 rounded-lg space-y-1 text-xs">
-          <div class="font-bold text-slate-900">\${r.sessionTitle}</div>
-          <div class="text-slate-500 text-[10px]">Tarikh: \${r.assessmentDate}</div>
-          <div class="text-slate-700">Tinggi: <b>\${r.heightCm} cm</b> | Berat: <b>\${r.weightKg} kg</b></div>
-          <div class="text-slate-700">BMI: <b>\${r.calculatedBmi}</b> (\${r.bmiCategory})</div>
-          <div class="text-slate-900 font-extrabold text-xs pt-0.5">Jumlah Skor: \${r.totalScore} / 20 (\${r.overallGrade})</div>
+          <div class="font-bold text-slate-900">${r.sessionTitle}</div>
+          <div class="text-slate-500 text-[10px]">Tarikh: ${r.assessmentDate}</div>
+          <div class="text-slate-700">Tinggi: <b>${r.heightCm} cm</b> | Berat: <b>${r.weightKg} kg</b></div>
+          <div class="text-slate-700">BMI: <b>${r.calculatedBmi}</b> (${r.bmiCategory})</div>
+          <div class="text-slate-900 font-extrabold text-xs pt-0.5">Jumlah Skor: ${r.totalScore} / 20 (${r.overallGrade})</div>
         </div>
-      \`).join('');
+      `).join('');
     }
 
     // PROFILE LOGIC
@@ -1510,9 +1555,7 @@ export const renderApp = (initialPath = '/login') => html`<!DOCTYPE html>
       
       if (data.success) {
         alert('Kata laluan berjaya ditukar!');
-        if (document.getElementById('currentPassword')) document.getElementById('currentPassword').value = '';
-        if (document.getElementById('newPassword')) document.getElementById('newPassword').value = '';
-        if (document.getElementById('confirmNewPassword')) document.getElementById('confirmNewPassword').value = '';
+        logout();
       } else {
         alert(data.message || 'Gagal menukar kata laluan');
       }
@@ -1527,15 +1570,14 @@ export const renderApp = (initialPath = '/login') => html`<!DOCTYPE html>
       const data = await res.json();
       if (!data.success) return;
 
-      schoolList.innerHTML = data.data.map(s => \`
-        <div class="p-3 bg-slate-50 border rounded-lg flex justify-between items-center text-xs">
-          <div>
-            <div class="font-bold text-slate-900">\${s.name}</div>
-            <div class="text-slate-500 text-[10px]">Kod: \${s.code} | \${s.state}</div>
-          </div>
-        </div>
-      \`).join('');
+      schoolList.innerHTML = data.data.length ? data.data.map(s => `
+        <article class="dashboard-card">
+          <div class="dashboard-card-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7" d="M3 10 12 4l9 6M5 9v10h14V9M9 19v-5h6v5"/></svg></div>
+          <div class="dashboard-card-content"><div class="dashboard-card-label">SEKOLAH BERDAFTAR</div><h3>${escapeHtml(s.name)}</h3><div class="dashboard-card-meta">Kod: ${escapeHtml(s.code)} · ${escapeHtml(s.state)}</div></div>
+        </article>
+      `).join('') : '<div class="dashboard-empty"><span class="dashboard-empty-icon" aria-hidden="true">✳</span><strong>Belum ada sekolah lagi</strong><p>Tambahkan sekolah pertama untuk bermula.</p></div>';
     }
   </script>
+  <script type="module" src="/src/ai-chat.js"></script>
 </body>
-</html>`
+</html>

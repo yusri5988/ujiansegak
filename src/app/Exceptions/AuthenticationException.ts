@@ -1,7 +1,7 @@
-import { HTTPException } from 'hono/http-exception'
+import { ApiException } from '@/app/Exceptions/ApiException'
 
-export class AuthenticationException extends HTTPException {
+export class AuthenticationException extends ApiException {
   constructor(message = 'Invalid credentials.') {
-    super(401, { message })
+    super(401, message)
   }
 }

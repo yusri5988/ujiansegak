@@ -1,8 +1,12 @@
 import { Context } from 'hono'
 import type { AppEnv } from '@/app/Env'
-import type { CreateClassInput } from '@/app/Requests/ClassRequests'
-import { classRepoFrom, classServiceFrom, userRepoFrom, auditRepoFrom } from '@/app/Services/AppServiceProvider'
-import { Hash } from '@/helpers/Hash'
+import type {
+  CreateClassInput,
+  CreateStudentInput,
+  ImportStudentsCsvInput,
+} from '@/app/Requests/ClassRequests'
+import type { ResetPasswordInput } from '@/app/Requests/AuthRequests'
+import { authServiceFrom, classRepoFrom, classServiceFrom, userRepoFrom, auditRepoFrom, passwordServiceFrom } from '@/app/Services/AppServiceProvider'
 
 export class ClassController {
   public static async getTeacherClasses(c: Context<AppEnv>) {
@@ -26,15 +30,15 @@ export class ClassController {
     return c.json({ success: true, data: students })
   }
 
-  public static async addStudent(c: Context<AppEnv>) {
+  public static async addStudent(c: Context<AppEnv>, input: CreateStudentInput) {
     const user = c.get('user')!
-    const { schoolId, classId, studentIdNum, fullName, gender, dob, heightCm, weightKg, guardianName, guardianPhone } = await c.req.json()
+    const { schoolId, classId, studentIdNum, fullName, gender, dob, heightCm, weightKg, guardianName, guardianPhone } = input
 
     const userRepo = userRepoFrom(c.env)
     const classRepo = classRepoFrom(c.env)
     const auditRepo = auditRepoFrom(c.env)
 
-    const passwordHash = await Hash.make('Murid1234!')
+    const passwordHash = await passwordServiceFrom().hash('123456')
     const newUser = await userRepo.createUser({
       username: studentIdNum,
       passwordHash,
@@ -70,22 +74,21 @@ export class ClassController {
     return c.json({ success: true, data: { user: newUser, profile: studentProfile } })
   }
 
-  public static async importStudentsCsv(c: Context<AppEnv>) {
+  public static async importStudentsCsv(c: Context<AppEnv>, input: ImportStudentsCsvInput) {
     const user = c.get('user')!
-    const { schoolId, classId, students } = await c.req.json()
+    const { schoolId, classId, students } = input
 
     const userRepo = userRepoFrom(c.env)
     const classRepo = classRepoFrom(c.env)
     const auditRepo = auditRepoFrom(c.env)
 
     const createdList = []
-    const defaultPasswordHash = await Hash.make('Murid1234!')
 
     for (const item of students) {
       try {
         const newUser = await userRepo.createUser({
           username: item.studentIdNum,
-          passwordHash: defaultPasswordHash,
+          passwordHash: await passwordServiceFrom().hash('123456'),
           role: 'student',
           status: 'active',
         })
@@ -123,11 +126,11 @@ export class ClassController {
     })
   }
 
-  public static async resetStudentPassword(c: Context<AppEnv>) {
-    const { userId, newPassword } = await c.req.json()
-    const userRepo = userRepoFrom(c.env)
-    const passwordHash = await Hash.make(newPassword || 'Murid1234!')
-    await userRepo.updatePassword(userId, passwordHash)
+  public static async resetStudentPassword(c: Context<AppEnv>, input: ResetPasswordInput) {
+    const { userId, newPassword } = input
+    const actor = c.get('user')
+    if (!actor) return c.json({ success: false, message: 'Tidak diotentikasi' }, 401)
+    await authServiceFrom(c.env).resetStudentPassword(actor, userId, newPassword || '123456')
 
     return c.json({ success: true, message: 'Kata laluan murid berjaya dikemaskini.' })
   }

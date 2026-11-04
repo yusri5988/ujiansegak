@@ -10,3 +10,8 @@ export const requestId = createMiddleware<AppEnv>(async (c, next) => {
   c.header('X-Request-Id', id)
   await next()
 })
+
+export const noStore = createMiddleware<AppEnv>(async (c, next) => {
+  c.header('Cache-Control', 'no-store')
+  await next()
+})

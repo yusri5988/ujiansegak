@@ -1,34 +1,630 @@
-import { eq, and, desc } from 'drizzle-orm'
-import { D1Database } from '@cloudflare/workers-types'
+import { eq, and, desc, asc, inArray, notInArray, sql } from 'drizzle-orm'
+import type { D1Database, D1PreparedStatement } from '@cloudflare/workers-types'
 import { drizzle } from 'drizzle-orm/d1'
 import * as schema from '@/database/schema'
 
+export type TrainingScheduleChanges = Pick<
+  typeof schema.trainingSchedules.$inferInsert,
+  'classId' | 'title' | 'trainingDate' | 'dueDate' | 'instructions' | 'evidenceRequired' | 'teacherNotes'
+>
+
+export type TrainingScheduleActivityInput = Pick<
+  typeof schema.trainingScheduleActivities.$inferInsert,
+  'templateId' | 'title' | 'sets' | 'reps' | 'videoUrl'
+>
+
+export type TrainingTemplateChanges = Pick<
+  typeof schema.trainingTemplates.$inferInsert,
+  | 'title'
+  | 'description'
+  | 'objective'
+  | 'category'
+  | 'estimatedDuration'
+  | 'difficulty'
+  | 'sets'
+  | 'reps'
+  | 'restSeconds'
+  | 'videoUrl'
+  | 'safetyNotes'
+>
+
 export class TrainingRepository {
   private db
+  private readonly d1: D1Database
 
   constructor(d1: D1Database) {
+    this.d1 = d1
     this.db = drizzle(d1, { schema })
   }
 
   // Templat Latihan
-  public async getTemplatesByTeacher(teacherId: number) {
+  public async getTemplatesByTeacher(teacherId: number, limit = 50) {
     return await this.db
       .select()
       .from(schema.trainingTemplates)
-      .where(eq(schema.trainingTemplates.teacherId, teacherId))
+      .where(and(eq(schema.trainingTemplates.teacherId, teacherId), sql`${schema.trainingTemplates.schoolId} = (SELECT school_id FROM teacher_profiles WHERE user_id = ${teacherId} ORDER BY id LIMIT 1)`))
+      .orderBy(desc(schema.trainingTemplates.updatedAt), desc(schema.trainingTemplates.id))
+      .limit(limit)
+  }
+
+  public async getTemplatesBySchool(schoolId: number, limit = 100) {
+    return await this.db
+      .select()
+      .from(schema.trainingTemplates)
+      .where(eq(schema.trainingTemplates.schoolId, schoolId))
+      .orderBy(desc(schema.trainingTemplates.updatedAt), desc(schema.trainingTemplates.id))
+      .limit(limit)
   }
 
   public async createTemplate(data: typeof schema.trainingTemplates.$inferInsert) {
-    const inserted = await this.db.insert(schema.trainingTemplates).values(data).returning()
+    const profile = await this.db.select({ schoolId: schema.teacherProfiles.schoolId }).from(schema.teacherProfiles).where(eq(schema.teacherProfiles.userId, data.teacherId)).orderBy(asc(schema.teacherProfiles.id)).limit(1)
+    if (!profile[0]) return undefined
+    const inserted = await this.db.insert(schema.trainingTemplates).values({ ...data, schoolId: profile[0].schoolId }).returning()
     return inserted[0]
   }
 
+  public async createTemplateForTeacher(
+    teacherId: number,
+    data: TrainingTemplateChanges,
+    creationRequestId: string,
+  ) {
+    const profile = await this.db.select({ schoolId: schema.teacherProfiles.schoolId }).from(schema.teacherProfiles).where(eq(schema.teacherProfiles.userId, teacherId)).orderBy(asc(schema.teacherProfiles.id)).limit(1)
+    if (!profile[0]) return null
+    const existing = await this.findTemplateByCreationRequestId(creationRequestId, teacherId)
+    if (existing) return existing
+
+    const inserted = await this.db
+      .insert(schema.trainingTemplates)
+      .values({ ...data, teacherId, schoolId: profile[0].schoolId, creationRequestId, status: 'active' })
+      .returning()
+    return inserted[0] ?? null
+  }
+
+  public async findTemplateByCreationRequestId(creationRequestId: string, teacherId: number) {
+    const rows = await this.db
+      .select()
+      .from(schema.trainingTemplates)
+      .where(
+        and(
+          eq(schema.trainingTemplates.creationRequestId, creationRequestId),
+          eq(schema.trainingTemplates.teacherId, teacherId),
+          sql`${schema.trainingTemplates.schoolId} = (SELECT school_id FROM teacher_profiles WHERE user_id = ${teacherId} ORDER BY id LIMIT 1)`,
+        ),
+      )
+      .limit(1)
+    return rows[0] ?? null
+  }
+
+  public async findTemplateForTeacher(templateId: number, teacherId: number) {
+    const rows = await this.db
+      .select()
+      .from(schema.trainingTemplates)
+      .where(and(eq(schema.trainingTemplates.id, templateId), eq(schema.trainingTemplates.teacherId, teacherId), sql`${schema.trainingTemplates.schoolId} = (SELECT school_id FROM teacher_profiles WHERE user_id = ${teacherId} ORDER BY id LIMIT 1)`))
+      .limit(1)
+    return rows[0] ?? null
+  }
+
+  public async findTemplateForSchool(templateId: number, schoolId: number) {
+    const rows = await this.db
+      .select()
+      .from(schema.trainingTemplates)
+      .where(and(eq(schema.trainingTemplates.id, templateId), eq(schema.trainingTemplates.schoolId, schoolId)))
+      .limit(1)
+    return rows[0] ?? null
+  }
+
+  public async updateTemplateForTeacher(templateId: number, teacherId: number, data: TrainingTemplateChanges) {
+    const updated = await this.db
+      .update(schema.trainingTemplates)
+      .set({ ...data, updatedAt: new Date() })
+      .where(and(eq(schema.trainingTemplates.id, templateId), eq(schema.trainingTemplates.teacherId, teacherId), sql`${schema.trainingTemplates.schoolId} = (SELECT school_id FROM teacher_profiles WHERE user_id = ${teacherId} ORDER BY id LIMIT 1)`))
+      .returning()
+    return updated[0] ?? null
+  }
+
+  public async updateTemplateForSchool(templateId: number, schoolId: number, data: TrainingTemplateChanges) {
+    const result = await this.d1
+      .prepare(
+        `UPDATE training_templates
+         SET title = ?, description = ?, objective = ?, category = ?, estimated_duration = ?, difficulty = ?,
+             sets = ?, reps = ?, rest_seconds = ?, video_url = ?, safety_notes = ?, updated_at = ?
+         WHERE id = ? AND school_id = ?`,
+      )
+      .bind(
+        data.title,
+        data.description ?? null,
+        data.objective ?? null,
+        data.category,
+        data.estimatedDuration ?? null,
+        data.difficulty ?? null,
+        data.sets ?? null,
+        data.reps ?? null,
+        data.restSeconds ?? null,
+        data.videoUrl ?? null,
+        data.safetyNotes ?? null,
+        Math.floor(Date.now() / 1000),
+        templateId,
+        schoolId,
+      )
+      .run()
+    if (result.meta.changes !== 1) return null
+    return this.findTemplateForSchool(templateId, schoolId)
+  }
+
+  public async archiveTemplateForTeacher(templateId: number, teacherId: number) {
+    const updated = await this.db
+      .update(schema.trainingTemplates)
+      .set({ status: 'archived', updatedAt: new Date() })
+      .where(and(eq(schema.trainingTemplates.id, templateId), eq(schema.trainingTemplates.teacherId, teacherId), sql`${schema.trainingTemplates.schoolId} = (SELECT school_id FROM teacher_profiles WHERE user_id = ${teacherId} ORDER BY id LIMIT 1)`))
+      .returning()
+    return updated[0] ?? null
+  }
+
+  public async archiveTemplateForSchool(templateId: number, schoolId: number) {
+    const result = await this.d1
+      .prepare(
+        `UPDATE training_templates SET status = 'archived', updated_at = ?
+         WHERE id = ? AND school_id = ?`,
+      )
+      .bind(Math.floor(Date.now() / 1000), templateId, schoolId)
+      .run()
+    if (result.meta.changes !== 1) return null
+    return this.findTemplateForSchool(templateId, schoolId)
+  }
+
   // Jadual Latihan
-  public async getSchedulesByTeacher(teacherId: number) {
-    return await this.db
+  public async getSchedulesByTeacher(teacherId: number, limit = 50) {
+    const scheduleRows = await this.db
       .select()
       .from(schema.trainingSchedules)
       .where(eq(schema.trainingSchedules.teacherId, teacherId))
+      .orderBy(
+        desc(schema.trainingSchedules.trainingDate),
+        desc(schema.trainingSchedules.id),
+      )
+      .limit(limit)
+
+    if (scheduleRows.length === 0) return []
+    const scheduleIds = scheduleRows.map((schedule) => schedule.id)
+    const activities = await this.db
+      .select()
+      .from(schema.trainingScheduleActivities)
+      .where(inArray(schema.trainingScheduleActivities.scheduleId, scheduleIds))
+      .orderBy(asc(schema.trainingScheduleActivities.scheduleId), asc(schema.trainingScheduleActivities.orderIndex))
+
+    const activitiesBySchedule = new Map<number, Array<typeof schema.trainingScheduleActivities.$inferSelect>>()
+    for (const activity of activities) {
+      const scheduleActivities = activitiesBySchedule.get(activity.scheduleId) ?? []
+      scheduleActivities.push(activity)
+      activitiesBySchedule.set(activity.scheduleId, scheduleActivities)
+    }
+
+    return scheduleRows.map((schedule) => ({
+      ...schedule,
+      activities: activitiesBySchedule.get(schedule.id) ?? [],
+    }))
+  }
+
+  public async getSchedulesBySchool(schoolId: number, limit = 100) {
+    const scheduleRows = await this.db
+      .select({ schedule: schema.trainingSchedules })
+      .from(schema.trainingSchedules)
+      .innerJoin(schema.classes, eq(schema.trainingSchedules.classId, schema.classes.id))
+      .where(eq(schema.classes.schoolId, schoolId))
+      .orderBy(desc(schema.trainingSchedules.trainingDate), desc(schema.trainingSchedules.id))
+      .limit(limit)
+      .then((rows) => rows.map((row) => row.schedule))
+
+    if (scheduleRows.length === 0) return []
+    const scheduleIds = scheduleRows.map((schedule) => schedule.id)
+    const activities = await this.db
+      .select()
+      .from(schema.trainingScheduleActivities)
+      .where(inArray(schema.trainingScheduleActivities.scheduleId, scheduleIds))
+      .orderBy(asc(schema.trainingScheduleActivities.scheduleId), asc(schema.trainingScheduleActivities.orderIndex))
+
+    const activitiesBySchedule = new Map<number, Array<typeof schema.trainingScheduleActivities.$inferSelect>>()
+    for (const activity of activities) {
+      const scheduleActivities = activitiesBySchedule.get(activity.scheduleId) ?? []
+      scheduleActivities.push(activity)
+      activitiesBySchedule.set(activity.scheduleId, scheduleActivities)
+    }
+
+    return scheduleRows.map((schedule) => ({
+      ...schedule,
+      activities: activitiesBySchedule.get(schedule.id) ?? [],
+    }))
+  }
+
+  public async findScheduleForTeacher(scheduleId: number, teacherId: number) {
+    const rows = await this.db
+      .select()
+      .from(schema.trainingSchedules)
+      .where(and(eq(schema.trainingSchedules.id, scheduleId), eq(schema.trainingSchedules.teacherId, teacherId)))
+      .limit(1)
+    return rows[0] ?? null
+  }
+
+  public async findScheduleForSchool(scheduleId: number, schoolId: number) {
+    const rows = await this.db
+      .select({ schedule: schema.trainingSchedules })
+      .from(schema.trainingSchedules)
+      .innerJoin(schema.classes, eq(schema.trainingSchedules.classId, schema.classes.id))
+      .where(and(eq(schema.trainingSchedules.id, scheduleId), eq(schema.classes.schoolId, schoolId)))
+      .limit(1)
+    return rows[0]?.schedule ?? null
+  }
+
+  public async findScheduleByCreationRequestIdInSchool(creationRequestId: string, schoolId: number) {
+    const rows = await this.db
+      .select({ schedule: schema.trainingSchedules })
+      .from(schema.trainingSchedules)
+      .innerJoin(schema.classes, eq(schema.trainingSchedules.classId, schema.classes.id))
+      .where(
+        and(
+          eq(schema.trainingSchedules.creationRequestId, creationRequestId),
+          eq(schema.classes.schoolId, schoolId),
+        ),
+      )
+      .limit(1)
+    return rows[0]?.schedule ?? null
+  }
+
+  public async createScheduleAtomicallyForSchool(
+    data: typeof schema.trainingSchedules.$inferInsert,
+    activities: TrainingScheduleActivityInput[],
+    creationRequestId: string,
+    schoolId: number,
+  ) {
+    const existing = await this.findScheduleByCreationRequestIdInSchool(creationRequestId, schoolId)
+    if (existing) return { ...existing, activities: await this.getScheduleActivities(existing.id) }
+
+    const nowSeconds = Math.floor(Date.now() / 1000)
+    const statements: D1PreparedStatement[] = [
+      this.d1
+        .prepare(
+          `INSERT INTO training_schedules
+            (creation_request_id, teacher_id, class_id, title, training_date, due_date, instructions,
+             evidence_required, teacher_notes, status, created_at, updated_at)
+           SELECT ?, ?, classes.id, ?, ?, ?, ?, ?, ?, ?, ?, ?
+           FROM classes
+           WHERE classes.id = ? AND classes.school_id = ? AND classes.status = 'active'`,
+        )
+        .bind(
+          creationRequestId,
+          data.teacherId,
+          data.title,
+          data.trainingDate,
+          data.dueDate,
+          data.instructions ?? null,
+          data.evidenceRequired ? 1 : 0,
+          data.teacherNotes ?? null,
+          data.status ?? 'published',
+          nowSeconds,
+          nowSeconds,
+          data.classId,
+          schoolId,
+        ),
+      ...activities.map((activity, orderIndex) =>
+        this.d1
+          .prepare(
+            `INSERT INTO training_schedule_activities
+              (schedule_id, template_id, title, sets, reps, video_url, order_index)
+             SELECT id, ?, ?, ?, ?, ?, ? FROM training_schedules
+             WHERE creation_request_id = ? AND teacher_id = ?`,
+          )
+          .bind(
+            activity.templateId ?? null,
+            activity.title,
+            activity.sets ?? 1,
+            activity.reps ?? null,
+            activity.videoUrl ?? null,
+            orderIndex,
+            creationRequestId,
+            data.teacherId,
+          ),
+      ),
+      this.d1
+        .prepare(
+          `INSERT INTO training_assignments (schedule_id, student_id, status)
+           SELECT training_schedules.id, class_students.student_id, 'not_started'
+           FROM training_schedules
+           INNER JOIN classes ON classes.id = training_schedules.class_id
+           INNER JOIN class_students ON class_students.class_id = training_schedules.class_id
+           INNER JOIN student_profiles ON student_profiles.user_id = class_students.student_id
+           WHERE training_schedules.creation_request_id = ?
+             AND training_schedules.teacher_id = ?
+             AND classes.school_id = ?
+             AND class_students.status = 'active'
+             AND student_profiles.school_id = ?`,
+        )
+        .bind(creationRequestId, data.teacherId, schoolId, schoolId),
+    ]
+
+    await this.d1.batch(statements)
+    const schedule = await this.findScheduleByCreationRequestIdInSchool(creationRequestId, schoolId)
+    if (!schedule) return null
+    return { ...schedule, activities: await this.getScheduleActivities(schedule.id) }
+  }
+
+  public async hasSubmissionsForSchedule(scheduleId: number, teacherId: number) {
+    const rows = await this.db
+      .select({ id: schema.trainingSubmissions.id })
+      .from(schema.trainingSubmissions)
+      .innerJoin(schema.trainingSchedules, eq(schema.trainingSubmissions.scheduleId, schema.trainingSchedules.id))
+      .where(and(eq(schema.trainingSubmissions.scheduleId, scheduleId), eq(schema.trainingSchedules.teacherId, teacherId)))
+      .limit(1)
+    return rows.length > 0
+  }
+
+  public async hasSubmissionsForScheduleInSchool(scheduleId: number, schoolId: number) {
+    const rows = await this.db
+      .select({ id: schema.trainingSubmissions.id })
+      .from(schema.trainingSubmissions)
+      .innerJoin(schema.trainingSchedules, eq(schema.trainingSubmissions.scheduleId, schema.trainingSchedules.id))
+      .innerJoin(schema.classes, eq(schema.trainingSchedules.classId, schema.classes.id))
+      .where(and(eq(schema.trainingSubmissions.scheduleId, scheduleId), eq(schema.classes.schoolId, schoolId)))
+      .limit(1)
+    return rows.length > 0
+  }
+
+  public async reviewSubmissionForSchool(
+    submissionId: number,
+    schoolId: number,
+    reviewStatus: 'approved' | 'needs_correction' | 'rejected',
+    teacherFeedback: string,
+    reviewedBy: number,
+  ) {
+    const now = new Date()
+    const nowSeconds = Math.floor(now.getTime() / 1000)
+    const assignmentStatus =
+      reviewStatus === 'approved' ? 'approved' : reviewStatus === 'needs_correction' ? 'needs_correction' : 'rejected'
+    const results = await this.d1.batch([
+      this.d1
+        .prepare(
+          `UPDATE training_submissions
+           SET review_status = ?, teacher_feedback = ?, reviewed_by = ?, reviewed_at = ?, updated_at = ?
+           WHERE id = ? AND EXISTS (
+             SELECT 1 FROM training_schedules
+             INNER JOIN classes ON classes.id = training_schedules.class_id
+             WHERE training_schedules.id = training_submissions.schedule_id
+               AND classes.school_id = ?
+           )`,
+        )
+        .bind(reviewStatus, teacherFeedback, reviewedBy, now.toISOString(), nowSeconds, submissionId, schoolId),
+      this.d1
+        .prepare(
+          `UPDATE training_assignments
+           SET status = ?, updated_at = ?
+           WHERE id = (
+             SELECT assignment_id FROM training_submissions
+             WHERE id = ? AND reviewed_by = ? AND review_status = ?
+               AND EXISTS (
+                 SELECT 1 FROM training_schedules
+                 INNER JOIN classes ON classes.id = training_schedules.class_id
+                 WHERE training_schedules.id = training_submissions.schedule_id
+                   AND classes.school_id = ?
+               )
+           )`,
+        )
+        .bind(assignmentStatus, nowSeconds, submissionId, reviewedBy, reviewStatus, schoolId),
+    ])
+
+    if ((results[0]?.meta.changes ?? 0) !== 1) return null
+    return this.findSubmissionForSchool(submissionId, schoolId)
+  }
+
+  public async updateScheduleForTeacher(
+    scheduleId: number,
+    teacherId: number,
+    changes: TrainingScheduleChanges,
+    activities: TrainingScheduleActivityInput[],
+    reassignedStudentIds?: number[],
+  ) {
+    const scheduleEligible = `EXISTS (
+      SELECT 1 FROM training_schedules
+      WHERE id = ? AND teacher_id = ?
+        AND NOT EXISTS (SELECT 1 FROM training_submissions WHERE schedule_id = ?)
+    )`
+    const statements: D1PreparedStatement[] = [
+      this.d1
+        .prepare(
+          `UPDATE training_schedules
+           SET class_id = ?, title = ?, training_date = ?, due_date = ?, instructions = ?,
+               evidence_required = ?, teacher_notes = ?, updated_at = ?
+           WHERE id = ? AND teacher_id = ?
+             AND NOT EXISTS (SELECT 1 FROM training_submissions WHERE schedule_id = ?)`,
+        )
+        .bind(
+          changes.classId,
+          changes.title,
+          changes.trainingDate,
+          changes.dueDate,
+          changes.instructions ?? null,
+          changes.evidenceRequired ? 1 : 0,
+          changes.teacherNotes ?? null,
+          Math.floor(Date.now() / 1000),
+          scheduleId,
+          teacherId,
+          scheduleId,
+        ),
+      this.d1
+        .prepare(
+          `DELETE FROM training_schedule_activities
+           WHERE schedule_id = ? AND ${scheduleEligible}`,
+        )
+        .bind(scheduleId, scheduleId, teacherId, scheduleId),
+      ...activities.map((activity, orderIndex) =>
+        this.d1
+          .prepare(
+            `INSERT INTO training_schedule_activities
+             (schedule_id, template_id, title, sets, reps, video_url, order_index)
+             SELECT ?, ?, ?, ?, ?, ?, ? WHERE ${scheduleEligible}`,
+          )
+          .bind(
+            scheduleId,
+            activity.templateId ?? null,
+            activity.title,
+            activity.sets ?? 1,
+            activity.reps ?? null,
+            activity.videoUrl ?? null,
+            orderIndex,
+            scheduleId,
+            teacherId,
+            scheduleId,
+          ),
+      ),
+    ]
+
+    if (reassignedStudentIds !== undefined) {
+      statements.push(
+        this.d1
+          .prepare(`DELETE FROM training_assignments WHERE schedule_id = ? AND ${scheduleEligible}`)
+          .bind(scheduleId, scheduleId, teacherId, scheduleId),
+      )
+      for (const studentId of reassignedStudentIds) {
+        statements.push(
+          this.d1
+            .prepare(
+              `INSERT INTO training_assignments (schedule_id, student_id, status)
+               SELECT ?, ?, 'not_started' WHERE ${scheduleEligible}`,
+            )
+            .bind(scheduleId, studentId, scheduleId, teacherId, scheduleId),
+        )
+      }
+    }
+
+    const results = await this.d1.batch(statements)
+    if (results[0]?.meta.changes !== 1) return null
+
+    const schedule = await this.findScheduleForTeacher(scheduleId, teacherId)
+    if (!schedule) return null
+    return {
+      ...schedule,
+      activities: await this.getScheduleActivities(scheduleId),
+    }
+  }
+
+  public async updateScheduleForSchool(
+    scheduleId: number,
+    schoolId: number,
+    changes: TrainingScheduleChanges,
+    activities: TrainingScheduleActivityInput[],
+    reassignedStudentIds?: number[],
+  ) {
+    const scheduleEligible = `EXISTS (
+      SELECT 1 FROM training_schedules scoped_schedule
+      INNER JOIN classes scoped_class ON scoped_class.id = scoped_schedule.class_id
+      WHERE scoped_schedule.id = ? AND scoped_class.school_id = ?
+        AND NOT EXISTS (SELECT 1 FROM training_submissions WHERE schedule_id = ?)
+    )`
+    const statements: D1PreparedStatement[] = [
+      this.d1
+        .prepare(
+          `UPDATE training_schedules
+           SET class_id = ?, title = ?, training_date = ?, due_date = ?, instructions = ?,
+               evidence_required = ?, teacher_notes = ?, updated_at = ?
+           WHERE id = ?
+             AND EXISTS (SELECT 1 FROM classes WHERE classes.id = ? AND classes.school_id = ?)
+             AND EXISTS (SELECT 1 FROM classes WHERE classes.id = training_schedules.class_id AND classes.school_id = ?)
+             AND NOT EXISTS (SELECT 1 FROM training_submissions WHERE schedule_id = ?)`,
+        )
+        .bind(
+          changes.classId,
+          changes.title,
+          changes.trainingDate,
+          changes.dueDate,
+          changes.instructions ?? null,
+          changes.evidenceRequired ? 1 : 0,
+          changes.teacherNotes ?? null,
+          Math.floor(Date.now() / 1000),
+          scheduleId,
+          changes.classId,
+          schoolId,
+          schoolId,
+          scheduleId,
+        ),
+      this.d1
+        .prepare(`DELETE FROM training_schedule_activities WHERE schedule_id = ? AND ${scheduleEligible}`)
+        .bind(scheduleId, scheduleId, schoolId, scheduleId),
+      ...activities.map((activity, orderIndex) =>
+        this.d1
+          .prepare(
+            `INSERT INTO training_schedule_activities
+              (schedule_id, template_id, title, sets, reps, video_url, order_index)
+             SELECT ?, ?, ?, ?, ?, ?, ? WHERE ${scheduleEligible}`,
+          )
+          .bind(
+            scheduleId,
+            activity.templateId ?? null,
+            activity.title,
+            activity.sets ?? 1,
+            activity.reps ?? null,
+            activity.videoUrl ?? null,
+            orderIndex,
+            scheduleId,
+            schoolId,
+            scheduleId,
+          ),
+      ),
+    ]
+
+    if (reassignedStudentIds !== undefined) {
+      statements.push(
+        this.d1
+          .prepare(`DELETE FROM training_assignments WHERE schedule_id = ? AND ${scheduleEligible}`)
+          .bind(scheduleId, scheduleId, schoolId, scheduleId),
+      )
+      for (const studentId of reassignedStudentIds) {
+        statements.push(
+          this.d1
+            .prepare(
+              `INSERT INTO training_assignments (schedule_id, student_id, status)
+               SELECT ?, ?, 'not_started' WHERE ${scheduleEligible}`,
+            )
+            .bind(scheduleId, studentId, scheduleId, schoolId, scheduleId),
+        )
+      }
+    }
+
+    const results = await this.d1.batch(statements)
+    if (results[0]?.meta.changes !== 1) return null
+    const schedule = await this.findScheduleForSchool(scheduleId, schoolId)
+    if (!schedule) return null
+    return { ...schedule, activities: await this.getScheduleActivities(scheduleId) }
+  }
+
+  public async deleteScheduleForTeacher(scheduleId: number, teacherId: number) {
+    const deleted = await this.d1
+      .prepare(
+        `DELETE FROM training_schedules
+         WHERE id = ? AND teacher_id = ?
+           AND NOT EXISTS (SELECT 1 FROM training_submissions WHERE schedule_id = ?)`,
+      )
+      .bind(scheduleId, teacherId, scheduleId)
+      .run()
+    return deleted.meta.changes > 0
+  }
+
+  public async archiveScheduleForTeacher(scheduleId: number, teacherId: number) {
+    const updated = await this.db
+      .update(schema.trainingSchedules)
+      .set({ status: 'archived', updatedAt: new Date() })
+      .where(and(eq(schema.trainingSchedules.id, scheduleId), eq(schema.trainingSchedules.teacherId, teacherId)))
+      .returning()
+    return updated[0] ?? null
+  }
+
+  public async archiveScheduleForSchool(scheduleId: number, schoolId: number) {
+    const result = await this.d1
+      .prepare(
+        `UPDATE training_schedules SET status = 'archived', updated_at = ?
+         WHERE id = ? AND class_id IN (SELECT id FROM classes WHERE school_id = ?)`,
+      )
+      .bind(Math.floor(Date.now() / 1000), scheduleId, schoolId)
+      .run()
+    if (result.meta.changes !== 1) return null
+    return this.findScheduleForSchool(scheduleId, schoolId)
   }
 
   public async getSchedulesByClass(classId: number) {
@@ -43,12 +639,113 @@ export class TrainingRepository {
     return inserted[0]
   }
 
+  public async createScheduleAtomically(
+    data: typeof schema.trainingSchedules.$inferInsert,
+    activities: TrainingScheduleActivityInput[],
+    creationRequestId: string,
+  ) {
+    const existing = await this.findScheduleByCreationRequestId(creationRequestId, data.teacherId)
+    if (existing) return { ...existing, activities: await this.getScheduleActivities(existing.id) }
+
+    const nowSeconds = Math.floor(Date.now() / 1000)
+    const statements: D1PreparedStatement[] = [
+      this.d1
+        .prepare(
+          `INSERT INTO training_schedules
+            (creation_request_id, teacher_id, class_id, title, training_date, due_date, instructions,
+             evidence_required, teacher_notes, status, created_at, updated_at)
+           SELECT ?, ?, classes.id, ?, ?, ?, ?, ?, ?, ?, ?, ?
+           FROM classes
+           WHERE classes.id = ? AND classes.teacher_id = ? AND classes.status = 'active'`,
+        )
+        .bind(
+          creationRequestId,
+          data.teacherId,
+          data.title,
+          data.trainingDate,
+          data.dueDate,
+          data.instructions ?? null,
+          data.evidenceRequired ? 1 : 0,
+          data.teacherNotes ?? null,
+          data.status ?? 'published',
+          nowSeconds,
+          nowSeconds,
+          data.classId,
+          data.teacherId,
+        ),
+      ...activities.map((activity, orderIndex) =>
+        this.d1
+          .prepare(
+            `INSERT INTO training_schedule_activities
+              (schedule_id, template_id, title, sets, reps, video_url, order_index)
+             SELECT id, ?, ?, ?, ?, ?, ? FROM training_schedules
+             WHERE creation_request_id = ? AND teacher_id = ?`,
+          )
+          .bind(
+            activity.templateId ?? null,
+            activity.title,
+            activity.sets ?? 1,
+            activity.reps ?? null,
+            activity.videoUrl ?? null,
+            orderIndex,
+            creationRequestId,
+            data.teacherId,
+          ),
+      ),
+      this.d1
+        .prepare(
+          `INSERT INTO training_assignments (schedule_id, student_id, status)
+           SELECT training_schedules.id, class_students.student_id, 'not_started'
+           FROM training_schedules
+           INNER JOIN class_students ON class_students.class_id = training_schedules.class_id
+           WHERE training_schedules.creation_request_id = ?
+             AND training_schedules.teacher_id = ?
+             AND class_students.status = 'active'`,
+        )
+        .bind(creationRequestId, data.teacherId),
+    ]
+
+    await this.d1.batch(statements)
+    const schedule = await this.findScheduleByCreationRequestId(creationRequestId, data.teacherId)
+    if (!schedule) return null
+    return { ...schedule, activities: await this.getScheduleActivities(schedule.id) }
+  }
+
+  public async findScheduleByCreationRequestId(creationRequestId: string, teacherId: number) {
+    const rows = await this.db
+      .select()
+      .from(schema.trainingSchedules)
+      .where(
+        and(
+          eq(schema.trainingSchedules.creationRequestId, creationRequestId),
+          eq(schema.trainingSchedules.teacherId, teacherId),
+        ),
+      )
+      .limit(1)
+    return rows[0] ?? null
+  }
+
   public async addScheduleActivity(data: typeof schema.trainingScheduleActivities.$inferInsert) {
     const inserted = await this.db.insert(schema.trainingScheduleActivities).values(data).returning()
     return inserted[0]
   }
 
   // Tugasan & Penghantaran
+  public async getPendingAssignmentsForStudentOnDate(studentId: number, date: string, limit: number) {
+    return this.db
+      .select({ assignmentId: schema.trainingAssignments.id, title: schema.trainingSchedules.title })
+      .from(schema.trainingAssignments)
+      .innerJoin(schema.trainingSchedules, eq(schema.trainingAssignments.scheduleId, schema.trainingSchedules.id))
+      .where(and(
+        eq(schema.trainingAssignments.studentId, studentId),
+        eq(schema.trainingSchedules.trainingDate, date),
+        eq(schema.trainingSchedules.status, 'published'),
+        notInArray(schema.trainingAssignments.status, ['submitted', 'approved']),
+      ))
+      .orderBy(asc(schema.trainingSchedules.id), asc(schema.trainingAssignments.id))
+      .limit(limit)
+  }
+
   public async createAssignment(scheduleId: number, studentId: number) {
     const inserted = await this.db
       .insert(schema.trainingAssignments)
@@ -95,14 +792,15 @@ export class TrainingRepository {
     return inserted[0]
   }
 
-  public async getSubmissionsForTeacher(teacherId: number) {
+  public async getSubmissionsForTeacher(teacherId: number, limit = 50) {
     return await this.db
       .select({
         submissionId: schema.trainingSubmissions.id,
         submissionDate: schema.trainingSubmissions.submissionDate,
         reviewStatus: schema.trainingSubmissions.reviewStatus,
         durationMinutes: schema.trainingSubmissions.durationMinutes,
-        studentNotes: schema.trainingSubmissions.studentNotes,
+        setsCompleted: schema.trainingSubmissions.setsCompleted,
+        repsCompleted: schema.trainingSubmissions.repsCompleted,
         studentName: schema.studentProfiles.fullName,
         scheduleTitle: schema.trainingSchedules.title,
       })
@@ -111,6 +809,127 @@ export class TrainingRepository {
       .innerJoin(schema.users, eq(schema.trainingSubmissions.studentId, schema.users.id))
       .innerJoin(schema.studentProfiles, eq(schema.users.id, schema.studentProfiles.userId))
       .where(eq(schema.trainingSchedules.teacherId, teacherId))
+      .orderBy(desc(schema.trainingSubmissions.submissionDate), desc(schema.trainingSubmissions.id))
+      .limit(limit)
+  }
+
+  public async getSubmissionsForSchool(schoolId: number, limit = 100) {
+    return await this.db
+      .select({
+        submissionId: schema.trainingSubmissions.id,
+        scheduleId: schema.trainingSchedules.id,
+        scheduleTitle: schema.trainingSchedules.title,
+        classId: schema.classes.id,
+        className: schema.classes.name,
+        studentId: schema.trainingSubmissions.studentId,
+        studentIdNum: schema.studentProfiles.studentIdNum,
+        studentName: schema.studentProfiles.fullName,
+        submissionDate: schema.trainingSubmissions.submissionDate,
+        reviewStatus: schema.trainingSubmissions.reviewStatus,
+        durationMinutes: schema.trainingSubmissions.durationMinutes,
+        setsCompleted: schema.trainingSubmissions.setsCompleted,
+        repsCompleted: schema.trainingSubmissions.repsCompleted,
+      })
+      .from(schema.trainingSubmissions)
+      .innerJoin(schema.trainingSchedules, eq(schema.trainingSubmissions.scheduleId, schema.trainingSchedules.id))
+      .innerJoin(schema.classes, eq(schema.trainingSchedules.classId, schema.classes.id))
+      .innerJoin(schema.studentProfiles, eq(schema.trainingSubmissions.studentId, schema.studentProfiles.userId))
+      .where(and(eq(schema.classes.schoolId, schoolId), eq(schema.studentProfiles.schoolId, schoolId)))
+      .orderBy(desc(schema.trainingSubmissions.submissionDate), desc(schema.trainingSubmissions.id))
+      .limit(limit)
+  }
+
+  public async findSubmissionForTeacher(submissionId: number, teacherId: number) {
+    const rows = await this.db
+      .select({
+        submissionId: schema.trainingSubmissions.id,
+        scheduleId: schema.trainingSubmissions.scheduleId,
+        scheduleTitle: schema.trainingSchedules.title,
+        reviewStatus: schema.trainingSubmissions.reviewStatus,
+        submissionDate: schema.trainingSubmissions.submissionDate,
+      })
+      .from(schema.trainingSubmissions)
+      .innerJoin(schema.trainingSchedules, eq(schema.trainingSubmissions.scheduleId, schema.trainingSchedules.id))
+      .where(and(eq(schema.trainingSubmissions.id, submissionId), eq(schema.trainingSchedules.teacherId, teacherId)))
+      .limit(1)
+    return rows[0] ?? null
+  }
+
+  public async findSubmissionForSchool(submissionId: number, schoolId: number) {
+    const rows = await this.db
+      .select({
+        submissionId: schema.trainingSubmissions.id,
+        scheduleId: schema.trainingSubmissions.scheduleId,
+        scheduleTitle: schema.trainingSchedules.title,
+        classId: schema.classes.id,
+        className: schema.classes.name,
+        studentId: schema.trainingSubmissions.studentId,
+        studentIdNum: schema.studentProfiles.studentIdNum,
+        studentName: schema.studentProfiles.fullName,
+        studentNotes: schema.trainingSubmissions.studentNotes,
+        durationMinutes: schema.trainingSubmissions.durationMinutes,
+        setsCompleted: schema.trainingSubmissions.setsCompleted,
+        repsCompleted: schema.trainingSubmissions.repsCompleted,
+        reviewStatus: schema.trainingSubmissions.reviewStatus,
+        submissionDate: schema.trainingSubmissions.submissionDate,
+      })
+      .from(schema.trainingSubmissions)
+      .innerJoin(schema.trainingSchedules, eq(schema.trainingSubmissions.scheduleId, schema.trainingSchedules.id))
+      .innerJoin(schema.classes, eq(schema.trainingSchedules.classId, schema.classes.id))
+      .innerJoin(schema.studentProfiles, eq(schema.trainingSubmissions.studentId, schema.studentProfiles.userId))
+      .where(
+        and(
+          eq(schema.trainingSubmissions.id, submissionId),
+          eq(schema.classes.schoolId, schoolId),
+          eq(schema.studentProfiles.schoolId, schoolId),
+        ),
+      )
+      .limit(1)
+    return rows[0] ?? null
+  }
+
+  public async reviewSubmissionForTeacher(
+    submissionId: number,
+    teacherId: number,
+    reviewStatus: 'approved' | 'needs_correction' | 'rejected',
+    teacherFeedback: string,
+    reviewedBy: number,
+  ) {
+    const now = new Date()
+    const nowSeconds = Math.floor(now.getTime() / 1000)
+    const assignmentStatus =
+      reviewStatus === 'approved' ? 'approved' : reviewStatus === 'needs_correction' ? 'needs_correction' : 'rejected'
+    const results = await this.d1.batch([
+      this.d1
+        .prepare(
+          `UPDATE training_submissions
+           SET review_status = ?, teacher_feedback = ?, reviewed_by = ?, reviewed_at = ?, updated_at = ?
+           WHERE id = ? AND EXISTS (
+             SELECT 1 FROM training_schedules
+             WHERE training_schedules.id = training_submissions.schedule_id
+               AND training_schedules.teacher_id = ?
+           )`,
+        )
+        .bind(reviewStatus, teacherFeedback, reviewedBy, now.toISOString(), nowSeconds, submissionId, teacherId),
+      this.d1
+        .prepare(
+          `UPDATE training_assignments
+           SET status = ?, updated_at = ?
+           WHERE id = (
+             SELECT assignment_id FROM training_submissions
+             WHERE id = ? AND reviewed_by = ? AND review_status = ?
+               AND EXISTS (
+                 SELECT 1 FROM training_schedules
+                 WHERE training_schedules.id = training_submissions.schedule_id
+                   AND training_schedules.teacher_id = ?
+               )
+           )`,
+        )
+        .bind(assignmentStatus, nowSeconds, submissionId, reviewedBy, reviewStatus, teacherId),
+    ])
+
+    if ((results[0]?.meta.changes ?? 0) !== 1) return null
+    return this.findSubmissionForTeacher(submissionId, teacherId)
   }
 
   public async updateSubmissionReview(
@@ -187,5 +1006,46 @@ export class TrainingRepository {
       )
       .where(and(eq(schema.classStudents.classId, classId), eq(schema.classStudents.status, 'active')))
       .orderBy(desc(schema.dailyActivityLogs.createdAt))
+  }
+
+  public async getDailyActivityLogsForClassInSchool(classId: number, schoolId: number, logDate: string, limit = 200) {
+    return await this.db
+      .select({
+        studentUserId: schema.users.id,
+        studentIdNum: schema.studentProfiles.studentIdNum,
+        fullName: schema.studentProfiles.fullName,
+        logId: schema.dailyActivityLogs.id,
+        logDate: schema.dailyActivityLogs.logDate,
+        warmupCompleted: schema.dailyActivityLogs.warmupCompleted,
+        curlUpReps: schema.dailyActivityLogs.curlUpReps,
+        cardioDurationMinutes: schema.dailyActivityLogs.cardioDurationMinutes,
+        cardioPulseOrReps: schema.dailyActivityLogs.cardioPulseOrReps,
+        pushUpReps: schema.dailyActivityLogs.pushUpReps,
+        sitReachCm: schema.dailyActivityLogs.sitReachCm,
+      })
+      .from(schema.classes)
+      .innerJoin(schema.classStudents, eq(schema.classStudents.classId, schema.classes.id))
+      .innerJoin(schema.users, eq(schema.classStudents.studentId, schema.users.id))
+      .innerJoin(schema.studentProfiles, eq(schema.users.id, schema.studentProfiles.userId))
+      .leftJoin(
+        schema.dailyActivityLogs,
+        and(
+          eq(schema.dailyActivityLogs.studentId, schema.classStudents.studentId),
+          eq(schema.dailyActivityLogs.logDate, logDate),
+        ),
+      )
+      .where(
+        and(
+          eq(schema.classes.id, classId),
+          eq(schema.classes.schoolId, schoolId),
+          eq(schema.classes.status, 'active'),
+          eq(schema.classStudents.status, 'active'),
+          eq(schema.users.role, 'student'),
+          eq(schema.users.status, 'active'),
+          eq(schema.studentProfiles.schoolId, schoolId),
+        ),
+      )
+      .orderBy(asc(schema.studentProfiles.fullName), desc(schema.dailyActivityLogs.createdAt))
+      .limit(limit)
   }
 }

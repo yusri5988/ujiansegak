@@ -1,0 +1,2 @@
+ALTER TABLE `assessment_results` ADD `creation_request_id` text;--> statement-breakpoint
+CREATE UNIQUE INDEX `assessment_results_creation_request_id_unique` ON `assessment_results` (`creation_request_id`);

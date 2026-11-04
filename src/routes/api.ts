@@ -6,6 +6,7 @@ import teacherRouter from './teachers'
 import studentRouter from './students'
 import segakRouter from './segak'
 import reportRouter from './reports'
+import aiRouter from './ai'
 
 const api = new Hono<AppEnv>()
 
@@ -17,5 +18,6 @@ api.route('/teacher', teacherRouter)
 api.route('/student', studentRouter)
 api.route('/segak', segakRouter)
 api.route('/reports', reportRouter)
+api.route('/ai', aiRouter)
 
 export default api

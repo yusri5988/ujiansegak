@@ -24,6 +24,10 @@ Route → Request Schema → Controller → Service → Repository → Drizzle �
 ## Project structure
 
 ```text
+frontend/
+├── index.html             # Vite client application entrypoint
+├── src/styles.css         # Frontend styles with HMR
+└── public/                # PWA manifest, service worker, and favicon
 src/
 ├── app/
 │   ├── Controllers/      # HTTP handlers; keep them thin
@@ -41,7 +45,7 @@ src/
 │   ├── schema/           # Drizzle schema source of truth
 │   └── seeders/           # local/demo seed data
 ├── helpers/              # response helpers
-├── routes/               # modular endpoint definitions (api, web, auth, users)
+├── routes/               # modular Worker API endpoints (auth, users, and resources)
 └── index.ts              # Worker entrypoint
 tests/
 AGENTS.md                # architecture rules for contributors and coding agents
@@ -51,10 +55,10 @@ worker-configuration.d.ts # generated binding types
 
 ## Local development
 
-Requirements: Node.js 20+, npm, and Wrangler authentication only for remote operations.
+Requirements: Node.js 20.19+ or 22.12+, npm, and Wrangler authentication only for remote operations.
 
 ```bash
-npm install
+npm ci
 copy .env.example .dev.vars       # PowerShell
 npm run typegen
 npm run db:migrate
@@ -62,7 +66,29 @@ npm run db:seed
 npm run dev
 ```
 
-The local Worker runs at `http://localhost:8787`.
+`npm run dev` builds the frontend once, then starts both development servers:
+
+- Frontend with Vite HMR: `http://localhost:5173`
+- Hono API Worker: `http://127.0.0.1:8787`
+
+Vite proxies `/api` and `/health` to the Worker. CSS changes apply without reloading; HTML/JavaScript changes trigger an automatic browser reload, so manual refresh is not needed. `npm run deploy` builds the frontend before deploying the Worker and its static assets.
+
+The student dashboard shows up to five published, unfinished assignments scheduled for today (Malaysia time). If there are more, students can open the activity page to see the full list. The authenticated student-only `GET /api/student/today-reminders` endpoint returns the date, reminders and a `hasMore` flag.
+
+## Pembantu AI guru
+
+Pembantu AI hanya tersedia kepada akaun guru. Sekolah ditentukan daripada profil guru yang sedang log masuk dan setiap tool mengehadkan akses kepada sekolah tersebut. Chatbot boleh membantu urusan kelas, murid, latihan, penyerahan, log harian, SEGAK dan laporan. Tindakan yang mengubah data memerlukan pengesahan; arkib atau pengguguran keahlian mengekalkan rekod lama. Kata laluan sementara untuk akaun murid dipaparkan sekali sahaja selepas pengesahan.
+
+Guru boleh memindahkan murid antara kelas aktif dalam sekolah yang sama dan mengemas kini profil sendiri melalui chat. Untuk import pukal, pilih fail CSV dengan lajur `studentIdNum,fullName,gender,dob`, satu murid setiap baris, `gender` bernilai `L` atau `P`, dan `dob` dalam format `YYYY-MM-DD`. Setiap import menerima maksimum 10 murid dan 3,500 bait. Semak setiap baris dalam pratonton sebelum mengesahkan; kandungan CSV dihantar kepada DeepSeek untuk diproses.
+
+DeepSeek dipanggil daripada Worker melalui `https://api.deepseek.com/chat/completions`. Tambahkan secret berikut ke `.dev.vars` untuk pembangunan setempat; jangan masukkan nilai sebenar ke Git:
+
+```dotenv
+JWT_SECRET=<random-secret-at-least-32-bytes>
+DEEPSEEK_API_KEY=<deepseek-api-key>
+```
+
+`DEEPSEEK_MODEL` ditetapkan melalui `wrangler.jsonc` dan boleh ditukar kepada model yang tersedia pada akaun DeepSeek. Perbualan disimpan dalam D1 sehingga guru memadamnya atau ia melepasi 90 hari. Kandungan mesej dan hasil tool dihantar ke DeepSeek; nama, keputusan SEGAK dan ukuran boleh dihantar apabila digunakan oleh tool. Tool tidak mendedahkan nota perubatan atau butiran penjaga. Kata laluan sementara dipaparkan sekali dan tidak disimpan dalam sejarah chat atau dihantar kepada DeepSeek.
 
 ## D1 setup and deployment
 
@@ -76,6 +102,7 @@ Then configure the secret and deploy:
 
 ```bash
 npx wrangler secret put JWT_SECRET
+npx wrangler secret put DEEPSEEK_API_KEY
 npm run typegen
 npm run db:migrate:remote
 npm run deploy

@@ -15,6 +15,41 @@
       "when": 1786033905077,
       "tag": "0001_past_colossus",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1793782192653,
+      "tag": "0002_magenta_martin_li",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1793783004798,
+      "tag": "0003_wandering_dorian_gray",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1793783351891,
+      "tag": "0004_volatile_zzzax",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "6",
+      "when": 1793787347027,
+      "tag": "0005_rainy_violations",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "6",
+      "when": 1793788403323,
+      "tag": "0006_fuzzy_grey_gargoyle",
+      "breakpoints": true
     }
   ]
 }

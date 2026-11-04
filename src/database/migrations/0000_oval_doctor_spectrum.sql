@@ -24,7 +24,7 @@ CREATE TABLE `student_profiles` (
 	`guardian_phone` text,
 	`created_at` integer NOT NULL,
 	`updated_at` integer NOT NULL,
-	FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON UPDATE no action ON DELETE cascade,
+	FOREIGN KEY (`user_id`) REFERENCES `smartfit_app_users`(`id`) ON UPDATE no action ON DELETE cascade,
 	FOREIGN KEY (`school_id`) REFERENCES `schools`(`id`) ON UPDATE no action ON DELETE cascade
 );
 --> statement-breakpoint
@@ -36,11 +36,11 @@ CREATE TABLE `teacher_profiles` (
 	`phone` text,
 	`created_at` integer NOT NULL,
 	`updated_at` integer NOT NULL,
-	FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON UPDATE no action ON DELETE cascade,
+	FOREIGN KEY (`user_id`) REFERENCES `smartfit_app_users`(`id`) ON UPDATE no action ON DELETE cascade,
 	FOREIGN KEY (`school_id`) REFERENCES `schools`(`id`) ON UPDATE no action ON DELETE cascade
 );
 --> statement-breakpoint
-CREATE TABLE `users` (
+CREATE TABLE `smartfit_app_users` (
 	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
 	`username` text NOT NULL,
 	`email` text,
@@ -51,7 +51,7 @@ CREATE TABLE `users` (
 	`updated_at` integer NOT NULL
 );
 --> statement-breakpoint
-CREATE UNIQUE INDEX `users_username_unique` ON `users` (`username`);--> statement-breakpoint
+CREATE UNIQUE INDEX `smartfit_app_users_username_unique` ON `smartfit_app_users` (`username`);--> statement-breakpoint
 CREATE TABLE `academic_sessions` (
 	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
 	`school_id` integer NOT NULL,
@@ -71,7 +71,7 @@ CREATE TABLE `class_students` (
 	`created_at` integer NOT NULL,
 	`updated_at` integer NOT NULL,
 	FOREIGN KEY (`class_id`) REFERENCES `classes`(`id`) ON UPDATE no action ON DELETE cascade,
-	FOREIGN KEY (`student_id`) REFERENCES `users`(`id`) ON UPDATE no action ON DELETE cascade
+	FOREIGN KEY (`student_id`) REFERENCES `smartfit_app_users`(`id`) ON UPDATE no action ON DELETE cascade
 );
 --> statement-breakpoint
 CREATE TABLE `classes` (
@@ -85,7 +85,7 @@ CREATE TABLE `classes` (
 	`updated_at` integer NOT NULL,
 	FOREIGN KEY (`school_id`) REFERENCES `schools`(`id`) ON UPDATE no action ON DELETE cascade,
 	FOREIGN KEY (`academic_session_id`) REFERENCES `academic_sessions`(`id`) ON UPDATE no action ON DELETE cascade,
-	FOREIGN KEY (`teacher_id`) REFERENCES `users`(`id`) ON UPDATE no action ON DELETE set null
+	FOREIGN KEY (`teacher_id`) REFERENCES `smartfit_app_users`(`id`) ON UPDATE no action ON DELETE set null
 );
 --> statement-breakpoint
 CREATE TABLE `submission_files` (
@@ -106,7 +106,7 @@ CREATE TABLE `training_assignments` (
 	`created_at` integer NOT NULL,
 	`updated_at` integer NOT NULL,
 	FOREIGN KEY (`schedule_id`) REFERENCES `training_schedules`(`id`) ON UPDATE no action ON DELETE cascade,
-	FOREIGN KEY (`student_id`) REFERENCES `users`(`id`) ON UPDATE no action ON DELETE cascade
+	FOREIGN KEY (`student_id`) REFERENCES `smartfit_app_users`(`id`) ON UPDATE no action ON DELETE cascade
 );
 --> statement-breakpoint
 CREATE TABLE `training_schedule_activities` (
@@ -135,7 +135,7 @@ CREATE TABLE `training_schedules` (
 	`status` text DEFAULT 'published' NOT NULL,
 	`created_at` integer NOT NULL,
 	`updated_at` integer NOT NULL,
-	FOREIGN KEY (`teacher_id`) REFERENCES `users`(`id`) ON UPDATE no action ON DELETE cascade,
+	FOREIGN KEY (`teacher_id`) REFERENCES `smartfit_app_users`(`id`) ON UPDATE no action ON DELETE cascade,
 	FOREIGN KEY (`class_id`) REFERENCES `classes`(`id`) ON UPDATE no action ON DELETE cascade
 );
 --> statement-breakpoint
@@ -156,9 +156,9 @@ CREATE TABLE `training_submissions` (
 	`created_at` integer NOT NULL,
 	`updated_at` integer NOT NULL,
 	FOREIGN KEY (`assignment_id`) REFERENCES `training_assignments`(`id`) ON UPDATE no action ON DELETE cascade,
-	FOREIGN KEY (`student_id`) REFERENCES `users`(`id`) ON UPDATE no action ON DELETE cascade,
+	FOREIGN KEY (`student_id`) REFERENCES `smartfit_app_users`(`id`) ON UPDATE no action ON DELETE cascade,
 	FOREIGN KEY (`schedule_id`) REFERENCES `training_schedules`(`id`) ON UPDATE no action ON DELETE cascade,
-	FOREIGN KEY (`reviewed_by`) REFERENCES `users`(`id`) ON UPDATE no action ON DELETE set null
+	FOREIGN KEY (`reviewed_by`) REFERENCES `smartfit_app_users`(`id`) ON UPDATE no action ON DELETE set null
 );
 --> statement-breakpoint
 CREATE TABLE `training_templates` (
@@ -178,7 +178,7 @@ CREATE TABLE `training_templates` (
 	`status` text DEFAULT 'active',
 	`created_at` integer NOT NULL,
 	`updated_at` integer NOT NULL,
-	FOREIGN KEY (`teacher_id`) REFERENCES `users`(`id`) ON UPDATE no action ON DELETE cascade
+	FOREIGN KEY (`teacher_id`) REFERENCES `smartfit_app_users`(`id`) ON UPDATE no action ON DELETE cascade
 );
 --> statement-breakpoint
 CREATE TABLE `assessment_result_items` (
@@ -208,9 +208,9 @@ CREATE TABLE `assessment_results` (
 	`created_at` integer NOT NULL,
 	`updated_at` integer NOT NULL,
 	FOREIGN KEY (`session_id`) REFERENCES `assessment_sessions`(`id`) ON UPDATE no action ON DELETE cascade,
-	FOREIGN KEY (`student_id`) REFERENCES `users`(`id`) ON UPDATE no action ON DELETE cascade,
-	FOREIGN KEY (`created_by`) REFERENCES `users`(`id`) ON UPDATE no action ON DELETE no action,
-	FOREIGN KEY (`updated_by`) REFERENCES `users`(`id`) ON UPDATE no action ON DELETE no action
+	FOREIGN KEY (`student_id`) REFERENCES `smartfit_app_users`(`id`) ON UPDATE no action ON DELETE cascade,
+	FOREIGN KEY (`created_by`) REFERENCES `smartfit_app_users`(`id`) ON UPDATE no action ON DELETE no action,
+	FOREIGN KEY (`updated_by`) REFERENCES `smartfit_app_users`(`id`) ON UPDATE no action ON DELETE no action
 );
 --> statement-breakpoint
 CREATE TABLE `assessment_sessions` (
@@ -228,7 +228,7 @@ CREATE TABLE `assessment_sessions` (
 	FOREIGN KEY (`school_id`) REFERENCES `schools`(`id`) ON UPDATE no action ON DELETE cascade,
 	FOREIGN KEY (`academic_session_id`) REFERENCES `academic_sessions`(`id`) ON UPDATE no action ON DELETE cascade,
 	FOREIGN KEY (`class_id`) REFERENCES `classes`(`id`) ON UPDATE no action ON DELETE cascade,
-	FOREIGN KEY (`teacher_id`) REFERENCES `users`(`id`) ON UPDATE no action ON DELETE cascade
+	FOREIGN KEY (`teacher_id`) REFERENCES `smartfit_app_users`(`id`) ON UPDATE no action ON DELETE cascade
 );
 --> statement-breakpoint
 CREATE TABLE `segak_activities` (
@@ -271,7 +271,7 @@ CREATE TABLE `audit_logs` (
 	`details` text,
 	`ip_address` text,
 	`created_at` integer NOT NULL,
-	FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON UPDATE no action ON DELETE set null
+	FOREIGN KEY (`user_id`) REFERENCES `smartfit_app_users`(`id`) ON UPDATE no action ON DELETE set null
 );
 --> statement-breakpoint
 CREATE TABLE `notifications` (
@@ -283,7 +283,7 @@ CREATE TABLE `notifications` (
 	`is_read` integer DEFAULT false,
 	`target_url` text,
 	`created_at` integer NOT NULL,
-	FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON UPDATE no action ON DELETE cascade
+	FOREIGN KEY (`user_id`) REFERENCES `smartfit_app_users`(`id`) ON UPDATE no action ON DELETE cascade
 );
 --> statement-breakpoint
 CREATE TABLE `system_settings` (

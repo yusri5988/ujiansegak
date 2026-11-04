@@ -1,4 +1,4 @@
-import { sqliteTable, integer, text } from 'drizzle-orm/sqlite-core'
+import { sqliteTable, integer, text, index } from 'drizzle-orm/sqlite-core'
 import { users } from './users'
 
 export const notifications = sqliteTable('notifications', {
@@ -12,16 +12,22 @@ export const notifications = sqliteTable('notifications', {
   createdAt: integer('created_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
 })
 
-export const auditLogs = sqliteTable('audit_logs', {
-  id: integer('id').primaryKey({ autoIncrement: true }),
-  userId: integer('user_id').references(() => users.id, { onDelete: 'set null' }),
-  action: text('action').notNull(),
-  entityType: text('entity_type').notNull(),
-  entityId: text('entity_id'),
-  details: text('details'),
-  ipAddress: text('ip_address'),
-  createdAt: integer('created_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
-})
+export const auditLogs = sqliteTable(
+  'audit_logs',
+  {
+    id: integer('id').primaryKey({ autoIncrement: true }),
+    userId: integer('user_id').references(() => users.id, { onDelete: 'set null' }),
+    action: text('action').notNull(),
+    entityType: text('entity_type').notNull(),
+    entityId: text('entity_id'),
+    details: text('details'),
+    ipAddress: text('ip_address'),
+    createdAt: integer('created_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
+  },
+  (table) => ({
+    userActionCreatedIdx: index('audit_logs_user_action_created_idx').on(table.userId, table.action, table.createdAt),
+  }),
+)
 
 export const systemSettings = sqliteTable('system_settings', {
   id: integer('id').primaryKey({ autoIncrement: true }),

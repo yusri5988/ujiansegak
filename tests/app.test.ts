@@ -1,14 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import app from '../src/app/app'
 
-describe('web routes', () => {
-  it('GET / returns HTML application', async () => {
-    const res = await app.request('http://localhost/')
-    expect(res.status).toBe(200)
-    const text = await res.text()
-    expect(text).toContain('Ujian SEGAK')
-  })
-
+describe('health route', () => {
   it('GET /health returns status ok', async () => {
     const res = await app.request('http://localhost/health')
     expect(res.status).toBe(200)

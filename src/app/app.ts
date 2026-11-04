@@ -6,7 +6,6 @@ import { requestId } from '@/app/Middleware/Global'
 import { notFound } from '@/app/Exceptions/HttpException'
 import { onError } from '@/app/Exceptions/Handler'
 import api from '@/routes/api'
-import web from '@/routes/web'
 
 const app = new Hono<AppEnv>()
 
@@ -15,7 +14,7 @@ app.use('*', requestId)
 app.use('/api/*', (c, next) => cors({ origin: c.env?.CORS_ORIGIN ?? 'http://localhost:5173' })(c, next))
 
 app.route('/api', api)
-app.route('/', web)
+app.get('/health', (c) => c.json({ status: 'ok', app: 'Sistem Pengurusan Ujian SEGAK' }))
 
 app.notFound(notFound)
 app.onError(onError)

@@ -5,24 +5,24 @@ INSERT OR IGNORE INTO schools (id, name, code, address, state, created_at, updat
 (1, 'SK Seri Bintang Utama', 'BBA1234', 'Jalan Seri Bintang, Kuala Lumpur', 'W.P. Kuala Lumpur', strftime('%s', 'now'), strftime('%s', 'now'));
 
 -- 2. Pengguna & Profil (Password Hash generated via Hash.make)
--- Admin (admin@segak.moe.edu.my / Admin1234!)
-INSERT OR REPLACE INTO users (id, username, email, password_hash, role, status, created_at, updated_at) VALUES
-(1, 'admin@segak.moe.edu.my', 'admin@segak.moe.edu.my', 'b92b967f19cdaf8ef39681b6ad7940ffd229614de7a5153aa0e80b520b0f3c0b', 'admin', 'active', strftime('%s', 'now'), strftime('%s', 'now'));
+-- Admin (admin@segak.moe.edu.my / 123456)
+INSERT OR REPLACE INTO smartfit_app_users (id, username, email, password_hash, role, status, created_at, updated_at) VALUES
+(1, 'admin@segak.moe.edu.my', 'admin@segak.moe.edu.my', 'a56c1409204e2c13705201000c367c7c0a41e59340cf5b58e7bbe9b9bdc5a091', 'admin', 'active', strftime('%s', 'now'), strftime('%s', 'now'));
 
 -- Guru (g-60579088@moe-dl.edu.my / 123456)
-INSERT OR REPLACE INTO users (id, username, email, password_hash, role, status, created_at, updated_at) VALUES
+INSERT OR REPLACE INTO smartfit_app_users (id, username, email, password_hash, role, status, created_at, updated_at) VALUES
 (2, 'g-60579088@moe-dl.edu.my', 'g-60579088@moe-dl.edu.my', 'a56c1409204e2c13705201000c367c7c0a41e59340cf5b58e7bbe9b9bdc5a091', 'teacher', 'active', strftime('%s', 'now'), strftime('%s', 'now'));
 
 INSERT OR IGNORE INTO teacher_profiles (id, user_id, school_id, full_name, phone, created_at, updated_at) VALUES
 (1, 2, 1, 'Cikgu Ahmad bin Razali', '012-3456789', strftime('%s', 'now'), strftime('%s', 'now'));
 
--- Murid (M1001 - M1005 / Murid1234!)
-INSERT OR REPLACE INTO users (id, username, email, password_hash, role, status, created_at, updated_at) VALUES
-(3, 'M1001', 'm1001@student.edu.my', '50f535f5901b25ac7a58bb52325bbcc2492fb64effe0a32e7b7c27a177f344be', 'student', 'active', strftime('%s', 'now'), strftime('%s', 'now')),
-(4, 'M1002', 'm1002@student.edu.my', '50f535f5901b25ac7a58bb52325bbcc2492fb64effe0a32e7b7c27a177f344be', 'student', 'active', strftime('%s', 'now'), strftime('%s', 'now')),
-(5, 'M1003', 'm1003@student.edu.my', '50f535f5901b25ac7a58bb52325bbcc2492fb64effe0a32e7b7c27a177f344be', 'student', 'active', strftime('%s', 'now'), strftime('%s', 'now')),
-(6, 'M1004', 'm1004@student.edu.my', '50f535f5901b25ac7a58bb52325bbcc2492fb64effe0a32e7b7c27a177f344be', 'student', 'active', strftime('%s', 'now'), strftime('%s', 'now')),
-(7, 'M1005', 'm1005@student.edu.my', '50f535f5901b25ac7a58bb52325bbcc2492fb64effe0a32e7b7c27a177f344be', 'student', 'active', strftime('%s', 'now'), strftime('%s', 'now'));
+-- Murid (M1001 - M1005 / 123456)
+INSERT OR REPLACE INTO smartfit_app_users (id, username, email, password_hash, role, status, created_at, updated_at) VALUES
+(3, 'M1001', 'm1001@student.edu.my', 'a56c1409204e2c13705201000c367c7c0a41e59340cf5b58e7bbe9b9bdc5a091', 'student', 'active', strftime('%s', 'now'), strftime('%s', 'now')),
+(4, 'M1002', 'm1002@student.edu.my', 'a56c1409204e2c13705201000c367c7c0a41e59340cf5b58e7bbe9b9bdc5a091', 'student', 'active', strftime('%s', 'now'), strftime('%s', 'now')),
+(5, 'M1003', 'm1003@student.edu.my', 'a56c1409204e2c13705201000c367c7c0a41e59340cf5b58e7bbe9b9bdc5a091', 'student', 'active', strftime('%s', 'now'), strftime('%s', 'now')),
+(6, 'M1004', 'm1004@student.edu.my', 'a56c1409204e2c13705201000c367c7c0a41e59340cf5b58e7bbe9b9bdc5a091', 'student', 'active', strftime('%s', 'now'), strftime('%s', 'now')),
+(7, 'M1005', 'm1005@student.edu.my', 'a56c1409204e2c13705201000c367c7c0a41e59340cf5b58e7bbe9b9bdc5a091', 'student', 'active', strftime('%s', 'now'), strftime('%s', 'now'));
 
 INSERT OR IGNORE INTO student_profiles (id, user_id, school_id, student_id_num, full_name, gender, dob, height_cm, weight_kg, created_at, updated_at) VALUES
 (1, 3, 1, 'M1001', 'Amirul bin Asyraf', 'L', '2015-04-12', 138.5, 34.0, strftime('%s', 'now'), strftime('%s', 'now')),

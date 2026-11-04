@@ -1,0 +1,12 @@
+/* Classes and monitoring share the training workspace's visual language. */
+.teacher-page .teacher-class-card { width: 100%; text-align: left; cursor: pointer; transition: border-color .15s, background .15s; }
+.teacher-page .teacher-class-card:hover { background: #f6faf6; border-color: #bcd7c3; }
+.teacher-page .teacher-card-arrow { width: 18px; height: 18px; flex: 0 0 18px; align-self: center; color: #80a18b; }
+.teacher-page .teacher-status { flex-shrink: 0; padding: 7px 10px; border-radius: 99px; background: #edf5f0; color: #34735c; font-size: 10px; font-weight: 800; }
+.teacher-page .teacher-status-pending { background: #edf3f8; color: #52748a; }
+.teacher-page .teacher-action { min-height: 36px; padding: 0 12px; border: 1px solid #dce9e1; border-radius: 9px; color: #315a49; font-size: 11px; font-weight: 800; }
+.teacher-page .teacher-action:hover { background: #f0f7f2; }
+@media (max-width: 640px) {
+  .teacher-page .training-section-heading { align-items: flex-start; }
+  .teacher-page .teacher-status { margin-left: 56px; }
+}

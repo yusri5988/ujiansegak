@@ -1,10 +1,13 @@
-import { sqliteTable, integer, text, real } from 'drizzle-orm/sqlite-core'
+import { sqliteTable, integer, text, real, uniqueIndex, index } from 'drizzle-orm/sqlite-core'
 import { users } from './users'
 import { classes } from './classes'
+import { schools } from './schools'
 
 export const trainingTemplates = sqliteTable('training_templates', {
   id: integer('id').primaryKey({ autoIncrement: true }),
+  creationRequestId: text('creation_request_id'),
   teacherId: integer('teacher_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  schoolId: integer('school_id').references(() => schools.id, { onDelete: 'restrict' }),
   title: text('title').notNull(),
   description: text('description'),
   objective: text('objective'),
@@ -19,10 +22,14 @@ export const trainingTemplates = sqliteTable('training_templates', {
   status: text('status').default('active'),
   createdAt: integer('created_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
   updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
-})
+}, (table) => ({
+  creationRequestIdUnique: uniqueIndex('training_templates_creation_request_id_unique').on(table.creationRequestId),
+  schoolIdIdx: index('training_templates_school_id_idx').on(table.schoolId),
+}))
 
 export const trainingSchedules = sqliteTable('training_schedules', {
   id: integer('id').primaryKey({ autoIncrement: true }),
+  creationRequestId: text('creation_request_id'),
   teacherId: integer('teacher_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
   classId: integer('class_id').notNull().references(() => classes.id, { onDelete: 'cascade' }),
   title: text('title').notNull(),
@@ -34,7 +41,9 @@ export const trainingSchedules = sqliteTable('training_schedules', {
   status: text('status', { enum: ['draft', 'published', 'closed', 'archived'] }).notNull().default('published'),
   createdAt: integer('created_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
   updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
-})
+}, (table) => ({
+  creationRequestIdUnique: uniqueIndex('training_schedules_creation_request_id_unique').on(table.creationRequestId),
+}))
 
 export const trainingScheduleActivities = sqliteTable('training_schedule_activities', {
   id: integer('id').primaryKey({ autoIncrement: true }),

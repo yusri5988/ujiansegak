@@ -10,6 +10,7 @@ studentRouter.use('*', authMiddleware, requireRole(['student']))
 
 // Tugasan & Penyerahan Latihan Murid
 studentRouter.get('/assignments', (c) => TrainingController.getStudentAssignments(c))
+studentRouter.get('/today-reminders', (c) => TrainingController.getTodayReminders(c))
 studentRouter.post('/submissions', (c) => TrainingController.submitTraining(c))
 
 // Log Latihan Harian Murid (5 Aktiviti SEGAK)

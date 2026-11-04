@@ -1,0 +1,70 @@
+/* Student and admin dashboards only; shared account and teacher screens remain unchanged. */
+#studentDashboard.dashboard-page, #studentActivity.dashboard-page, #adminDashboard.dashboard-page { max-width: 1050px; margin: 8px auto 0; }
+#studentDashboard.dashboard-page:not(.hidden), #studentActivity.dashboard-page:not(.hidden) { display: block; }
+.dashboard-page .dashboard-heading { display: flex; justify-content: space-between; align-items: end; gap: 24px; margin-bottom: 26px; }
+.dashboard-page .dashboard-eyebrow { color: #619071; font-size: 10px; font-weight: 800; letter-spacing: .15em; }
+.dashboard-page .dashboard-eyebrow span { color: #a9c1ad; margin: 0 5px; }
+.dashboard-page .dashboard-heading h1 { margin: 9px 0 8px; color: #173d31; font-size: clamp(30px, 4vw, 43px); font-weight: 800; letter-spacing: -.055em; line-height: 1.1; overflow-wrap: anywhere; }
+.dashboard-page .dashboard-heading h1 .dashboard-dot { color: #9bc849; }
+.dashboard-page .dashboard-heading > div > p:last-child, .dashboard-page .dashboard-section-heading > div > p:last-child { color: #71877c; font-size: 13px; line-height: 1.6; }
+.dashboard-page .dashboard-date { flex-shrink: 0; padding: 8px 12px; border: 1px solid #dce9df; border-radius: 10px; background: #f3f8f1; color: #527662; font-size: 11px; font-weight: 800; }
+.dashboard-page .dashboard-primary { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 0 17px; border-radius: 11px; background: #214f3d; color: white; font-size: 12px; font-weight: 800; }
+.dashboard-page .dashboard-primary:hover { background: #173d31; }
+.dashboard-page .dashboard-primary svg { width: 17px; height: 17px; }
+.student-reminders { margin-bottom: 14px; padding: 21px 24px; border: 1px solid #e8dfbd; border-radius: 18px; background: #fffdf5; }
+.student-reminders-heading { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.student-reminders-heading h2 { margin-top: 6px; color: #173d31; font-size: 19px; font-weight: 800; letter-spacing: -.035em; }
+.student-reminders-icon { display: grid; flex: 0 0 42px; place-items: center; width: 42px; height: 42px; border-radius: 13px; background: #fbf1d4; color: #997125; }
+.student-reminders-icon svg { width: 21px; height: 21px; }
+.student-reminders-message { margin-top: 12px; color: #718077; font-size: 12px; line-height: 1.6; }
+.student-reminders-list { display: grid; gap: 9px; margin-top: 15px; }
+.student-reminders-list li { display: flex; align-items: baseline; gap: 10px; color: #36554e; font-size: 13px; font-weight: 700; overflow-wrap: anywhere; }
+.student-reminders-dot { flex: 0 0 7px; width: 7px; height: 7px; border-radius: 50%; background: #c39535; }
+.student-reminders-action { min-height: 40px; margin-top: 10px; color: #286d4d; font-size: 12px; font-weight: 800; text-align: left; }
+.student-reminders-action:hover { color: #173d31; }
+.student-home-feature { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; padding: 26px; border: 1px solid #d6e6d9; border-radius: 20px; background: linear-gradient(135deg, #f4f8ed 0%, #e7f2e8 100%); }
+.student-home-copy { max-width: 520px; }
+.student-home-eyebrow { color: #63856c; font-size: 10px; font-weight: 800; letter-spacing: .13em; }
+.student-home-copy h2 { margin: 8px 0 7px; color: #173d31; font-size: clamp(22px, 3vw, 30px); font-weight: 800; letter-spacing: -.04em; line-height: 1.2; }
+.student-home-copy > p:last-child { max-width: 470px; color: #557064; font-size: 13px; line-height: 1.65; }
+.student-home-action { display: inline-flex; flex-shrink: 0; align-items: center; justify-content: center; gap: 10px; min-height: 44px; padding: 0 16px; border-radius: 11px; background: #214f3d; color: #fff; font-size: 12px; font-weight: 800; }
+.student-home-action:hover { background: #173d31; }
+.student-home-action svg { width: 17px; height: 17px; }
+.student-home-note { display: flex; align-items: center; gap: 14px; margin-top: 14px; padding: 17px; border: 1px solid #e0ebe4; border-radius: 15px; background: #fff; }
+.student-home-note-icon { display: grid; flex: 0 0 42px; place-items: center; width: 42px; height: 42px; border-radius: 13px; background: #edf6e8; color: #34735c; }
+.student-home-note-icon svg { width: 21px; height: 21px; }
+.student-home-note strong { color: #264f3d; font-size: 12px; }
+.student-home-note p { margin-top: 3px; color: #71877c; font-size: 11px; line-height: 1.5; }
+.dashboard-page .dashboard-section { margin-top: 34px; }
+.dashboard-page .dashboard-section-heading { display: flex; justify-content: space-between; align-items: center; gap: 15px; margin-bottom: 17px; }
+.dashboard-page .dashboard-section-heading h2 { margin: 5px 0 3px; color: #173d31; font-size: 21px; font-weight: 800; letter-spacing: -.035em; }
+.dashboard-page .dashboard-list { display: grid; gap: 10px; }
+.dashboard-page .dashboard-card { display: flex; align-items: flex-start; gap: 16px; padding: 20px; background: #fff; border: 1px solid #e0ebe4; border-radius: 16px; box-shadow: 0 6px 20px #153b3608; }
+.dashboard-page .dashboard-card-icon { display: grid; flex: 0 0 44px; place-items: center; width: 44px; height: 44px; border-radius: 13px; color: #34735c; background: #eaf5e8; }
+.dashboard-page .dashboard-card-icon svg { width: 21px; height: 21px; }
+.dashboard-page .dashboard-card-content { flex: 1; min-width: 0; }
+.dashboard-page .dashboard-card-label { color: #80a18b; font-size: 9px; font-weight: 800; letter-spacing: .12em; }
+.dashboard-page .dashboard-card h3 { overflow-wrap: anywhere; margin: 5px 0 8px; color: #173d31; font-size: 15px; font-weight: 800; }
+.dashboard-page .dashboard-card-meta { color: #72877c; font-size: 11px; font-weight: 600; overflow-wrap: anywhere; }
+.dashboard-page .dashboard-card-content > p { margin-top: 10px; color: #557064; font-size: 12px; line-height: 1.6; overflow-wrap: anywhere; }
+.dashboard-page .dashboard-card-actions { display: flex; align-items: flex-end; flex-direction: column; gap: 10px; }
+.dashboard-page .dashboard-card-actions button { min-height: 34px; padding: 0 12px; border: 1px solid #dce9e1; border-radius: 9px; color: #315a49; font-size: 11px; font-weight: 800; }
+.dashboard-page .dashboard-card-actions button:hover { background: #f0f7f2; }
+.dashboard-page .dashboard-status { padding: 5px 9px; border-radius: 999px; font-size: 10px; font-weight: 800; white-space: nowrap; }
+.dashboard-page .dashboard-status.is-done { color: #276747; background: #e7f5e9; }
+.dashboard-page .dashboard-status.is-pending { color: #8a6426; background: #fcf4dc; }
+.dashboard-page .dashboard-empty { display: flex; flex-direction: column; align-items: center; padding: 40px 20px; text-align: center; color: #758a7e; background: #fff; border: 1px dashed #cbded0; border-radius: 17px; font-size: 12px; }
+.dashboard-page .dashboard-empty-icon { display: grid; place-items: center; width: 48px; height: 48px; margin-bottom: 14px; color: #4d8664; background: #edf6e8; border-radius: 15px; font-size: 24px; }
+.dashboard-page .dashboard-empty strong { color: #264f3d; font-size: 14px; }
+.dashboard-page .dashboard-empty p { margin-top: 6px; line-height: 1.6; }
+.dashboard-page button:focus-visible { outline: 3px solid #91bb53; outline-offset: 3px; }
+@media (max-width: 640px) {
+  #studentDashboard.dashboard-page, #studentActivity.dashboard-page, #adminDashboard.dashboard-page { margin-top: 2px; }
+  .dashboard-page .dashboard-heading { align-items: flex-start; flex-direction: column; gap: 16px; margin-bottom: 20px; }
+  .dashboard-page .dashboard-heading h1 { font-size: 32px; }
+  .student-home-feature { align-items: stretch; flex-direction: column; gap: 18px; padding: 20px; }
+  .student-home-action { width: 100%; }
+  .dashboard-page .dashboard-section { margin-top: 26px; }
+  .dashboard-page .dashboard-card { flex-wrap: wrap; gap: 12px; padding: 16px; }
+  .dashboard-page .dashboard-card-actions { width: 100%; padding-left: 56px; flex-direction: row; align-items: center; justify-content: space-between; flex-wrap: wrap; }
+}

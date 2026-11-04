@@ -1,7 +1,7 @@
-import { sqliteTable, integer, text, real } from 'drizzle-orm/sqlite-core'
+import { sqliteTable, integer, text, real, index } from 'drizzle-orm/sqlite-core'
 import { schools } from './schools'
 
-export const users = sqliteTable('users', {
+export const users = sqliteTable('smartfit_app_users', {
   id: integer('id').primaryKey({ autoIncrement: true }),
   username: text('username').notNull().unique(), // Email for admin/teacher, ID Murid for student
   email: text('email'),
@@ -39,7 +39,23 @@ export const studentProfiles = sqliteTable('student_profiles', {
   updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
 })
 
+export const authSessions = sqliteTable(
+  'smartfit_app_auth_sessions',
+  {
+    jti: text('jti').primaryKey(),
+    userId: integer('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+    expiresAt: integer('expires_at', { mode: 'timestamp' }).notNull(),
+    revokedAt: integer('revoked_at', { mode: 'timestamp' }),
+    createdAt: integer('created_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
+  },
+  (table) => ({
+    userIdIdx: index('smartfit_app_auth_sessions_user_id_idx').on(table.userId),
+  }),
+)
+
 export type UserRow = typeof users.$inferSelect
 export type NewUserRow = typeof users.$inferInsert
 export type TeacherProfileRow = typeof teacherProfiles.$inferSelect
 export type StudentProfileRow = typeof studentProfiles.$inferSelect
+export type AuthSessionRow = typeof authSessions.$inferSelect
+export type NewAuthSessionRow = typeof authSessions.$inferInsert

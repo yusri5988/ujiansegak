@@ -11,15 +11,24 @@
   },
   "vars": {
     "APP_NAME": "sistem-ujian-segak",
-    "CORS_ORIGIN": "http://localhost:5173"
+    "CORS_ORIGIN": "http://localhost:5173",
+    "DEEPSEEK_MODEL": "deepseek-flash"
+  },
+  "secrets": {
+    "required": ["JWT_SECRET", "DEEPSEEK_API_KEY"]
   },
   "d1_databases": [
     {
       "binding": "DB",
-      "database_name": "sistem-ujian-segak",
-      "database_id": "d02515c2-3cf5-456a-987b-d1ec1ea69158",
+      "database_name": "smartfit",
+      "database_id": "7c3d1bf8-4b66-4b57-8f85-f3f96fd142de",
       "migrations_dir": "src/database/migrations"
     }
   ],
+  "assets": {
+    "directory": "./frontend/dist",
+    "not_found_handling": "single-page-application",
+    "run_worker_first": ["/api/*", "/api", "/health"]
+  },
   "minify": true
 }

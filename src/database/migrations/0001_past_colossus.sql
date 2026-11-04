@@ -10,5 +10,5 @@ CREATE TABLE `daily_activity_logs` (
 	`sit_reach_cm` real DEFAULT 0,
 	`notes` text,
 	`created_at` integer NOT NULL,
-	FOREIGN KEY (`student_id`) REFERENCES `users`(`id`) ON UPDATE no action ON DELETE cascade
+	FOREIGN KEY (`student_id`) REFERENCES `smartfit_app_users`(`id`) ON UPDATE no action ON DELETE cascade
 );
