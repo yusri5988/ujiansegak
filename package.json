@@ -20,6 +20,7 @@
     "db:seed:remote": "wrangler d1 execute DB --remote --file=./src/database/seeders/seed.sql",
     "setup:d1": "powershell -ExecutionPolicy Bypass -File ./scripts/setup.ps1",
     "test": "vitest run",
+    "test:teacher-daily-log": "vitest run tests/teacher-daily-log.test.ts",
     "test:workers": "vitest run --config vitest.config.ts",
     "test:watch": "vitest"
   },

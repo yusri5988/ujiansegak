@@ -206,9 +206,24 @@
 
         <!-- TAB 2: PANTAUAN LATIHAN -->
         <div id="tabTeacherDailyLogs" class="hidden training-page teacher-page">
-          <div class="training-heading"><div><p class="training-eyebrow">RUANG GURU <span>/</span> PANTAUAN</p><h1>Pantauan latihan<span>.</span></h1><p>Semak latihan yang sudah dihantar oleh murid.</p></div><button type="button" onclick="loadTeacherSubmissions()" class="training-primary">Muat semula</button></div>
+          <div class="training-heading"><div><p class="training-eyebrow">RUANG GURU <span>/</span> LOG HARIAN</p><h1>Progress murid<span>.</span></h1><p>Lihat kemas kini aktiviti setiap murid mengikut tarikh.</p></div><button type="button" onclick="loadTeacherDailyLogs()" class="training-primary">Muat semula</button></div>
+          <section class="training-section" aria-labelledby="dailyLogTitle">
+            <div class="training-section-heading"><div><p class="training-eyebrow">REKOD AKTIVITI</p><h2 id="dailyLogTitle">Progress harian murid</h2><p>Pilih kelas dan satu tarikh. Tarikh yang sama digunakan untuk semua murid dalam kelas tersebut.</p></div></div>
+            <div class="daily-log-filters">
+              <div class="daily-log-filter-field"><label for="dailyLogClassSelect">Kelas</label><select id="dailyLogClassSelect" onchange="loadTeacherDailyLogs()"><option value="">Pilih kelas</option></select></div>
+              <div class="daily-log-filter-field"><label for="dailyLogDate">Tarikh progress</label><input id="dailyLogDate" type="date" onchange="loadTeacherDailyLogs()"></div>
+            </div>
+            <div class="daily-log-overview" aria-live="polite">
+              <div><span>Kelas</span><strong id="dailyLogClassName">—</strong></div>
+              <div><span>Tarikh</span><strong id="dailyLogSelectedDate">—</strong></div>
+              <div><span>Jumlah murid</span><strong id="dailyLogTotal">0</strong></div>
+              <div><span>Sudah kemas kini</span><strong id="dailyLogCompleted">0</strong></div>
+              <div><span>Belum kemas kini</span><strong id="dailyLogNotCompleted">0</strong></div>
+            </div>
+            <div id="dailyLogStudentList" class="training-list daily-log-student-list" aria-live="polite"><p class="training-empty">Pilih kelas dan tarikh untuk melihat progress murid.</p></div>
+          </section>
           <section class="training-section" aria-labelledby="teacherSubmissionTitle">
-            <div class="training-section-heading"><div><p class="training-eyebrow">AKTIVITI MURID</p><h2 id="teacherSubmissionTitle">Senarai penghantaran</h2><p>Penghantaran latihan daripada murid anda.</p></div></div>
+            <div class="training-section-heading"><div><p class="training-eyebrow">LATIHAN BERJADUAL</p><h2 id="teacherSubmissionTitle">Penghantaran latihan</h2><p>Semakan bagi latihan yang diberikan kepada murid.</p></div><button type="button" onclick="loadTeacherSubmissions()" class="teacher-action">Muat semula</button></div>
             <div id="teacherSubmissionList" class="training-list" aria-live="polite"><p class="training-empty">Memuatkan penghantaran...</p></div>
           </section>
         </div>
@@ -441,6 +456,7 @@
     let activeClassId = null;
     let editingScheduleId = null;
     let teacherSchedules = [];
+    let dailyLogRequest = 0;
 
     const isLocalDev = ['localhost', '127.0.0.1'].includes(window.location.hostname);
     if ('serviceWorker' in navigator && !isLocalDev) {
@@ -533,7 +549,6 @@
         }
         loadTeacherClasses();
         if (path === '/teacher/segak' || path === '/teacher/training') loadTeacherSchedules();
-        if (path === '/teacher/daily-log') loadTeacherSubmissions();
       } else if (role === 'student') {
         const studentPath = path === '/student/activity' ? '/student/activity' : '/student/dashboard';
         if (path !== studentPath) history.replaceState(null, '', studentPath);
@@ -753,6 +768,7 @@
         document.getElementById('tabTeacherDailyLogs').classList.remove('hidden');
         const activeEl = document.getElementById('bNavDailyLogs');
         if (activeEl) activeEl.classList.add('active-nav-item');
+        loadTeacherDailyLogs();
         loadTeacherSubmissions();
       }
       if (tabName === 'teacherTraining') {
@@ -766,9 +782,6 @@
         const activeEl = document.getElementById('bNavAi');
         if (activeEl) activeEl.classList.add('active-nav-item');
         if (window.loadAiConversations) window.loadAiConversations();
-      }
-      if (tabName === 'teacherDailyLogs') {
-        loadTeacherSubmissions();
       }
     }
 
@@ -1005,7 +1018,7 @@
       const select = document.getElementById('dailyLogClassSelect');
       if (!select) return;
       const currentValue = select.value;
-      select.innerHTML = '<option value="">Pilih kelas</option>' + classes.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+      select.innerHTML = '<option value="">Pilih kelas</option>' + classes.map(c => `<option value="${escapeHtml(c.id)}">${escapeHtml(c.name)}</option>`).join('');
       if (currentValue && classes.some(c => String(c.id) === currentValue)) select.value = currentValue;
     }
 
@@ -1021,58 +1034,85 @@
 
     async function loadTeacherDailyLogs() {
       const classId = document.getElementById('dailyLogClassSelect')?.value;
-      const date = document.getElementById('dailyLogDate')?.value;
+      const dateInput = document.getElementById('dailyLogDate');
       const container = document.getElementById('dailyLogStudentList');
-      if (!classId || !date) {
-        container.innerHTML = '<p class="text-xs text-slate-400 text-center py-3">Pilih kelas dan tarikh untuk melihat rekod.</p>';
+      if (!dateInput || !container) return;
+      if (!dateInput.value) dateInput.value = new Date(Date.now() + 8 * 60 * 60 * 1000).toISOString().slice(0, 10);
+      const date = dateInput.value;
+      const request = ++dailyLogRequest;
+
+      if (!classId) {
+        document.getElementById('dailyLogClassName').textContent = '—';
+        document.getElementById('dailyLogSelectedDate').textContent = formatDate(date);
+        document.getElementById('dailyLogTotal').textContent = '0';
+        document.getElementById('dailyLogCompleted').textContent = '0';
+        document.getElementById('dailyLogNotCompleted').textContent = '0';
+        container.innerHTML = '<div class="training-empty"><strong>Pilih kelas untuk mula.</strong><p>Pilih kelas dan tarikh untuk melihat progress semua murid.</p></div>';
         return;
       }
 
-      container.innerHTML = '<p class="text-xs text-slate-400 text-center py-3">Memuatkan status murid...</p>';
-      const res = await fetch(`/api/teacher/classes/${classId}/daily-logs?date=${date}`, {
-        headers: { 'Authorization': 'Bearer ' + currentToken }
-      });
-      const data = await res.json();
-      if (!data.success) {
-        container.innerHTML = `<p class="text-xs text-red-500 text-center py-3">${data.message || 'Gagal memuatkan rekod.'}</p>`;
-        return;
-      }
+      container.innerHTML = '<p class="training-empty">Memuatkan progress murid...</p>';
+      try {
+        const res = await fetch(`/api/teacher/classes/${encodeURIComponent(classId)}/daily-logs?date=${encodeURIComponent(date)}`, {
+          headers: { 'Authorization': 'Bearer ' + currentToken }
+        });
+        const data = await res.json();
+        if (request !== dailyLogRequest) return;
+        if (!res.ok || !data.success) {
+          container.innerHTML = `<div class="training-empty"><strong>Rekod tidak dapat dimuatkan.</strong><p>${escapeHtml(data.message || 'Sila cuba lagi.')}</p></div>`;
+          return;
+        }
 
-      document.getElementById('dailyLogTotal').textContent = data.data.summary.total;
-      document.getElementById('dailyLogCompleted').textContent = data.data.summary.completed;
-      document.getElementById('dailyLogNotCompleted').textContent = data.data.summary.notCompleted;
-      document.getElementById('dailyLogClassName').textContent = data.data.class.name;
-      document.getElementById('dailyLogSelectedDate').textContent = 'Tarikh: ' + data.data.date;
+        document.getElementById('dailyLogTotal').textContent = data.data.summary.total;
+        document.getElementById('dailyLogCompleted').textContent = data.data.summary.completed;
+        document.getElementById('dailyLogNotCompleted').textContent = data.data.summary.notCompleted;
+        document.getElementById('dailyLogClassName').textContent = data.data.class.name;
+        document.getElementById('dailyLogSelectedDate').textContent = formatDate(data.data.date);
 
-      if (data.data.students.length === 0) {
-        container.innerHTML = '<p class="text-xs text-slate-400 text-center py-3">Tiada murid dalam kelas ini.</p>';
-        return;
-      }
+        if (data.data.students.length === 0) {
+          container.innerHTML = '<div class="training-empty"><strong>Tiada murid dalam kelas ini.</strong><p>Murid yang didaftarkan dalam kelas akan dipaparkan di sini.</p></div>';
+          return;
+        }
 
-      container.innerHTML = data.data.students.map(student => {
-        const completed = student.status === 'completed';
-        const log = student.log;
-        return `
-          <details class="group p-3 bg-slate-50 border border-slate-200 rounded-xl">
-            <summary class="list-none cursor-pointer flex items-center justify-between gap-3">
-              <div class="min-w-0">
-                <div class="font-bold text-xs text-slate-900 truncate">${student.fullName}</div>
-                <div class="text-[10px] text-slate-500">ID: ${student.studentIdNum} Â· ${student.gender === 'L' ? 'Lelaki' : 'Perempuan'}</div>
+        container.innerHTML = data.data.students.map(student => {
+          const completed = student.status === 'completed';
+          const log = student.log;
+          const metrics = log ? [
+            ['Panaskan badan', log.warmupCompleted ? 'Selesai' : 'Belum selesai'],
+            ['Bangkit tubi', `${log.curlUpReps ?? 0} ulangan`],
+            ['Kardio', `${log.cardioDurationMinutes ?? 0} minit`],
+            ['Nadi / ulangan kardio', log.cardioPulseOrReps ?? 0],
+            ['Tekan tubi', `${log.pushUpReps ?? 0} ulangan`],
+            ['Jangkauan melunjur', `${log.sitReachCm ?? 0} cm`]
+          ] : [];
+          const rows = metrics.length
+            ? metrics.map(([activity, progress]) => `<tr><th scope="row">${escapeHtml(activity)}</th><td>${escapeHtml(progress)}</td></tr>`).join('')
+            : '<tr><td colspan="2" class="daily-log-no-entry">Belum ada progress direkodkan pada tarikh ini.</td></tr>';
+
+          return `
+            <article class="daily-log-card">
+              <header class="daily-log-card-header">
+                <div class="daily-log-student">
+                  <p>ID murid: ${escapeHtml(student.studentIdNum || '—')}</p>
+                  <h3>${escapeHtml(student.fullName || 'Nama murid')}</h3>
+                </div>
+                <span class="daily-log-status ${completed ? 'is-complete' : 'is-pending'}">${completed ? 'Sudah kemas kini' : 'Belum kemas kini'}</span>
+              </header>
+              <div class="daily-log-table-wrap">
+                <table class="daily-log-table">
+                  <caption class="sr-only">Progress ${escapeHtml(student.fullName || 'murid')} pada ${escapeHtml(formatDate(date))}</caption>
+                  <thead><tr><th scope="col">Aktiviti</th><th scope="col">Progress</th></tr></thead>
+                  <tbody>${rows}</tbody>
+                </table>
               </div>
-              <span class="shrink-0 text-[10px] font-bold px-2 py-1 rounded-full ${completed ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}">${completed ? 'Sudah buat' : 'Belum buat'}</span>
-            </summary>
-            ${completed ? `<div class="mt-3 pt-3 border-t border-slate-200 grid grid-cols-2 gap-1 text-[10px] text-slate-700">
-              <div>Warm-up: <b>${log.warmupCompleted ? 'Selesai' : 'Tidak'}</b></div>
-              <div>Bangkit tubi: <b>${log.curlUpReps ?? 0} reps</b></div>
-              <div>Kardio: <b>${log.cardioDurationMinutes ?? 0} min</b></div>
-              <div>Nadi/ulangan: <b>${log.cardioPulseOrReps ?? 0}</b></div>
-              <div>Tekan tubi: <b>${log.pushUpReps ?? 0} reps</b></div>
-              <div>Jangkauan: <b>${log.sitReachCm ?? 0} cm</b></div>
-              ${log.notes ? `<div class="col-span-2 text-slate-500 italic pt-1">Catatan: "${log.notes}"</div>` : ''}
-            </div>` : '<div class="mt-2 text-[10px] text-slate-500">Murid belum menghantar rekod untuk tarikh ini.</div>'}
-          </details>
-        `;
-      }).join('');
+              ${log?.notes ? `<p class="daily-log-note"><strong>Catatan:</strong> ${escapeHtml(log.notes)}</p>` : ''}
+            </article>
+          `;
+        }).join('');
+      } catch (_) {
+        if (request !== dailyLogRequest) return;
+        container.innerHTML = '<div class="training-empty"><strong>Sambungan terganggu.</strong><p>Rekod tidak dapat dimuatkan. Sila cuba lagi.</p></div>';
+      }
     }
 
     async function selectClass(classId, className) {

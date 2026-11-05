@@ -22,3 +22,85 @@
   #tabTeacherTraining .training-card-actions { gap: 5px; }
   #tabTeacherTraining .training-order-action { flex-basis: 32px; width: 32px; min-width: 32px; }
 }
+
+/* Daily progress is filtered once for the whole selected class. */
+#tabTeacherDailyLogs .daily-log-filters {
+  display: grid;
+  grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid #dcebe3;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, .86);
+}
+#tabTeacherDailyLogs .daily-log-filter-field { display: grid; gap: 6px; min-width: 0; }
+#tabTeacherDailyLogs .daily-log-filter-field label { color: #315d4d; font-size: 11px; font-weight: 800; }
+#tabTeacherDailyLogs .daily-log-filter-field select,
+#tabTeacherDailyLogs .daily-log-filter-field input {
+  width: 100%;
+  min-height: 43px;
+  padding: 0 12px;
+  border: 1px solid #d4e4da !important;
+  border-radius: 11px !important;
+  color: #173d31;
+  background: #fff !important;
+  font: inherit;
+  font-size: 12px;
+}
+#tabTeacherDailyLogs .daily-log-filter-field select:focus,
+#tabTeacherDailyLogs .daily-log-filter-field input:focus { outline: none; border-color: #6da888 !important; box-shadow: 0 0 0 3px rgba(57, 128, 86, .12); }
+#tabTeacherDailyLogs .daily-log-overview {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) repeat(4, minmax(0, 1fr));
+  gap: 9px;
+  margin: 12px 0;
+}
+#tabTeacherDailyLogs .daily-log-overview > div {
+  display: grid;
+  min-width: 0;
+  gap: 5px;
+  padding: 12px;
+  border: 1px solid #deebe2;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, .78);
+}
+#tabTeacherDailyLogs .daily-log-overview span { color: #71877c; font-size: 9px; font-weight: 700; }
+#tabTeacherDailyLogs .daily-log-overview strong { overflow-wrap: anywhere; color: #0d352a; font-size: 12px; font-weight: 800; }
+#tabTeacherDailyLogs .daily-log-student-list { gap: 12px; }
+#tabTeacherDailyLogs .daily-log-card {
+  min-width: 0;
+  padding: 17px;
+  border: 1px solid #dcebe3;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, .96);
+  box-shadow: 0 10px 20px rgba(21, 74, 49, .06);
+}
+#tabTeacherDailyLogs .daily-log-card-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 13px; }
+#tabTeacherDailyLogs .daily-log-student { min-width: 0; }
+#tabTeacherDailyLogs .daily-log-student p { color: #71877c; font-size: 10px; font-weight: 700; }
+#tabTeacherDailyLogs .daily-log-student h3 { margin: 4px 0 0; color: #0b362a; font-size: 16px; font-weight: 800; overflow-wrap: anywhere; }
+#tabTeacherDailyLogs .daily-log-status { flex: 0 0 auto; padding: 6px 9px; border-radius: 999px; font-size: 9px; font-weight: 800; }
+#tabTeacherDailyLogs .daily-log-status.is-complete { color: #24704c; background: #eaf6eb; }
+#tabTeacherDailyLogs .daily-log-status.is-pending { color: #916426; background: #fff5e3; }
+#tabTeacherDailyLogs .daily-log-table-wrap { overflow-x: auto; border: 1px solid #e4eee7; border-radius: 13px; }
+#tabTeacherDailyLogs .daily-log-table { width: 100%; border-collapse: collapse; text-align: left; }
+#tabTeacherDailyLogs .daily-log-table th,
+#tabTeacherDailyLogs .daily-log-table td { padding: 10px 12px; border-bottom: 1px solid #edf2ee; font-size: 11px; }
+#tabTeacherDailyLogs .daily-log-table thead th { color: #557064; background: #f5faf5; font-size: 9px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; }
+#tabTeacherDailyLogs .daily-log-table tbody th { width: 48%; color: #5e7065; font-weight: 600; }
+#tabTeacherDailyLogs .daily-log-table tbody td { color: #173d31; font-weight: 800; }
+#tabTeacherDailyLogs .daily-log-table tbody tr:last-child th,
+#tabTeacherDailyLogs .daily-log-table tbody tr:last-child td { border-bottom: 0; }
+#tabTeacherDailyLogs .daily-log-table .daily-log-no-entry { color: #758a7e; font-weight: 600; text-align: center; }
+#tabTeacherDailyLogs .daily-log-note { margin-top: 11px; color: #64766b; font-size: 11px; line-height: 1.55; overflow-wrap: anywhere; }
+#tabTeacherDailyLogs .daily-log-note strong { color: #315d4d; }
+@media (max-width: 700px) {
+  #tabTeacherDailyLogs .daily-log-filters { grid-template-columns: 1fr; gap: 10px; padding: 13px; }
+  #tabTeacherDailyLogs .daily-log-overview { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 7px; }
+  #tabTeacherDailyLogs .daily-log-overview > div { padding: 10px; }
+  #tabTeacherDailyLogs .daily-log-card { padding: 13px; border-radius: 17px; }
+  #tabTeacherDailyLogs .daily-log-card-header { gap: 8px; }
+  #tabTeacherDailyLogs .daily-log-status { max-width: 118px; text-align: center; }
+  #tabTeacherDailyLogs .daily-log-table th,
+  #tabTeacherDailyLogs .daily-log-table td { padding: 9px 10px; font-size: 10px; }
+}
