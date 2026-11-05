@@ -11,13 +11,766 @@
   .teacher-page .teacher-status { margin-left: 56px; }
 }
 
+/* Teacher classes — SEGAK's fresh, active classroom identity. */
+body:has(#appHeader:not(.hidden)) {
+  background: #eff7f1 !important;
+}
+body:has(#appHeader:not(.hidden)) .mobile-container {
+  max-width: 1280px;
+  overflow: hidden;
+  background: linear-gradient(180deg, #fbfdfb 0%, #f3faf5 58%, #edf7f0 100%) !important;
+  border-color: transparent;
+  box-shadow: 0 0 50px rgba(21, 59, 54, .06);
+}
+body:has(#appHeader:not(.hidden)) main {
+  max-width: none;
+  padding: 24px clamp(20px, 5vw, 60px) 148px !important;
+}
+body:has(#appHeader:not(.hidden)) #appHeader {
+  position: relative;
+  align-items: center;
+  padding: 25px clamp(20px, 4.8vw, 48px) 12px !important;
+  background: rgba(251, 253, 251, .94) !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+body:has(#appHeader:not(.hidden)) #appHeader .cursor-pointer {
+  gap: 14px;
+}
+body:has(#appHeader:not(.hidden)) #appHeader .cursor-pointer > * + * {
+  margin-left: 0 !important;
+}
+body:has(#appHeader:not(.hidden)) #appHeader .cursor-pointer > div:first-child {
+  position: relative;
+  display: grid;
+  flex: 0 0 72px;
+  place-items: center;
+  width: 72px;
+  height: 64px;
+  overflow: hidden;
+  border: 0 !important;
+  border-radius: 18px !important;
+  background: linear-gradient(145deg, #25885d 0%, #07523d 58%, #023a2e 100%) !important;
+  box-shadow: 0 4px 8px rgba(4, 65, 45, .16), inset 0 1px 0 rgba(255,255,255,.2);
+  color: transparent !important;
+  font-size: 0;
+}
+body:has(#appHeader:not(.hidden)) #appHeader .cursor-pointer > div:first-child::after {
+  content: "";
+  display: block;
+  width: 44px;
+  height: 44px;
+  background: center / contain no-repeat url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 72 72' fill='none'%3E%3Ccircle cx='43' cy='12' r='6' fill='white'/%3E%3Cpath d='m39 22-9 12 11 7 10-10m-19 3-11-4-7 8m27-6 10-8 10 5M41 41 30 52l-6 13m9-12 13 5 9 10m-26-16-12 9m29-8 13 5' stroke='white' stroke-width='5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+body:has(#appHeader:not(.hidden)) #appHeader .cursor-pointer > div:nth-child(2) {
+  position: relative;
+  margin-left: 2px;
+  padding-left: 18px;
+}
+body:has(#appHeader:not(.hidden)) #appHeader .cursor-pointer > div:nth-child(2)::before {
+  position: absolute;
+  top: 1px;
+  bottom: 1px;
+  left: 0;
+  width: 2px;
+  background: #c4d2cc;
+  content: "";
+}
+body:has(#appHeader:not(.hidden)) #appHeader .cursor-pointer > div:nth-child(2) > span:first-child {
+  color: #0d3429 !important;
+  font-size: clamp(22px, 2.8vw, 28px);
+  font-weight: 800;
+  letter-spacing: -.045em;
+  line-height: 1.08;
+}
+body:has(#appHeader:not(.hidden)) #appHeader .cursor-pointer > div:nth-child(2) > span:last-child {
+  margin-top: 4px;
+  color: #59645f !important;
+  font-size: clamp(14px, 1.9vw, 18px);
+  font-weight: 500;
+  line-height: 1.2;
+}
+body:has(#appHeader:not(.hidden)) #userHeaderNav {
+  gap: 14px !important;
+}
+body:has(#appHeader:not(.hidden)) #appHeader .account-action {
+  display: grid;
+  flex: 0 0 58px;
+  place-items: center;
+  width: 58px;
+  height: 56px;
+  padding: 0;
+  border-radius: 16px;
+  box-shadow: 0 5px 11px rgba(22, 74, 51, .07);
+}
+body:has(#appHeader:not(.hidden)) #appHeader .account-action-profile {
+  color: #146344;
+  background: #f0fbf4;
+  border-color: #d5eddd;
+}
+body:has(#appHeader:not(.hidden)) #appHeader .account-action-logout {
+  color: #aa454a;
+  background: #fff5f4;
+  border-color: #f0d9d7;
+}
+body:has(#appHeader:not(.hidden)) #appHeader .account-action svg {
+  width: 25px;
+  height: 25px;
+}
+body:has(#appHeader:not(.hidden)) #appHeader .account-action span {
+  display: none;
+}
+
+#tabTeacherClasses.teacher-page {
+  position: relative;
+  isolation: isolate;
+  max-width: 760px;
+  margin: 10px auto 0;
+}
+#tabTeacherClasses.teacher-page::before {
+  position: absolute;
+  z-index: -1;
+  top: -128px;
+  right: -14vw;
+  left: -14vw;
+  height: 500px;
+  border-radius: 0 0 48% 44%;
+  background:
+    radial-gradient(ellipse at 76% 45%, rgba(208, 239, 217, .68) 0%, rgba(225, 244, 231, .36) 32%, transparent 66%),
+    linear-gradient(174deg, rgba(248, 252, 248, .2) 14%, rgba(224, 243, 230, .48) 62%, rgba(241, 249, 242, .16) 100%);
+  content: "";
+  pointer-events: none;
+}
+#tabTeacherClasses .training-heading {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  min-height: 316px;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 0;
+  margin-bottom: 0;
+  padding-top: 2px;
+}
+#tabTeacherClasses .training-heading::after {
+  position: absolute;
+  z-index: 0;
+  top: -86px;
+  right: -106px;
+  width: min(65%, 465px);
+  height: 410px;
+  background: url("/teacher-running-art.svg") center right / contain no-repeat;
+  content: "";
+  opacity: .68;
+  pointer-events: none;
+}
+#tabTeacherClasses .training-heading > div,
+#tabTeacherClasses .training-heading > button {
+  position: relative;
+  z-index: 1;
+}
+#tabTeacherClasses .training-eyebrow {
+  color: #315d4d;
+  font-size: clamp(14px, 2vw, 18px);
+  font-weight: 800;
+  letter-spacing: .17em;
+  line-height: 1.4;
+}
+#tabTeacherClasses .training-eyebrow span {
+  padding: 0 6px;
+  color: #526e61;
+}
+#tabTeacherClasses .training-heading h1 {
+  margin: 20px 0 12px;
+  color: #0d352a;
+  font-size: clamp(44px, 6.6vw, 66px);
+  font-weight: 800;
+  letter-spacing: -.06em;
+  line-height: .98;
+}
+#tabTeacherClasses .training-heading h1 span {
+  color: #a7dc35;
+}
+#tabTeacherClasses .training-heading > div > p:last-child {
+  max-width: 650px;
+  color: #5e6262;
+  font-size: clamp(16px, 2.4vw, 22px);
+  font-weight: 400;
+  line-height: 1.5;
+}
+#tabTeacherClasses .training-primary {
+  width: min(100%, 350px);
+  min-height: 78px;
+  margin-top: 26px;
+  padding: 0 28px;
+  gap: 16px;
+  border: 1px solid rgba(255,255,255,.3);
+  border-radius: 999px;
+  background: linear-gradient(110deg, #04734f 0%, #087b4d 72%, #14823d 100%);
+  box-shadow: 0 6px 0 #9bdc35, 0 11px 20px rgba(32, 105, 64, .17), inset 0 2px 0 rgba(255,255,255,.16);
+  font-size: clamp(22px, 3.1vw, 29px);
+  font-weight: 800;
+  transition: transform .18s ease, box-shadow .18s ease, filter .18s ease;
+}
+#tabTeacherClasses .training-primary:hover {
+  filter: brightness(1.04);
+  background: linear-gradient(110deg, #04734f 0%, #087b4d 72%, #14823d 100%);
+  box-shadow: 0 6px 0 #9bdc35, 0 14px 22px rgba(32, 105, 64, .2), inset 0 2px 0 rgba(255,255,255,.16);
+  transform: translateY(-2px);
+}
+#tabTeacherClasses .training-primary:active {
+  box-shadow: 0 3px 0 #9bdc35, 0 7px 12px rgba(32, 105, 64, .15);
+  transform: translateY(3px);
+}
+#tabTeacherClasses .training-primary svg {
+  width: 34px;
+  height: 34px;
+  flex-basis: 34px;
+}
+#tabTeacherClasses .training-section {
+  margin-top: 0;
+}
+#tabTeacherClasses #studentListSection {
+  margin-top: clamp(24px, 3vw, 36px);
+}
+#tabTeacherClasses .training-section-heading {
+  display: block;
+  margin-bottom: 28px;
+}
+#tabTeacherClasses .training-section-heading .training-eyebrow {
+  color: #1d6848;
+}
+#tabTeacherClasses .training-section-heading .training-eyebrow::after {
+  display: inline-block;
+  width: 48px;
+  height: 5px;
+  margin-left: 15px;
+  border-radius: 99px;
+  background: #a4d866;
+  content: "";
+  vertical-align: middle;
+}
+#tabTeacherClasses .training-section-heading h2 {
+  margin: 10px 0 6px;
+  color: #0c3529;
+  font-size: clamp(32px, 4.8vw, 46px);
+  font-weight: 800;
+  letter-spacing: -.06em;
+  line-height: 1.1;
+}
+#tabTeacherClasses .training-section-heading > div > p:last-child {
+  color: #5e6262;
+  font-size: clamp(16px, 2.4vw, 22px);
+  line-height: 1.5;
+}
+#tabTeacherClasses .training-list {
+  gap: 24px;
+}
+#tabTeacherClasses .teacher-class-card {
+  min-height: 184px;
+  align-items: center;
+  gap: 22px;
+  padding: 26px 30px;
+  border: 1px solid #dcebe3;
+  border-radius: 32px;
+  background: rgba(255, 255, 255, .94);
+  box-shadow: 0 12px 22px rgba(21, 74, 49, .08), 0 2px 5px rgba(21, 74, 49, .03);
+  transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+}
+#tabTeacherClasses .teacher-class-card:hover {
+  transform: translateY(-2px);
+  border-color: #c6e2cf;
+  background: #fff;
+  box-shadow: 0 16px 27px rgba(21, 74, 49, .11);
+}
+#tabTeacherClasses .training-card-icon {
+  position: relative;
+  display: grid;
+  flex: 0 0 96px;
+  place-items: center;
+  width: 96px;
+  height: 96px;
+  overflow: hidden;
+  border: 1px solid #e1f1e4;
+  border-radius: 28px;
+  color: #116444;
+  background: linear-gradient(145deg, #e6f5e5 0%, #d8f0de 72%, #b8e7c7 73%, #a4dcae 100%);
+  box-shadow: inset 0 -2px 0 rgba(98, 165, 113, .2), 0 3px 8px rgba(31, 93, 58, .08);
+}
+#tabTeacherClasses .training-card-icon svg {
+  width: 42px;
+  height: 42px;
+  stroke-width: 1.9;
+}
+#tabTeacherClasses .training-card-content {
+  padding-left: 22px;
+  border-left: 2px solid #d4dfd9;
+}
+#tabTeacherClasses .training-card-label {
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
+  padding: 3px 16px;
+  border-radius: 999px;
+  color: #1f6246;
+  background: #eef7e9;
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: .14em;
+}
+#tabTeacherClasses .training-card h3 {
+  margin: 9px 0 5px;
+  color: #0b362a;
+  font-size: clamp(26px, 3.8vw, 35px);
+  font-weight: 800;
+  letter-spacing: -.05em;
+  line-height: 1.1;
+}
+#tabTeacherClasses .training-card-meta {
+  color: #606362;
+  font-size: clamp(15px, 2.15vw, 20px);
+  font-weight: 400;
+  line-height: 1.4;
+}
+#tabTeacherClasses .teacher-card-arrow {
+  display: grid;
+  flex: 0 0 56px;
+  align-self: center;
+  width: 56px;
+  height: 56px;
+  padding: 12px;
+  border-radius: 20px;
+  color: #146340;
+  background: #eff8e8;
+  transition: background-color .18s ease, transform .18s ease;
+}
+#tabTeacherClasses .teacher-class-card:hover .teacher-card-arrow {
+  background: #e4f3d7;
+  transform: translateX(2px);
+}
+#tabTeacherClasses .training-empty {
+  min-height: 180px;
+  justify-content: center;
+  border-style: solid;
+  border-color: #deebe2;
+  border-radius: 30px;
+  box-shadow: 0 12px 22px rgba(21, 74, 49, .06);
+  font-size: 15px;
+}
+#tabTeacherClasses .training-empty strong {
+  color: #0d3a2c;
+  font-size: 19px;
+}
+
+/* The bottom bar becomes a roomy, floating tab strip for teachers. */
+body:has(#appHeader:not(.hidden)) #bottomNav {
+  right: 0;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  min-height: 124px;
+  padding: 10px 0 8px;
+  border: 1px solid rgba(255,255,255,.94) !important;
+  border-radius: 42px 42px 0 0;
+  background: rgba(255, 255, 255, .96) !important;
+  box-shadow: 0 -9px 24px rgba(31, 95, 60, .08);
+  backdrop-filter: blur(18px);
+}
+body:has(#appHeader:not(.hidden)) #bottomNavInner {
+  display: grid;
+  width: 100%;
+  max-width: 100%;
+  height: 98px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: center;
+  gap: 8px;
+  padding: 0 clamp(24px, 4.5vw, 46px);
+  font-size: 18px;
+}
+body:has(#appHeader:not(.hidden)) #bottomNavInner:has(#bNavAi) {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+body:has(#appHeader:not(.hidden)) #bottomNavInner button {
+  display: flex;
+  min-width: 0;
+  min-height: 88px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 5px;
+  border-radius: 27px;
+  color: #59615d;
+  font-size: clamp(13px, 2.2vw, 20px);
+  font-weight: 500;
+  line-height: 1.1;
+  transition: color .18s ease, background-color .18s ease, transform .18s ease;
+}
+body:has(#appHeader:not(.hidden)) #bottomNavInner button svg {
+  width: clamp(24px, 3.8vw, 36px);
+  height: clamp(24px, 3.8vw, 36px);
+  flex: 0 0 auto;
+  stroke-width: 1.8;
+}
+body:has(#appHeader:not(.hidden)) #bottomNavInner button.active-nav-item {
+  color: #fff !important;
+  background: linear-gradient(135deg, #08764f 0%, #05623f 100%);
+  box-shadow: 0 4px 0 #a7df37, 0 8px 16px rgba(14, 104, 61, .16);
+  font-weight: 800;
+  transform: translateY(-1px);
+}
+body:has(#appHeader:not(.hidden)) #bottomNavInner button:focus-visible {
+  outline: 3px solid #91bb53;
+  outline-offset: 3px;
+}
+
+@media (max-width: 700px) {
+  body:has(#appHeader:not(.hidden)) main {
+    padding: 14px 14px 96px !important;
+  }
+  body:has(#appHeader:not(.hidden)) #appHeader {
+    padding: 9px 14px 6px !important;
+  }
+  body:has(#appHeader:not(.hidden)) #appHeader .cursor-pointer {
+    gap: 8px;
+  }
+  body:has(#appHeader:not(.hidden)) #appHeader .cursor-pointer > div:first-child {
+    flex-basis: 44px;
+    width: 44px;
+    height: 40px;
+    border-radius: 12px !important;
+  }
+  body:has(#appHeader:not(.hidden)) #appHeader .cursor-pointer > div:first-child::after {
+    width: 28px;
+    height: 28px;
+  }
+  body:has(#appHeader:not(.hidden)) #appHeader .cursor-pointer > div:nth-child(2) {
+    padding-left: 9px;
+  }
+  body:has(#appHeader:not(.hidden)) #appHeader .cursor-pointer > div:nth-child(2) > span:first-child {
+    font-size: clamp(15px, 3.3vw, 19px);
+  }
+  body:has(#appHeader:not(.hidden)) #appHeader .cursor-pointer > div:nth-child(2) > span:last-child {
+    margin-top: 2px;
+    font-size: clamp(10px, 2vw, 12px);
+  }
+  body:has(#appHeader:not(.hidden)) #userHeaderNav {
+    gap: 5px !important;
+  }
+  body:has(#appHeader:not(.hidden)) #appHeader .account-action {
+    flex-basis: 36px;
+    width: 36px;
+    height: 36px;
+    border-radius: 11px;
+  }
+  body:has(#appHeader:not(.hidden)) #appHeader .account-action svg {
+    width: 18px;
+    height: 18px;
+  }
+  #tabTeacherClasses.teacher-page {
+    margin-top: 4px;
+  }
+  #tabTeacherClasses.teacher-page::before {
+    top: -64px;
+    height: 300px;
+  }
+  #tabTeacherClasses .training-heading {
+    min-height: 200px;
+  }
+  #tabTeacherClasses .training-heading::after {
+    top: -28px;
+    right: -50px;
+    width: 60%;
+    height: 250px;
+    opacity: .45;
+  }
+  #tabTeacherClasses .training-heading h1 {
+    margin: 12px 0 6px;
+    font-size: clamp(32px, 8vw, 44px);
+  }
+  #tabTeacherClasses .training-heading > div > p:last-child,
+  #tabTeacherClasses .training-section-heading > div > p:last-child {
+    font-size: clamp(14px, 3.4vw, 16px);
+  }
+  #tabTeacherClasses .training-primary {
+    width: min(100%, 174px);
+    min-height: 46px;
+    margin-top: 12px;
+    gap: 8px;
+    padding: 0 12px;
+    font-size: 16px;
+  }
+  #tabTeacherClasses .training-primary svg {
+    width: 20px;
+    height: 20px;
+    flex-basis: 20px;
+  }
+  #tabTeacherClasses .training-section-heading {
+    margin-bottom: 16px;
+  }
+  #tabTeacherClasses .training-section-heading h2 {
+    margin-top: 6px;
+    font-size: clamp(26px, 6.5vw, 32px);
+  }
+  #tabTeacherClasses .training-section-heading .training-eyebrow::after {
+    width: 30px;
+    height: 4px;
+    margin-left: 8px;
+  }
+  #tabTeacherClasses .training-list {
+    gap: 12px;
+  }
+  #tabTeacherClasses .teacher-class-card {
+    min-height: 110px;
+    gap: 10px;
+    padding: 12px 11px;
+    border-radius: 18px;
+  }
+  #tabTeacherClasses .training-card-icon {
+    flex-basis: 48px;
+    width: 48px;
+    height: 48px;
+    border-radius: 15px;
+  }
+  #tabTeacherClasses .training-card-icon svg {
+    width: 24px;
+    height: 24px;
+  }
+  #tabTeacherClasses .training-card-content {
+    padding-left: 9px;
+  }
+  #tabTeacherClasses .training-card-label {
+    min-height: 20px;
+    padding: 2px 8px;
+    font-size: 10px;
+  }
+  #tabTeacherClasses .training-card h3 {
+    margin: 5px 0 3px;
+    font-size: clamp(17px, 4.4vw, 21px);
+  }
+  #tabTeacherClasses .training-card-meta {
+    font-size: clamp(11px, 3.2vw, 13px);
+  }
+  #tabTeacherClasses .teacher-card-arrow {
+    flex-basis: 30px;
+    width: 30px;
+    height: 30px;
+    padding: 7px;
+    border-radius: 11px;
+  }
+  body:has(#appHeader:not(.hidden)) #bottomNav {
+    min-height: 72px;
+    padding: 5px 0 4px;
+    border-radius: 23px 23px 0 0;
+  }
+  body:has(#appHeader:not(.hidden)) #bottomNavInner {
+    height: 60px;
+    gap: 2px;
+    padding: 0 8px;
+    font-size: 10px;
+  }
+  body:has(#appHeader:not(.hidden)) #bottomNavInner button {
+    min-height: 52px;
+    gap: 2px;
+    padding: 4px 2px;
+    border-radius: 16px;
+    font-size: clamp(9px, 2.5vw, 11px);
+  }
+  body:has(#appHeader:not(.hidden)) #bottomNavInner button svg {
+    width: 19px;
+    height: 19px;
+  }
+  body:has(#appHeader:not(.hidden)) #bottomNavInner button.active-nav-item {
+    box-shadow: 0 3px 0 #a7df37, 0 5px 10px rgba(14, 104, 61, .13);
+  }
+}
+
+@media (max-width: 390px) {
+  body:has(#appHeader:not(.hidden)) #appHeader {
+    padding-right: 12px !important;
+    padding-left: 12px !important;
+  }
+  body:has(#appHeader:not(.hidden)) #appHeader .cursor-pointer > div:nth-child(2) {
+    padding-left: 9px;
+  }
+  body:has(#appHeader:not(.hidden)) #userHeaderNav {
+    gap: 5px !important;
+  }
+  body:has(#appHeader:not(.hidden)) #appHeader .account-action {
+    flex-basis: 34px;
+    width: 34px;
+    height: 34px;
+  }
+  #tabTeacherClasses .teacher-class-card {
+    gap: 8px;
+    padding-right: 10px;
+    padding-left: 10px;
+  }
+  #tabTeacherClasses .training-card-icon {
+    flex-basis: 46px;
+    width: 46px;
+    height: 46px;
+    border-radius: 14px;
+  }
+  #tabTeacherClasses .training-card-content {
+    padding-left: 8px;
+  }
+  #tabTeacherClasses .training-card-label {
+    min-height: 20px;
+    font-size: 9px;
+  }
+  #tabTeacherClasses .teacher-card-arrow {
+    flex-basis: 28px;
+    width: 28px;
+    height: 28px;
+    padding: 6px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #tabTeacherClasses .training-primary,
+  #tabTeacherClasses .teacher-class-card,
+  #tabTeacherClasses .teacher-card-arrow,
+  body:has(#appHeader:not(.hidden)) #bottomNavInner button {
+    transition: none;
+  }
+}
+
+/* Keep the teacher header clean: the wordmark stands on its own. */
+body:has(#appHeader:not(.hidden)) #appHeader .cursor-pointer > div:first-child {
+  display: none !important;
+}
+body:has(#appHeader:not(.hidden)) #appHeader .cursor-pointer > div:nth-child(2) {
+  margin-left: 0 !important;
+  padding-left: 0 !important;
+}
+body:has(#appHeader:not(.hidden)) #appHeader .cursor-pointer > div:nth-child(2)::before {
+  display: none;
+}
+
+/* Other teacher tabs use the same compact hierarchy and card treatment. */
+#tabTeacherDailyLogs.training-page,
+#tabTeacherTraining.training-page {
+  max-width: 760px;
+  margin: 10px auto 0;
+}
+#tabTeacherDailyLogs .training-heading,
+#tabTeacherTraining .training-heading {
+  align-items: flex-start;
+  flex-direction: column;
+  gap: 0;
+  margin-bottom: 22px;
+}
+#tabTeacherDailyLogs .training-eyebrow,
+#tabTeacherTraining .training-eyebrow {
+  color: #315d4d;
+  font-size: clamp(11px, 1.6vw, 14px);
+  letter-spacing: .17em;
+}
+#tabTeacherDailyLogs .training-heading h1,
+#tabTeacherTraining .training-heading h1 {
+  margin: 14px 0 8px;
+  color: #0d352a;
+  font-size: clamp(32px, 5.2vw, 46px);
+  letter-spacing: -.06em;
+}
+#tabTeacherDailyLogs .training-heading > div > p:last-child,
+#tabTeacherTraining .training-heading > div > p:last-child,
+#tabTeacherDailyLogs .training-section-heading > div > p:last-child,
+#tabTeacherTraining .training-section-heading > div > p:last-child {
+  color: #5e6862;
+  font-size: clamp(14px, 2vw, 16px);
+  line-height: 1.55;
+}
+#tabTeacherDailyLogs .training-primary,
+#tabTeacherTraining .training-primary {
+  width: min(100%, 180px);
+  min-height: 44px;
+  margin-top: 14px;
+  padding: 0 16px;
+  border-radius: 999px;
+  background: linear-gradient(110deg, #08734e, #0a7948);
+  box-shadow: 0 4px 0 #a7df37, 0 8px 14px rgba(14, 104, 61, .12);
+  font-size: 12px;
+}
+#tabTeacherDailyLogs .training-section,
+#tabTeacherTraining .training-section { margin-top: 22px; }
+#tabTeacherDailyLogs .training-section-heading,
+#tabTeacherTraining .training-section-heading { display: block; margin-bottom: 16px; }
+#tabTeacherDailyLogs .training-section-heading h2,
+#tabTeacherTraining .training-section-heading h2 {
+  margin: 8px 0 5px;
+  color: #0d352a;
+  font-size: clamp(23px, 3.4vw, 30px);
+  letter-spacing: -.05em;
+}
+#tabTeacherDailyLogs .training-list,
+#tabTeacherTraining .training-list { gap: 12px; }
+#tabTeacherDailyLogs .training-card,
+#tabTeacherTraining .training-card {
+  align-items: center;
+  gap: 14px;
+  padding: 16px;
+  border-color: #dcebe3;
+  border-radius: 20px;
+  box-shadow: 0 10px 20px rgba(21, 74, 49, .06);
+}
+#tabTeacherDailyLogs .training-card-icon,
+#tabTeacherTraining .training-card-icon {
+  flex-basis: 48px;
+  width: 48px;
+  height: 48px;
+  border-radius: 15px;
+  color: #116444;
+  background: linear-gradient(145deg, #e6f5e5, #d8f0de);
+}
+#tabTeacherDailyLogs .training-card-icon svg,
+#tabTeacherTraining .training-card-icon svg { width: 25px; height: 25px; }
+#tabTeacherDailyLogs .training-card-label,
+#tabTeacherTraining .training-card-label {
+  display: inline-flex;
+  padding: 4px 10px;
+  border-radius: 999px;
+  color: #1f6246;
+  background: #eef7e9;
+  font-size: 9px;
+}
+#tabTeacherDailyLogs .training-card h3,
+#tabTeacherTraining .training-card h3 {
+  margin: 8px 0 5px;
+  color: #0b362a;
+  font-size: 16px;
+}
+#tabTeacherDailyLogs .training-card-meta,
+#tabTeacherTraining .training-card-meta { color: #64766b; font-size: 12px; }
+#tabTeacherDailyLogs .training-card-actions button,
+#tabTeacherTraining .training-card-actions button {
+  border-color: #dcebe3;
+  border-radius: 999px;
+  background: #f5faf4;
+  color: #176745;
+}
+@media (max-width: 700px) {
+  #tabTeacherDailyLogs.training-page,
+  #tabTeacherTraining.training-page { margin-top: 4px; }
+  #tabTeacherDailyLogs .training-heading,
+  #tabTeacherTraining .training-heading { margin-bottom: 18px; }
+  #tabTeacherDailyLogs .training-heading h1,
+  #tabTeacherTraining .training-heading h1 { margin-top: 10px; font-size: 30px; }
+  #tabTeacherDailyLogs .training-section,
+  #tabTeacherTraining .training-section { margin-top: 20px; }
+  #tabTeacherDailyLogs .training-card,
+  #tabTeacherTraining .training-card { gap: 10px; padding: 13px; }
+}
+
 #tabTeacherTraining .training-class-group { display: grid; gap: 9px; }
-#tabTeacherTraining .training-class-heading { margin: 2px 0 0; color: #173d31; font-size: 15px; font-weight: 800; letter-spacing: -.02em; }
+#tabTeacherTraining .training-class-heading { margin: 2px 0 0; color: #0d352a; font-size: 16px; font-weight: 800; letter-spacing: -.02em; }
 #tabTeacherTraining .training-class-group > .training-list { gap: 10px; }
 #tabTeacherTraining .training-card-actions { align-items: center; flex-wrap: wrap; justify-content: flex-end; }
 #tabTeacherTraining .training-order-action { display: inline-flex; flex: 0 0 34px; align-items: center; justify-content: center; width: 34px; min-width: 34px; padding: 0; border-radius: 50% !important; color: #176745 !important; background: #eff8e8; font-size: 17px !important; }
 #tabTeacherTraining .training-order-action:disabled { cursor: not-allowed; opacity: .42; }
-@media (max-width: 640px) {
+@media (max-width: 700px) {
   #tabTeacherTraining .training-class-heading { font-size: 14px; }
   #tabTeacherTraining .training-card-actions { gap: 5px; }
   #tabTeacherTraining .training-order-action { flex-basis: 32px; width: 32px; min-width: 32px; }

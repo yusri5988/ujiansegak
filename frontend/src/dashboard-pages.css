@@ -69,8 +69,195 @@
   .dashboard-page .dashboard-card-actions { width: 100%; padding-left: 56px; flex-direction: row; align-items: center; justify-content: space-between; flex-wrap: wrap; }
 }
 
+/* Student and admin pages share the compact teacher/classes rhythm. */
+#studentDashboard.dashboard-page:not(.hidden),
+#studentActivity.dashboard-page:not(.hidden),
+#adminDashboard.dashboard-page:not(.hidden) {
+  display: block !important;
+  max-width: 760px;
+  margin: 10px auto 0;
+}
+.dashboard-page .dashboard-heading {
+  align-items: flex-start;
+  flex-direction: column;
+  gap: 0;
+  margin-bottom: 24px;
+}
+.dashboard-page .dashboard-eyebrow {
+  color: #315d4d;
+  font-size: clamp(11px, 1.6vw, 14px);
+  font-weight: 800;
+  letter-spacing: .17em;
+}
+.dashboard-page .dashboard-eyebrow span { color: #829e8e; }
+.dashboard-page .dashboard-heading h1 {
+  margin: 14px 0 8px;
+  color: #0d352a;
+  font-size: clamp(32px, 5.2vw, 46px);
+  letter-spacing: -.06em;
+}
+.dashboard-page .dashboard-heading h1 .dashboard-dot { color: #a7dc35; }
+.dashboard-page .dashboard-heading > div > p:last-child,
+.dashboard-page .dashboard-section-heading > div > p:last-child {
+  color: #5e6862;
+  font-size: clamp(14px, 2vw, 16px);
+  line-height: 1.55;
+}
+.dashboard-page .dashboard-date {
+  margin-top: 15px;
+  padding: 7px 11px;
+  border-color: #dcebe3;
+  border-radius: 999px;
+  background: #f0f8ed;
+  color: #315d4d;
+  font-size: 11px;
+}
+.dashboard-page .dashboard-primary {
+  min-height: 44px;
+  margin-top: 16px;
+  padding: 0 17px;
+  border-radius: 999px;
+  background: linear-gradient(110deg, #08734e, #0a7948);
+  box-shadow: 0 4px 0 #a7df37, 0 8px 14px rgba(14, 104, 61, .12);
+  font-size: 13px;
+}
+.dashboard-page .dashboard-primary:hover { background: #075b3e; }
+.dashboard-page .dashboard-section { margin-top: 26px; }
+.dashboard-page .dashboard-section-heading { display: block; margin-bottom: 16px; }
+.dashboard-page .dashboard-section-heading h2 {
+  margin: 8px 0 5px;
+  color: #0d352a;
+  font-size: clamp(23px, 3.4vw, 30px);
+  letter-spacing: -.05em;
+}
+.student-reminders {
+  margin: 0 0 14px;
+  padding: 18px 20px;
+  border-color: #dcebe3;
+  border-radius: 22px;
+  background: rgba(255,255,255,.94);
+  box-shadow: 0 10px 22px rgba(21, 74, 49, .06);
+}
+.student-reminders-heading h2 { color: #0d352a; font-size: 17px; }
+.student-reminders-icon {
+  flex-basis: 40px;
+  width: 40px;
+  height: 40px;
+  border-radius: 13px;
+  background: #edf7e9;
+  color: #24714c;
+}
+.student-reminders-icon svg { width: 20px; height: 20px; }
+.student-reminders-message { color: #66766d; font-size: 12px; }
+.student-reminders-dot { background: #a7d956; }
+.student-reminders-action { color: #176745; }
+.student-home-feature {
+  align-items: flex-start;
+  flex-direction: column;
+  gap: 15px;
+  padding: 20px;
+  border-color: #d7e9db;
+  border-radius: 22px;
+  background: linear-gradient(145deg, #e8f5e8, #f8fbf7);
+  box-shadow: 0 10px 22px rgba(21, 74, 49, .055);
+}
+.student-home-eyebrow { color: #315d4d; }
+.student-home-copy h2 {
+  margin: 8px 0 6px;
+  color: #0d352a;
+  font-size: clamp(21px, 3vw, 27px);
+}
+.student-home-copy > p:last-child { color: #5e6862; font-size: 14px; }
+.student-home-action {
+  min-height: 44px;
+  padding: 0 17px;
+  border-radius: 999px;
+  background: linear-gradient(110deg, #08734e, #0a7948);
+  box-shadow: 0 4px 0 #a7df37, 0 8px 14px rgba(14, 104, 61, .12);
+  font-size: 13px;
+}
+.student-home-note {
+  gap: 12px;
+  margin-top: 12px;
+  padding: 14px;
+  border-color: #dfece3;
+  border-radius: 18px;
+  box-shadow: 0 8px 18px rgba(21, 74, 49, .045);
+}
+.student-home-note-icon { flex-basis: 38px; width: 38px; height: 38px; border-radius: 12px; }
+.student-home-note-icon svg { width: 19px; height: 19px; }
+.dashboard-page .dashboard-list { gap: 12px; }
+.dashboard-page .dashboard-card {
+  align-items: center;
+  gap: 14px;
+  padding: 16px;
+  border-color: #dcebe3;
+  border-radius: 21px;
+  box-shadow: 0 11px 22px rgba(21, 74, 49, .07);
+}
+.dashboard-page .dashboard-card-icon {
+  flex-basis: 48px;
+  width: 48px;
+  height: 48px;
+  border-radius: 16px;
+  color: #116444;
+  background: linear-gradient(145deg, #e6f5e5, #d8f0de);
+}
+.dashboard-page .dashboard-card-icon svg { width: 25px; height: 25px; }
+.dashboard-page .dashboard-card-label {
+  display: inline-flex;
+  padding: 4px 10px;
+  border-radius: 999px;
+  color: #1f6246;
+  background: #eef7e9;
+  font-size: 9px;
+}
+.dashboard-page .dashboard-card h3 {
+  margin: 8px 0 5px;
+  color: #0b362a;
+  font-size: 16px;
+  letter-spacing: -.035em;
+}
+.dashboard-page .dashboard-card-meta { color: #64766b; font-size: 12px; }
+.dashboard-page .dashboard-card-content > p { margin-top: 8px; color: #5e6862; font-size: 12px; }
+.dashboard-page .dashboard-card-actions { align-items: flex-end; gap: 8px; }
+.dashboard-page .dashboard-card-actions button {
+  min-height: 34px;
+  border-color: #dcebe3;
+  border-radius: 999px;
+  color: #176745;
+  background: #f5faf4;
+  font-size: 11px;
+}
+.dashboard-page .dashboard-card-actions button:hover { background: #eaf5e8; }
+.dashboard-page .dashboard-empty {
+  padding: 32px 18px;
+  border-color: #dcebe3;
+  border-style: solid;
+  border-radius: 22px;
+  background: rgba(255,255,255,.94);
+  box-shadow: 0 10px 20px rgba(21, 74, 49, .05);
+}
+.dashboard-page .dashboard-empty-icon { width: 42px; height: 42px; margin-bottom: 10px; border-radius: 13px; font-size: 20px; }
+.dashboard-page .dashboard-empty strong { color: #0d3a2c; font-size: 15px; }
+.dashboard-page button:focus-visible { outline: 3px solid #91bb53; outline-offset: 3px; }
+@media (max-width: 640px) {
+  #studentDashboard.dashboard-page:not(.hidden),
+  #studentActivity.dashboard-page:not(.hidden),
+  #adminDashboard.dashboard-page:not(.hidden) { margin-top: 4px; }
+  .dashboard-page .dashboard-heading { margin-bottom: 18px; }
+  .dashboard-page .dashboard-heading h1 { margin-top: 10px; font-size: 30px; }
+  .dashboard-page .dashboard-primary { width: min(100%, 174px); min-height: 42px; margin-top: 14px; font-size: 12px; }
+  .dashboard-page .dashboard-section { margin-top: 22px; }
+  .student-home-feature { gap: 13px; padding: 16px; }
+  .student-home-action { width: auto; min-width: 154px; min-height: 42px; }
+  .dashboard-page .dashboard-card { gap: 10px; padding: 13px; }
+  .dashboard-page .dashboard-card-icon { flex-basis: 42px; width: 42px; height: 42px; }
+  .dashboard-page .dashboard-card-actions { width: 100%; padding-left: 52px; flex-direction: row; align-items: center; justify-content: space-between; }
+}
+
 .student-assignment-group { display: grid; gap: 9px; }
-.student-assignment-heading { margin: 2px 0 0; color: #173d31; font-size: 15px; font-weight: 800; letter-spacing: -.02em; }
+.student-assignment-heading { margin: 2px 0 0; color: #0d352a; font-size: 15px; font-weight: 800; letter-spacing: -.02em; }
 @media (max-width: 640px) {
   .student-assignment-heading { font-size: 14px; }
 }

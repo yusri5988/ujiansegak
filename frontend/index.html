@@ -441,7 +441,7 @@
   <div id="modalSubmitTraining" class="hidden fixed inset-0 bg-slate-900/70 backdrop-blur-xs flex items-center justify-center p-2 sm:p-4 z-50 overflow-y-auto">
     <div class="bg-white rounded-2xl p-4 sm:p-6 max-w-5xl w-full max-h-[96vh] overflow-y-auto shadow-xl space-y-4 border border-slate-200">
       <h3 id="submitTrainingTitle" class="font-bold text-base sm:text-lg text-slate-900">Hantar Latihan</h3>
-      <p id="submitTrainingInstructions" class="text-[10px] text-slate-500"></p>
+      <p id="submitTrainingInstructions" class="text-sm leading-relaxed text-slate-600"></p>
       <div id="submitTrainingActivities" class="space-y-4"></div>
       <input type="hidden" id="submitAssignmentId"><input type="hidden" id="submitScheduleId">
       <div><label class="font-semibold block mb-1 text-slate-700 text-xs">Catatan (pilihan)</label><textarea id="submitTrainingNotes" rows="2" class="w-full p-2.5 border border-slate-300 rounded-lg bg-slate-50 text-xs" placeholder="Catatan untuk cikgu"></textarea></div>
@@ -922,7 +922,7 @@
             return `
               <article class="dashboard-card">
                 <div class="dashboard-card-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7" d="M8 3v4m8-4v4M4 10h16M5 5h14a1 1 0 011 1v13a2 2 0 01-2 2H6a2 2 0 01-2-2V6a1 1 0 011-1z"/></svg></div>
-                <div class="dashboard-card-content"><div class="dashboard-card-label">LATIHAN ${index + 1}</div><h3>${escapeHtml(assignment.title)}</h3><div class="dashboard-card-meta">Tarikh latihan: ${escapeHtml(formatDate(assignment.trainingDate))}</div>${assignment.instructions ? `<p>${escapeHtml(assignment.instructions)}</p>` : ''}</div>
+                <div class="dashboard-card-content"><div class="dashboard-card-label">LATIHAN ${index + 1}</div><h3>${escapeHtml(assignment.title)}</h3><div class="dashboard-card-meta">Tarikh latihan: ${escapeHtml(formatDate(assignment.trainingDate))}</div></div>
                 <div class="dashboard-card-actions"><span class="dashboard-status ${done ? 'is-done' : 'is-pending'}">${done ? 'Selesai' : 'Belum selesai'}</span><button type="button" onclick="openStudentAssignment(${escapeHtml(JSON.stringify(assignment))})">${done ? 'Lihat latihan' : 'Buka &amp; tandakan selesai'}</button></div>
               </article>
             `;

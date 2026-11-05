@@ -1,31 +1,46 @@
-/* Shared account and dialog styling, aligned with the training workspace. */
+/* Shared account and dialog styling, aligned with teacher/classes. */
 #appHeader { padding-top: 14px; padding-bottom: 14px; }
 #bottomNav { border-color: #e0ebe4 !important; box-shadow: 0 -8px 24px rgba(21, 59, 54, .06); }
 #bottomNavInner { height: 64px; }
 #bottomNavInner button { gap: 3px; min-height: 48px; font-size: 10px; }
 #bottomNavInner button.active-nav-item { color: #194d39 !important; }
 #bottomNavInner button:focus-visible, .account-action:focus-visible { outline: 3px solid #91bb53; outline-offset: -3px; }
-.profile-shell { max-width: 1050px; }
-.profile-shell > .flex:first-child { margin-bottom: 24px; }
-.profile-shell > .flex:first-child h1 { font-size: clamp(28px, 4vw, 40px); line-height: 1.15; letter-spacing: -.05em; }
-.profile-hero { padding: 30px !important; border-radius: 20px !important; background: #163e31; }
-.profile-hero p { line-height: 1.8; }
-.profile-avatar { color: #173e31; background: #d4f36a; border: 0; }
-.profile-section { padding: 26px !important; border-color: #e0ebe4 !important; border-radius: 18px !important; }
-.profile-section-heading h3 { font-size: 16px; letter-spacing: -.03em; }
+.profile-shell { max-width: 760px; }
+.profile-shell > .flex:first-child { margin-bottom: 18px; }
+.profile-shell > .flex:first-child h1 { font-size: clamp(24px, 3.5vw, 34px); line-height: 1.15; letter-spacing: -.05em; }
+.profile-hero { position: relative; overflow: hidden; padding: 24px !important; border: 1px solid #dcebe1 !important; border-radius: 22px !important; background: linear-gradient(135deg, #e7f5e8 0%, #f7fbf7 100%); color: #123b2e; box-shadow: 0 12px 24px rgba(21, 74, 49, .07) !important; }
+.profile-hero::after { border-color: rgba(74, 137, 93, .16); box-shadow: 0 0 0 24px rgba(74, 137, 93, .04), 0 0 0 48px rgba(74, 137, 93, .03); }
+.profile-hero p { line-height: 1.65; }
+.profile-hero .text-emerald-100, .profile-hero .text-emerald-50 { color: #537365 !important; }
+.profile-avatar { color: #fff; background: linear-gradient(145deg, #17865b, #07553d); border: 0; box-shadow: 0 5px 12px rgba(21, 90, 58, .16); }
+.profile-section { padding: 22px !important; border-color: #dfece3 !important; border-radius: 20px !important; box-shadow: 0 10px 22px rgba(21, 74, 49, .06) !important; }
+.profile-section-heading h3 { font-size: 15px; letter-spacing: -.03em; }
 .profile-section-heading p { font-size: 12px; }
-.profile-section-icon { width: 42px; height: 42px; border-radius: 13px; }
+.profile-section-icon { width: 40px; height: 40px; border-radius: 13px; }
 .profile-field-label { font-size: 12px; }
-.profile-field input { min-height: 46px; font-size: 13px; }
-.profile-save-button, .profile-password-button { min-height: 46px; font-size: 12px; }
-.profile-save-button { background: #194d39; }
-[id^="modal"] > div { border-radius: 20px !important; box-shadow: 0 24px 70px rgba(14, 49, 35, .2) !important; }
+.profile-field input { min-height: 44px; font-size: 13px; }
+.profile-save-button, .profile-password-button { min-height: 44px; border-radius: 999px; font-size: 12px; }
+.profile-save-button { background: linear-gradient(110deg, #08734e, #0a7948); box-shadow: 0 4px 0 #a7df37, 0 8px 14px rgba(14, 104, 61, .12); }
+.profile-security { background: #f8fbf8 !important; }
+.profile-security .profile-section-icon { background: #eaf5e8; color: #34735c; }
+.profile-password-button { border-color: #e7d6d3; background: #fff8f7; }
+[id^="modal"] > div { border: 1px solid #dcebe3 !important; border-radius: 22px !important; box-shadow: 0 24px 60px rgba(14, 49, 35, .18) !important; }
 [id^="modal"] h3 { color: #173d31; font-weight: 800; letter-spacing: -.025em; }
 [id^="modal"] label { color: #365a49; }
-[id^="modal"] input, [id^="modal"] select, [id^="modal"] textarea { min-height: 43px; border: 1px solid #d4e4da; border-radius: 10px; font-size: 12px; }
+[id^="modal"] input, [id^="modal"] select, [id^="modal"] textarea { min-height: 42px; border: 1px solid #d4e4da; border-radius: 11px; font-size: 12px; }
 [id^="modal"] textarea { resize: vertical; }
-[id^="modal"] button { min-height: 38px; }
+[id^="modal"] button { min-height: 38px; border-radius: 999px; }
+[id^="modal"] button.bg-slate-900 { background: linear-gradient(110deg, #08734e, #0a7948) !important; box-shadow: 0 4px 0 #a7df37, 0 7px 13px rgba(14, 104, 61, .12) !important; }
+[id^="modal"] button.bg-slate-100 { color: #315a49 !important; background: #eff7f0 !important; }
+body:has(#appHeader:not(.hidden)) [id^="modal"] { background-color: rgba(10, 46, 34, .46) !important; }
+body:has(#appHeader:not(.hidden)) [id^="modal"] input:focus,
+body:has(#appHeader:not(.hidden)) [id^="modal"] select:focus,
+body:has(#appHeader:not(.hidden)) [id^="modal"] textarea:focus {
+  border-color: #6da888 !important;
+  box-shadow: 0 0 0 3px rgba(57, 128, 86, .12);
+  outline: none;
+}
 @media (max-width: 640px) {
-  .profile-hero { padding: 24px !important; }
-  .profile-section { padding: 20px !important; }
+  .profile-hero { padding: 18px !important; }
+  .profile-section { padding: 16px !important; }
 }
